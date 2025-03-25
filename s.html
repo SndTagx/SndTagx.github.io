@@ -44,17 +44,21 @@
             return urlParams.get(param);
         }
 
-        // Get the sound name from the URL query parameter (?s=CoolBeat)
-        const soundName = getQueryParam('s') || '';
+        // Get the sound name from the URL query parameter (?s=lesha)
+        const soundNameLower = getQueryParam('s') || '';
+        
+        // Capitalize first letter for the file name (lesha -> Lesha)
+        const soundName = soundNameLower 
+            ? soundNameLower.charAt(0).toUpperCase() + soundNameLower.slice(1).toLowerCase() 
+            : '';
 
         // Construct the sound file path dynamically
-        const soundFile = soundName ? `Sounds/{"${soundName}"}Skin.mp3` : '';
+        const soundFile = soundName ? `Sounds/{${soundName}}Skin.mp3` : '';
 
         // Set page title and handle invalid URLs
         const playButton = document.getElementById('playButton');
         if (soundName) {
-            document.title = soundName + ' - Sound Player';
-            playButton.textContent = `Play ${soundName}`;
+            
 
             // Check if the sound file exists by attempting to load it
             fetch(soundFile, { method: 'HEAD' })
