@@ -75,64 +75,65 @@
         }
         #upgradeButton {
             position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 20px;
-            background-size: cover;
-            background-position: center;
-            background-color: rgba(30, 30, 50, 0.7);
-            background-blend-mode: overlay;
-            border: 2px solid #00d4ff;
-            border-radius: 10px;
-            color: #e0e0e0;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 180px;
-            height: 50px;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
-        }
-        #rebirthButton {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
+            bottom: 80px;
+            left: 20px;
             padding: 8px 16px;
+            background: linear-gradient(135deg, #00b4db, #0083b0);
             background-size: cover;
             background-position: center;
-            background-color: rgba(50, 30, 30, 0.7);
             background-blend-mode: overlay;
-            border: 2px solid #ff4d4d;
-            border-radius: 10px;
-            color: #e0e0e0;
+            border: none;
+            border-radius: 12px;
+            color: #fff;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            width: 120px;
+            width: 140px;
             height: 40px;
             outline: none;
             -webkit-tap-highlight-color: transparent;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        #rebirthButton {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #ff4d4d, #b00000);
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 160px;
+            height: 50px;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
         #upgradeButton:hover:not(:disabled), #rebirthButton:hover:not(:disabled) {
+            transform: translateY(-2px);
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
-            filter: brightness(120%);
+            filter: brightness(110%);
         }
         #upgradeButton:active, #rebirthButton:active {
-            filter: brightness(80%);
+            transform: translateY(1px);
+            filter: brightness(90%);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
         #upgradeButton:disabled, #rebirthButton:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             box-shadow: none;
-            background-color: rgba(80, 80, 80, 0.5);
+            background: linear-gradient(135deg, #555, #333);
         }
         #upgradeCounter, #rebirthCounter {
             position: absolute;
@@ -141,12 +142,12 @@
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
         #upgradeCounter {
-            bottom: 70px;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 125px;
+            left: 20px;
+            color: #00b4db;
         }
         #rebirthCounter {
-            bottom: 65px;
+            bottom: 135px;
             right: 20px;
             color: #ff4d4d;
         }
