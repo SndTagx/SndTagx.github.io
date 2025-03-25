@@ -10,8 +10,8 @@
             padding: 0;
             overflow: hidden; 
             display: grid; 
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr;
+            grid-template-columns: 1fr; /* Single column */
+            grid-template-rows: 1fr 1fr; /* Two rows, stacked vertically */
             height: 100vh; 
             width: 100vw; 
         }
@@ -26,7 +26,7 @@
     <canvas id="c1"></canvas>
     <canvas id="c2"></canvas>
     <script>
-        function initCanvas(canvasId) {
+        function initCanvas(canvasId, direction) {
             var cx, cy;
             var glposition, glright, glforward, glup, glorigin, glx, gly, gllen;
             var canvas = document.getElementById(canvasId);
@@ -36,12 +36,13 @@
             var mx = 0, my = 0, mx1 = 0, my1 = 0, lasttimen = 0;
             var ml = 0, mr = 0, mm = 0;
             var len = 1.6;
-            var ang1 = 2.8; // Yaw (horizontal rotation)
-            var ang2 = 0.4; // Pitch (vertical rotation)
-            var ang3 = 0.0; // Roll (new rotation around Z-axis)
+            var ang1 = 2.8; // Yaw
+            var ang2 = 0.4; // Pitch
+            var ang3 = 0.0; // Roll
             var cenx = 0.0;
             var ceny = 0.0;
             var cenz = 0.0;
+            var dir = direction; // Direction multiplier (1 or -1)
             var KERNEL = "float kernal(vec3 ver){\n" +
                 "   vec3 a;\n" +
                 "   float b,c,d,e;\n" +
@@ -66,20 +67,19 @@
                 var deltaTime = (t2 - t1) / 1000; // Time difference in seconds
                 t1 = t2;
 
-                // Automatic movement and rotation
-                ang1 += 0.02 * deltaTime; // Yaw
-                ang2 += 0.015 * deltaTime; // Pitch
-                ang3 += 0.01 * deltaTime; // Roll (new rotation)
-                cenx += Math.sin(t2 * 0.001) * 0.01; // Oscillate X
-                ceny += Math.cos(t2 * 0.001) * 0.01; // Oscillate Y
-                cenz += Math.sin(t2 * 0.0005) * 0.01; // Oscillate Z
+                // Automatic movement and rotation with direction multiplier
+                ang1 += dir * 0.1 * deltaTime; // Faster yaw
+                ang2 += dir * 0.08 * deltaTime; // Faster pitch
+                ang3 += dir * 0.05 * deltaTime; // Faster roll
+                cenx += dir * Math.sin(t2 * 0.001) * 0.02; // Faster X oscillation
+                ceny += dir * Math.cos(t2 * 0.0015) * 0.02; // Faster Y oscillation with different frequency
+                cenz += dir * Math.sin(t2 * 0.0008) * 0.02; // Faster Z oscillation with different frequency
 
                 draw();
                 window.requestAnimationFrame(ontimer);
             }
 
             function draw() {
-                // Calculate base vectors with yaw (ang1) and pitch (ang2)
                 var forwardX = -Math.cos(ang1) * Math.cos(ang2);
                 var forwardY = -Math.sin(ang2);
                 var forwardZ = -Math.sin(ang1) * Math.cos(ang2);
@@ -92,11 +92,9 @@
                 var upY = Math.cos(ang2);
                 var upZ = -Math.sin(ang2) * Math.sin(ang1);
 
-                // Apply roll (ang3) by rotating right and up vectors around forward
                 var cosRoll = Math.cos(ang3);
                 var sinRoll = Math.sin(ang3);
 
-                // Rotate right and up vectors around forward axis
                 var newRightX = rightX * cosRoll + upX * sinRoll;
                 var newRightY = rightY * cosRoll + upY * sinRoll;
                 var newRightZ = rightZ * cosRoll + upZ * sinRoll;
@@ -105,7 +103,6 @@
                 var newUpY = -rightY * sinRoll + upY * cosRoll;
                 var newUpZ = -rightZ * sinRoll + upZ * cosRoll;
 
-                // Update WebGL uniforms
                 gl.uniform1f(glx, cx * 2.0 / (cx + cy));
                 gl.uniform1f(gly, cy * 2.0 / (cx + cy));
                 gl.uniform1f(gllen, len);
@@ -421,8 +418,8 @@
         }
 
         window.onload = function() {
-            initCanvas('c1');
-            initCanvas('c2');
+            initCanvas('c1', 1);  // Positive direction for c1
+            initCanvas('c2', -1); // Opposite direction for c2
         };
 
         window.onresize = function() {
