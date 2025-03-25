@@ -71,11 +71,10 @@
             50% { opacity: 0.9; transform: translateY(-50px) scale(1.05); }
             100% { opacity: 0; transform: translateY(-100px) scale(0.8); }
         }
-        #upgradeButton {
+        #upgradeButton, #rebirthButton {
             position: absolute;
             bottom: 80px;
-            left: 20px;
-            padding: 8px 16px;
+            padding: 10px 15px;
             background-size: cover;
             background-position: center;
             border: none;
@@ -84,34 +83,19 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            width: 140px;
-            height: 40px;
+            width: 150px;
+            height: 45px;
             outline: none;
             -webkit-tap-highlight-color: transparent;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             transition: transform 0.3s ease;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
+        #upgradeButton {
+            left: 20px;
+        }
         #rebirthButton {
-            position: absolute;
-            bottom: 80px;
             right: 20px;
-            padding: 10px 20px;
-            background-size: cover;
-            background-position: center;
-            border: none;
-            border-radius: 12px;
-            color: #fff;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 160px;
-            height: 50px;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s ease;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
         #upgradeButton:hover:not(:disabled), #rebirthButton:hover:not(:disabled) {
             transform: translateY(-2px);
@@ -640,7 +624,7 @@
                 if (coinCount) coinCount.textContent = count;
 
                 const coin = document.createElement('img');
-                coin.src = currentSkin;
+                coin.src = current TakCount = document.createElement('img');
                 coin.className = 'flying-coin';
                 const rect = mainButton.getBoundingClientRect();
                 coin.style.left = (e.clientX - rect.left - 16) + 'px';
