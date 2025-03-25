@@ -85,13 +85,13 @@
         #skinPanelToggle, #achievementsToggle, #dailyRewardsToggle {
             position: absolute;
             top: 10px;
-            width: 50px; /* Fixed size */
+            width: 50px;
             height: 50px;
             background: linear-gradient(135deg, #1e1e2f 0%, #2e3e5f 100%);
             border: 2px solid #173a5b;
             border-radius: 50%;
             color: #fff;
-            font-size: 26px; /* Fixed size */
+            font-size: 26px;
             font-weight: bold;
             text-align: center;
             line-height: 50px;
@@ -158,9 +158,10 @@
             cursor: not-allowed;
         }
         .claimable, .buyable {
-            background: linear-gradient(135deg, #ff4d4d 0%, #b00000 100%);
+            background: rgba(255, 255, 255, 0.05); /* Reset background */
             border: 2px solid;
             border-image: linear-gradient(135deg, #ff4d4d, #b00000) 1;
+            border-radius: 8px; /* Smooth corners */
         }
         .id-label {
             position: absolute;
@@ -267,7 +268,14 @@
             <button id="nextPage" style="padding: 4px 8px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: #e0e0e0; cursor: pointer; font-size: 12px;">Next</button>
         </div>
     </div>
-    <div id="achievementsPanel"></div>
+    <div id="achievementsPanel">
+        <div id="achievementPages"></div>
+        <div style="display: flex; justify-content: center; gap: 8px; margin-top: 10px;">
+            <button id="achPrevPage" style="padding: 4px 8px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: #e0e0e0; cursor: pointer; font-size: 12px;">Previous</button>
+            <span id="achPageIndicator" style="font-size: 15px; align-self: center;"></span>
+            <button id="achNextPage" style="padding: 4px 8px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: #e0e0e0; cursor: pointer; font-size: 12px;">Next</button>
+        </div>
+    </div>
     <div id="dailyRewardsPanel"></div>
     <div id="adminPanel">
         <h2>Admin Control</h2>
@@ -304,6 +312,10 @@
             const pageIndicator = document.getElementById('pageIndicator');
             const achievementsToggle = document.getElementById('achievementsToggle');
             const achievementsPanel = document.getElementById('achievementsPanel');
+            const achievementPages = document.getElementById('achievementPages');
+            const achPrevPage = document.getElementById('achPrevPage');
+            const achNextPage = document.getElementById('achNextPage');
+            const achPageIndicator = document.getElementById('achPageIndicator');
             const dailyRewardsToggle = document.getElementById('dailyRewardsToggle');
             const dailyRewardsPanel = document.getElementById('dailyRewardsPanel');
             const clickSound = document.getElementById('clickSound');
@@ -352,8 +364,21 @@
                 { id: 1, name: "Новичок", type: "coins", goal: 10000, reward: 5000, desc: "Собери 10000 монет" },
                 { id: 2, name: "Кликовый мастер", type: "coins", goal: 100000, reward: 20000, desc: "Собери 100000 монет" },
                 { id: 3, name: "Улучшатор", type: "upgrades", goal: 25, reward: 50000, desc: "Купи 25 улучшений" },
-                { id: 4, name: "Возрождённый", type: "rebirths", goal: 1, reward: 100000, desc: "Соверши 1 перерождения" },
+                { id: 4, name: "Возрождённый", type: "rebirths", goal: 1, reward: 100000, desc: "Соверши 1 перерождение" },
                 { id: 5, name: "Комбо-гуру", type: "combo", goal: 3, reward: 150000, desc: "Достигни комбо 3x" },
+                { id: 6, name: "Монетный магнат", type: "coins", goal: 500000, reward: 75000, desc: "Собери 500000 монет" },
+                { id: 7, name: "Улучшение эксперта", type: "upgrades", goal: 50, reward: 100000, desc: "Купи 50 улучшений" },
+                { id: 8, name: "Дважды рождённый", type: "rebirths", goal: 2, reward: 200000, desc: "Соверши 2 перерождения" },
+                { id: 9, name: "Миллионер", type: "coins", goal: 1000000, reward: 150000, desc: "Собери 1M монет" },
+                { id: 10, name: "Мастер кликов", type: "coins", goal: 5000000, reward: 500000, desc: "Собери 5M монет" },
+                { id: 11, name: "Улучшатор-эпик", type: "upgrades", goal: 100, reward: 250000, desc: "Купи 100 улучшений" },
+                { id: 12, name: "Трижды рождённый", type: "rebirths", goal: 3, reward: 400000, desc: "Соверши 3 перерождения" },
+                { id: 13, name: "Богач", type: "coins", goal: 10000000, reward: 1000000, desc: "Собери 10M монет" },
+                { id: 14, name: "Улучшение титана", type: "upgrades", goal: 200, reward: 500000, desc: "Купи 200 улучшений" },
+                { id: 15, name: "Пять перерождений", type: "rebirths", goal: 5, reward: 750000, desc: "Соверши 5 перерождений" },
+                { id: 16, name: "Мультимиллионер", type: "coins", goal: 50000000, reward: 2000000, desc: "Собери 50M монет" },
+                { id: 27, name: "Улучшение бога", type: "upgrades", goal: 500, reward: 1500000, desc: "Купи 500 улучшений" },
+                { id: 28, name: "Вечный возрождённый", type: "rebirths", goal: 10, reward: 3000000, desc: "Соверши 10 перерождений" },
             ];
 
             const dailyRewards = [
@@ -384,8 +409,11 @@
             const MAX_COMBO_CLICKS = 100;
             const MAX_MULTIPLIER = 3;
             const skinsPerPage = 7;
-            let currentPage = 0;
-            const totalPages = Math.ceil(skins.length / skinsPerPage);
+            const achievementsPerPage = 7;
+            let currentSkinPage = 0;
+            let currentAchPage = 0;
+            const totalSkinPages = Math.ceil(skins.length / skinsPerPage);
+            const totalAchPages = Math.ceil(achievements.length / achievementsPerPage);
 
             mainButton.style.backgroundImage = `url('${currentSkin}')`;
             upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
@@ -599,16 +627,30 @@
             dailyRewardsToggle.addEventListener('click', togglePanel.bind(null, dailyRewardsPanel, renderDailyRewards));
 
             prevPage.addEventListener('click', () => {
-                if (currentPage > 0) {
-                    currentPage--;
+                if (currentSkinPage > 0) {
+                    currentSkinPage--;
                     renderSkinPage();
                 }
             });
 
             nextPage.addEventListener('click', () => {
-                if (currentPage < totalPages - 1) {
-                    currentPage++;
+                if (currentSkinPage < totalSkinPages - 1) {
+                    currentSkinPage++;
                     renderSkinPage();
+                }
+            });
+
+            achPrevPage.addEventListener('click', () => {
+                if (currentAchPage > 0) {
+                    currentAchPage--;
+                    renderAchievements();
+                }
+            });
+
+            achNextPage.addEventListener('click', () => {
+                if (currentAchPage < totalAchPages - 1) {
+                    currentAchPage++;
+                    renderAchievements();
                 }
             });
 
@@ -630,22 +672,19 @@
             }
 
             function updateNotifications() {
-                // Skins notification
                 const buyableSkins = skins.filter(s => !unlockedSkins.includes(s.skin) && count >= s.cost).length;
                 skinNotification.style.display = buyableSkins > 0 ? 'block' : 'none';
                 skinNotification.textContent = buyableSkins;
 
-                // Achievements notification
                 const claimableAchievements = achievements.filter(ach => !completedAchievements.includes(ach.id) && (
                     (ach.type === "coins" && count >= ach.goal) ||
                     (ach.type === "upgrades" && upgradeLevel >= ach.goal) ||
                     (ach.type === "rebirths" && rebirths >= ach.goal) ||
-                    (ach.type === "combo" && clickCombo >= ach.goal)
+                    (ach.type === "combo" && Math.min(Math.floor(clickCombo / (MAX_COMBO_CLICKS / (MAX_MULTIPLIER - 1))) + 1, MAX_MULTIPLIER) >= ach.goal)
                 )).length;
                 achievementsNotification.style.display = claimableAchievements > 0 ? 'block' : 'none';
                 achievementsNotification.textContent = claimableAchievements;
 
-                // Daily rewards notification
                 const today = new Date().toDateString();
                 const canClaimDaily = (!lastClaimDate || lastClaimDate !== today) && dailyRewardDay < dailyRewards.length;
                 dailyNotification.style.display = canClaimDaily ? 'block' : 'none';
@@ -654,7 +693,7 @@
 
             function renderSkinPage() {
                 skinPages.innerHTML = '';
-                const startIndex = currentPage * skinsPerPage;
+                const startIndex = currentSkinPage * skinsPerPage;
                 const endIndex = Math.min(startIndex + skinsPerPage, skins.length);
                 skins.slice(startIndex, endIndex).forEach((skinData, index) => {
                     const globalIndex = startIndex + index + 1;
@@ -688,9 +727,9 @@
                     }
                     skinPages.appendChild(option);
                 });
-                pageIndicator.textContent = `Page ${currentPage + 1} of ${totalPages}`;
-                prevPage.disabled = currentPage === 0;
-                nextPage.disabled = currentPage === totalPages - 1;
+                pageIndicator.textContent = `Page ${currentSkinPage + 1} of ${totalSkinPages}`;
+                prevPage.disabled = currentSkinPage === 0;
+                nextPage.disabled = currentSkinPage === totalSkinPages - 1;
             }
 
             function checkAchievements() {
@@ -700,17 +739,19 @@
                         if (ach.type === "coins" && count >= ach.goal) achieved = true;
                         if (ach.type === "upgrades" && upgradeLevel >= ach.goal) achieved = true;
                         if (ach.type === "rebirths" && rebirths >= ach.goal) achieved = true;
-                        if (ach.type === "combo" && clickCombo >= ach.goal) achieved = true;
+                        if (ach.type === "combo" && Math.min(Math.floor(clickCombo / (MAX_COMBO_CLICKS / (MAX_MULTIPLIER - 1))) + 1, MAX_MULTIPLIER) >= ach.goal) achieved = true;
                         if (achieved) {
-                            renderAchievements(); // Update UI but don't auto-claim
+                            renderAchievements();
                         }
                     }
                 });
             }
 
             function renderAchievements() {
-                achievementsPanel.innerHTML = '';
-                achievements.forEach(ach => {
+                achievementPages.innerHTML = '';
+                const startIndex = currentAchPage * achievementsPerPage;
+                const endIndex = Math.min(startIndex + achievementsPerPage, achievements.length);
+                achievements.slice(startIndex, endIndex).forEach(ach => {
                     const option = document.createElement('div');
                     option.className = 'achievement-option';
                     option.innerHTML = `<span class="id-label">${ach.id}</span><img src="${currentSkin}" alt="Ach"><span>${ach.name} (${ach.reward} монет)<br>${ach.desc}</span>`;
@@ -720,7 +761,7 @@
                         (ach.type === "coins" && count >= ach.goal) ||
                         (ach.type === "upgrades" && upgradeLevel >= ach.goal) ||
                         (ach.type === "rebirths" && rebirths >= ach.goal) ||
-                        (ach.type === "combo" && clickCombo >= ach.goal)
+                        (ach.type === "combo" && Math.min(Math.floor(clickCombo / (MAX_COMBO_CLICKS / (MAX_MULTIPLIER - 1))) + 1, MAX_MULTIPLIER) >= ach.goal)
                     ) {
                         option.classList.add('claimable');
                         option.addEventListener('click', function() {
@@ -732,8 +773,11 @@
                             updateNotifications();
                         });
                     }
-                    achievementsPanel.appendChild(option);
+                    achievementPages.appendChild(option);
                 });
+                achPageIndicator.textContent = `Page ${currentAchPage + 1} of ${totalAchPages}`;
+                achPrevPage.disabled = currentAchPage === 0;
+                achNextPage.disabled = currentAchPage === totalAchPages - 1;
             }
 
             function renderDailyRewards() {
