@@ -30,6 +30,11 @@
         #playButton:hover {
             background-color: #333;
         }
+
+        #playButton:disabled {
+            cursor: default;
+            background-color: black;
+        }
     </style>
 </head>
 <body>
@@ -55,10 +60,13 @@
         // Construct the sound file path dynamically
         const soundFile = soundName ? `Sounds/${soundName}Skin.mp3` : '';
 
-        // Set page title and handle invalid URLs
+        // Set button text and handle invalid URLs
         const playButton = document.getElementById('playButton');
         if (soundName) {
-            // Check if the sound file exists by attempting to load it
+            // No text for valid sound
+            playButton.textContent = '';
+
+            // Check if the sound file exists
             fetch(soundFile, { method: 'HEAD' })
                 .then(response => {
                     if (!response.ok) {
@@ -66,23 +74,22 @@
                     }
                 })
                 .catch(() => {
-                    document.title = 'Sound Not Found';
-                    playButton.textContent = 'Sound Not Found';
+                    playButton.textContent = 'No Sound Found';
                     playButton.disabled = true;
                 });
         } else {
-            document.title = 'No Sound Selected';
-            playButton.textContent = 'No Sound Selected';
+            playButton.textContent = 'No Sound Found';
             playButton.disabled = true;
         }
 
-        // Play button functionality with looping
+        // Play button functionality with looping and disable after one click
         playButton.addEventListener('click', function() {
             if (soundFile && !this.disabled) {
-                audio.pause(); // Stop any currently playing audio
+                audio.pause(); // Stop any existing audio
                 audio = new Audio(soundFile);
                 audio.loop = true; // Enable looping
                 audio.play();
+                this.disabled = true; // Disable button after first click
             }
         });
     </script>
