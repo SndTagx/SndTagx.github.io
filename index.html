@@ -214,7 +214,7 @@
             position: absolute;
             top: 60px;
             left: 15px;
-            width: 280px;
+            width: 320px;
             background: rgba(30, 30, 50, 0.95);
             border-radius: 15px;
             padding: 20px;
@@ -341,19 +341,31 @@
         </div>
     </div>
     <div id="adminPanel">
-        <h2>Admin Control</h2>
+        <h2>Admin Panel</h2>
         <button id="adminCloseButton">X</button>
         <div class="admin-field">
             <input type="number" id="adminCoins" placeholder="Coins">
             <button id="setCoins">Set</button>
         </div>
         <div class="admin-field">
-            <input type="number" id="adminUpgrades" placeholder="Upgrades">
+            <input type="number" id="adminCoinsPerClick" placeholder="Coins Per Click">
+            <button id="setCoinsPerClick">Set</button>
+        </div>
+        <div class="admin-field">
+            <input type="number" id="adminUpgrades" placeholder="Upgrade Level">
             <button id="setUpgrades">Set</button>
+        </div>
+        <div class="admin-field">
+            <input type="number" id="adminUpgradeCost" placeholder="Upgrade Cost">
+            <button id="setUpgradeCost">Set</button>
         </div>
         <div class="admin-field">
             <input type="number" id="adminRebirths" placeholder="Rebirths">
             <button id="setRebirths">Set</button>
+        </div>
+        <div class="admin-field">
+            <input type="number" id="adminRebirthCost" placeholder="Rebirth Cost">
+            <button id="setRebirthCost">Set</button>
         </div>
         <div id="adminSkinsSection">
             <h3 style="font-size: 16px; margin: 0 0 10px;">Skin Manager</h3>
@@ -363,7 +375,6 @@
 
     <script>
         window.onload = function() {
-            // Получение всех элементов с проверкой
             const mainButton = document.getElementById('mainButton');
             const upgradeButton = document.getElementById('upgradeButton');
             const rebirthButton = document.getElementById('rebirthButton');
@@ -383,28 +394,31 @@
             const pageIndicator = document.getElementById('pageIndicator');
             const adminPanel = document.getElementById('adminPanel');
             const setCoinsButton = document.getElementById('setCoins');
+            const setCoinsPerClickButton = document.getElementById('setCoinsPerClick');
             const setUpgradesButton = document.getElementById('setUpgrades');
+            const setUpgradeCostButton = document.getElementById('setUpgradeCost');
             const setRebirthsButton = document.getElementById('setRebirths');
+            const setRebirthCostButton = document.getElementById('setRebirthCost');
             const adminCoinsInput = document.getElementById('adminCoins');
+            const adminCoinsPerClickInput = document.getElementById('adminCoinsPerClick');
             const adminUpgradesInput = document.getElementById('adminUpgrades');
+            const adminUpgradeCostInput = document.getElementById('adminUpgradeCost');
             const adminRebirthsInput = document.getElementById('adminRebirths');
+            const adminRebirthCostInput = document.getElementById('adminRebirthCost');
             const adminCloseButton = document.getElementById('adminCloseButton');
             const adminSkinsSection = document.getElementById('adminSkinsSection');
 
-            // Проверка на null для ключевых элементов
             if (!coinCount) console.error("Element 'coinCount' not found!");
             if (!upgradeCostLabel) console.error("Element 'upgradeCostLabel' not found!");
             if (!upgradeCountLabel) console.error("Element 'upgradeCountLabel' not found!");
             if (!rebirthCostLabel) console.error("Element 'rebirthCostLabel' not found!");
             if (!rebirthCountLabel) console.error("Element 'rebirthCountLabel' not found!");
 
-            // Если ключевые элементы отсутствуют, прерываем выполнение
             if (!mainButton || !coinCount || !upgradeButton || !rebirthButton) {
                 console.error("Critical elements missing. Aborting initialization.");
                 return;
             }
 
-            // Skin data with custom sounds
             const skins = [
                 { skin: "Skins/SvetlanaSkin.jpg", cost: 0, name: "🔢Svetlana (Free)", sound: "Sounds/SvetlanaSkin.mp3" },
                 { skin: "Skins/LeshaSkin.jpg", cost: 1, name: "😍Lesha (1)", sound: "Sounds/LeshaSkin.mp3" },
@@ -418,22 +432,19 @@
                 { skin: "Skins/DuraSkin.jpg", cost: 200000, name: "📑Dura (200000)", sound: "Sounds/DuraSkin.mp3" },
             ];
 
-            // Load saved values from localStorage
             let count = parseInt(localStorage.getItem('coinCount')) || 0;
             let coinsPerClick = parseInt(localStorage.getItem('coinsPerClick')) || 1;
             let upgradeLevel = parseInt(localStorage.getItem('upgradeLevel')) || 0;
             let rebirths = parseInt(localStorage.getItem('rebirths')) || 0;
-            let upgradeCost = Math.floor(10 * Math.pow(upgradeLevel, 2)) || 10;
-            let rebirthCost = Math.floor(1000000 * Math.pow(2, rebirths));
+            let upgradeCost = parseInt(localStorage.getItem('upgradeCost')) || Math.floor(10 * Math.pow(upgradeLevel, 2)) || 10;
+            let rebirthCost = parseInt(localStorage.getItem('rebirthCost')) || Math.floor(1000000 * Math.pow(2, rebirths));
             let currentSkin = localStorage.getItem('currentSkin') || 'Skins/SvetlanaSkin.jpg';
             let unlockedSkins = JSON.parse(localStorage.getItem('unlockedSkins')) || ['Skins/SvetlanaSkin.jpg'];
 
-            // Pagination variables
             const skinsPerPage = 7;
             let currentPage = 0;
             const totalPages = Math.ceil(skins.length / skinsPerPage);
 
-            // Apply initial skin and sound
             mainButton.style.backgroundImage = `url('${currentSkin}')`;
             upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
             rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
@@ -441,7 +452,6 @@
             const initialSkinData = skins.find(s => s.skin === currentSkin);
             if (clickSound) clickSound.src = initialSkinData ? initialSkinData.sound : "ston.mp3";
 
-            // Initialize display with null checks
             if (coinCount) coinCount.textContent = count;
             if (upgradeCostLabel) upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
             if (upgradeCountLabel) upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
@@ -450,21 +460,20 @@
             if (upgradeButton) upgradeButton.disabled = count < upgradeCost;
             if (rebirthButton) rebirthButton.disabled = count < rebirthCost;
 
-            // Autosave function
             function autosave() {
                 localStorage.setItem('coinCount', count);
                 localStorage.setItem('coinsPerClick', coinsPerClick);
                 localStorage.setItem('upgradeLevel', upgradeLevel);
                 localStorage.setItem('rebirths', rebirths);
+                localStorage.setItem('upgradeCost', upgradeCost);
+                localStorage.setItem('rebirthCost', rebirthCost);
                 localStorage.setItem('unlockedSkins', JSON.stringify(unlockedSkins));
                 localStorage.setItem('currentSkin', currentSkin);
             }
 
-            // Long press detection for admin panel (10 seconds)
             const holdDuration = 10000;
             let holdTimeout = null;
 
-            // Mouse events for desktop
             if (clickArea) {
                 clickArea.addEventListener('mousedown', function(e) {
                     e.preventDefault();
@@ -485,7 +494,6 @@
                     clearTimeout(holdTimeout);
                 });
 
-                // Touch events for mobile
                 clickArea.addEventListener('touchstart', function(e) {
                     e.preventDefault();
                     holdTimeout = setTimeout(() => {
@@ -506,47 +514,62 @@
                 });
             }
 
-            // Admin panel functionality
+            // Admin panel functionality (no restrictions)
             if (setCoinsButton) {
                 setCoinsButton.addEventListener('click', function() {
-                    const newCoins = parseInt(adminCoinsInput.value);
-                    if (!isNaN(newCoins) && newCoins >= 0) {
-                        count = newCoins;
-                        if (coinCount) coinCount.textContent = count;
-                        if (upgradeButton) upgradeButton.disabled = count < upgradeCost;
-                        if (rebirthButton) rebirthButton.disabled = count < rebirthCost;
-                        autosave();
-                        renderSkinPage();
-                    }
+                    const newCoins = parseInt(adminCoinsInput.value) || 0; // Allow any value, including negative
+                    count = newCoins;
+                    if (coinCount) coinCount.textContent = count;
+                    if (upgradeButton) upgradeButton.disabled = count < upgradeCost;
+                    if (rebirthButton) rebirthButton.disabled = count < rebirthCost;
+                    autosave();
+                    renderSkinPage();
+                });
+            }
+
+            if (setCoinsPerClickButton) {
+                setCoinsPerClickButton.addEventListener('click', function() {
+                    const newCoinsPerClick = parseInt(adminCoinsPerClickInput.value) || 1; // Allow any value
+                    coinsPerClick = newCoinsPerClick;
+                    autosave();
                 });
             }
 
             if (setUpgradesButton) {
                 setUpgradesButton.addEventListener('click', function() {
-                    const newUpgrades = parseInt(adminUpgradesInput.value);
-                    if (!isNaN(newUpgrades) && newUpgrades >= 0) {
-                        coinsPerClick = newUpgrades + 1;
-                        upgradeLevel = newUpgrades;
-                        upgradeCost = Math.floor(10 * Math.pow(upgradeLevel, 2)) || 10;
-                        if (upgradeCostLabel) upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
-                        if (upgradeCountLabel) upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
-                        if (upgradeButton) upgradeButton.disabled = count < upgradeCost;
-                        autosave();
-                    }
+                    const newUpgrades = parseInt(adminUpgradesInput.value) || 0; // Allow any value
+                    upgradeLevel = newUpgrades;
+                    if (upgradeCountLabel) upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
+                    autosave();
+                });
+            }
+
+            if (setUpgradeCostButton) {
+                setUpgradeCostButton.addEventListener('click', function() {
+                    const newUpgradeCost = parseInt(adminUpgradeCostInput.value) || 0; // Allow any value
+                    upgradeCost = newUpgradeCost;
+                    if (upgradeCostLabel) upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
+                    if (upgradeButton) upgradeButton.disabled = count < upgradeCost;
+                    autosave();
                 });
             }
 
             if (setRebirthsButton) {
                 setRebirthsButton.addEventListener('click', function() {
-                    const newRebirths = parseInt(adminRebirthsInput.value);
-                    if (!isNaN(newRebirths) && newRebirths >= 0) {
-                        rebirths = newRebirths;
-                        rebirthCost = Math.floor(1000000 * Math.pow(2, rebirths));
-                        if (rebirthCostLabel) rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
-                        if (rebirthCountLabel) rebirthCountLabel.textContent = `Count: ${rebirths} (x${rebirths + 1})`;
-                        if (rebirthButton) rebirthButton.disabled = count < rebirthCost;
-                        autosave();
-                    }
+                    const newRebirths = parseInt(adminRebirthsInput.value) || 0; // Allow any value
+                    rebirths = newRebirths;
+                    if (rebirthCountLabel) rebirthCountLabel.textContent = `Count: ${rebirths} (x${rebirths + 1})`;
+                    autosave();
+                });
+            }
+
+            if (setRebirthCostButton) {
+                setRebirthCostButton.addEventListener('click', function() {
+                    const newRebirthCost = parseInt(adminRebirthCostInput.value) || 0; // Allow any value
+                    rebirthCost = newRebirthCost;
+                    if (rebirthCostLabel) rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
+                    if (rebirthButton) rebirthButton.disabled = count < rebirthCost;
+                    autosave();
                 });
             }
 
@@ -556,7 +579,6 @@
                 });
             }
 
-            // Render admin skins
             function renderAdminSkins() {
                 if (!adminSkinsSection) return;
                 const skinsList = adminSkinsSection.querySelector('.skins-list') || document.createElement('div');
@@ -613,7 +635,6 @@
                 if (clickSound) clickSound.src = skinData ? skinData.sound : "ston.mp3";
             }
 
-            // Main button click (mouse)
             mainButton.addEventListener('click', function(e) {
                 if (clickSound) {
                     clickSound.volume = 1.0;
@@ -624,7 +645,7 @@
                 if (coinCount) coinCount.textContent = count;
 
                 const coin = document.createElement('img');
-                coin.src = current TakCount = document.createElement('img');
+                coin.src = currentSkin;
                 coin.className = 'flying-coin';
                 const rect = mainButton.getBoundingClientRect();
                 coin.style.left = (e.clientX - rect.left - 16) + 'px';
@@ -638,7 +659,6 @@
                 renderSkinPage();
             });
 
-            // Main button touch support
             mainButton.addEventListener('touchstart', function(e) {
                 e.preventDefault();
                 if (clickSound) {
@@ -665,7 +685,6 @@
                 renderSkinPage();
             });
 
-            // Upgrade button
             if (upgradeButton) {
                 upgradeButton.addEventListener('click', function() {
                     if (count >= upgradeCost) {
@@ -684,7 +703,6 @@
                 });
             }
 
-            // Rebirth button
             if (rebirthButton) {
                 rebirthButton.addEventListener('click', function() {
                     if (count >= rebirthCost) {
@@ -711,7 +729,6 @@
                 });
             }
 
-            // Skin panel toggle
             if (skinPanelToggle) {
                 skinPanelToggle.addEventListener('click', function() {
                     if (skinPanel) {
@@ -723,7 +740,6 @@
                 });
             }
 
-            // Pagination controls
             if (prevPage) {
                 prevPage.addEventListener('click', function() {
                     if (currentPage > 0) {
@@ -742,7 +758,6 @@
                 });
             }
 
-            // Render skin page
             function renderSkinPage() {
                 if (!skinPages) return;
                 skinPages.innerHTML = '';
@@ -797,14 +812,12 @@
                 if (nextPage) nextPage.disabled = currentPage === totalPages - 1;
             }
 
-            // Close skin panel when clicking outside
             document.addEventListener('click', function(e) {
                 if (skinPanel && !skinPanel.contains(e.target) && e.target !== skinPanelToggle) {
                     skinPanel.style.display = 'none';
                 }
             });
 
-            // Initial render
             renderSkinPage();
         };
     </script>
