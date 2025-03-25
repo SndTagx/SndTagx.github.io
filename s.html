@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SndTagX</title>
+    <title>Sound Player</title>
     <style>
         body {
             margin: 0;
@@ -33,15 +33,9 @@
     </style>
 </head>
 <body>
-    <button id="playButton"></button>
+    <button id="playButton">Click to Play</button>
 
     <script>
-        // Hardcoded sound map (custom URL name to actual file)
-        const soundMap = {
-            's1': 'Sounds/SvetlanaSkin.mp3',
-            's2': 'Sounds/LeshaSkin.mp3'
-        };
-        
         let audio = new Audio();
 
         // Function to get query parameter
@@ -50,24 +44,41 @@
             return urlParams.get(param);
         }
 
-        // Get the sound name from the URL query parameter (?s=Sound1)
+        // Get the sound name from the URL query parameter (?s=CoolBeat)
         const soundName = getQueryParam('s') || '';
+
+        // Construct the sound file path dynamically
+        const soundFile = soundName ? `Sounds/{"${soundName}"}Skin.mp3` : '';
 
         // Set page title and handle invalid URLs
         const playButton = document.getElementById('playButton');
-        if (soundMap[soundName]) {
-                       
+        if (soundName) {
+            document.title = soundName + ' - Sound Player';
+            playButton.textContent = `Play ${soundName}`;
+
+            // Check if the sound file exists by attempting to load it
+            fetch(soundFile, { method: 'HEAD' })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Sound not found');
+                    }
+                })
+                .catch(() => {
+                    document.title = 'Sound Not Found';
+                    playButton.textContent = 'Sound Not Found';
+                    playButton.disabled = true;
+                });
         } else {
-            document.title = 'Sound Not Found';
-            playButton.textContent = 'Sound Not Found';
+            document.title = 'No Sound Selected';
+            playButton.textContent = 'No Sound Selected';
             playButton.disabled = true;
         }
 
         // Play button functionality
         playButton.addEventListener('click', function() {
-            if (soundMap[soundName]) {
+            if (soundFile && !this.disabled) {
                 audio.pause();
-                audio = new Audio(soundMap[soundName]);
+                audio = new Audio(soundFile);
                 audio.play();
             }
         });
