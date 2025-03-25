@@ -212,39 +212,43 @@
         }
         #adminPanel {
             position: absolute;
-            top: 60px;
+            top: 50px;
             left: 15px;
-            width: 320px;
+            width: 180px; /* Reduced from 320px */
+            max-width: 90vw; /* Prevents overflow on very small screens */
             background: rgba(30, 30, 50, 0.95);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            padding: 10px; /* Reduced from 20px */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
             border: 2px solid #00d4ff;
             backdrop-filter: blur(10px);
             display: none;
             z-index: 20;
+            max-height: 300px;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
         #adminPanel h2 {
-            margin: 0 0 20px;
-            font-size: 22px;
+            margin: 0 0 10px; /* Reduced spacing */
+            font-size: 18px; /* Reduced from 22px */
             text-align: center;
             color: #00d4ff;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
         }
         #adminPanel .admin-field {
-            margin-bottom: 15px;
+            margin-bottom: 8px; /* Reduced from 15px */
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 5px; /* Reduced from 10px */
         }
         #adminPanel input {
             flex: 1;
-            padding: 8px;
-            border-radius: 8px;
+            padding: 6px; /* Reduced from 8px */
+            border-radius: 6px;
             border: 1px solid rgba(255, 255, 255, 0.3);
             background: rgba(255, 255, 255, 0.05);
             color: #e0e0e0;
-            font-size: 14px;
+            font-size: 12px; /* Reduced from 14px */
             box-sizing: border-box;
         }
         #adminPanel input:focus {
@@ -252,12 +256,12 @@
             outline: none;
         }
         #adminPanel button {
-            padding: 8px 12px;
+            padding: 6px 8px; /* Reduced from 8px 12px */
             background: linear-gradient(135deg, #ff4d4d, #b00000);
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             color: #fff;
-            font-size: 14px;
+            font-size: 12px; /* Reduced from 14px */
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -268,15 +272,15 @@
         }
         #adminCloseButton {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 16px;
-            height: 16px;
+            top: 5px; /* Adjusted for smaller padding */
+            right: 5px;
+            width: 14px; /* Reduced from 16px */
+            height: 14px;
             background: #ff4d4d;
             border: none;
             border-radius: 50%;
             color: #fff;
-            font-size: 10px;
+            font-size: 8px; /* Reduced from 10px */
             font-weight: bold;
             cursor: pointer;
             display: flex;
@@ -288,22 +292,22 @@
             background: #ff6666;
         }
         #adminSkinsSection {
-            margin-top: 20px;
-            max-height: 300px;
+            margin-top: 10px; /* Reduced from 20px */
+            max-height: 200px; /* Reduced to fit smaller panel */
             overflow-y: auto;
         }
         #adminSkinsSection .skin-option {
             justify-content: space-between;
-            padding: 8px;
-            margin: 5px 0;
+            padding: 6px; /* Reduced from 8px */
+            margin: 3px 0; /* Reduced from 5px */
         }
         #adminSkinsSection .skin-option img {
-            width: 32px;
-            height: 32px;
+            width: 24px; /* Reduced from 32px */
+            height: 24px;
         }
         #adminSkinsSection .skin-option button {
-            padding: 4px 8px;
-            font-size: 12px;
+            padding: 3px 6px; /* Reduced from 4px 8px */
+            font-size: 10px; /* Reduced from 12px */
         }
         #adminSkinsSection .toggle-unlock {
             background: linear-gradient(135deg, #00b4db, #0083b0);
@@ -341,18 +345,18 @@
         </div>
     </div>
     <div id="adminPanel">
-        <h2>Admin Panel</h2>
+        <h2>Admin Control</h2>
         <button id="adminCloseButton">X</button>
         <div class="admin-field">
             <input type="number" id="adminCoins" placeholder="Coins">
             <button id="setCoins">Set</button>
         </div>
         <div class="admin-field">
-            <input type="number" id="adminCoinsPerClick" placeholder="Coins Per Click">
+            <input type="number" id="adminCoinsPerClick" placeholder="Coins/Click">
             <button id="setCoinsPerClick">Set</button>
         </div>
         <div class="admin-field">
-            <input type="number" id="adminUpgrades" placeholder="Upgrade Level">
+            <input type="number" id="adminUpgrades" placeholder="Upgrades">
             <button id="setUpgrades">Set</button>
         </div>
         <div class="admin-field">
@@ -368,7 +372,7 @@
             <button id="setRebirthCost">Set</button>
         </div>
         <div id="adminSkinsSection">
-            <h3 style="font-size: 16px; margin: 0 0 10px;">Skin Manager</h3>
+            <h3 style="font-size: 14px; margin: 0 0 8px;">Skin Manager</h3>
         </div>
     </div>
     <audio id="clickSound" loop></audio>
@@ -514,10 +518,9 @@
                 });
             }
 
-            // Admin panel functionality (no restrictions)
             if (setCoinsButton) {
                 setCoinsButton.addEventListener('click', function() {
-                    const newCoins = parseInt(adminCoinsInput.value) || 0; // Allow any value, including negative
+                    const newCoins = parseInt(adminCoinsInput.value) || 0;
                     count = newCoins;
                     if (coinCount) coinCount.textContent = count;
                     if (upgradeButton) upgradeButton.disabled = count < upgradeCost;
@@ -529,7 +532,7 @@
 
             if (setCoinsPerClickButton) {
                 setCoinsPerClickButton.addEventListener('click', function() {
-                    const newCoinsPerClick = parseInt(adminCoinsPerClickInput.value) || 1; // Allow any value
+                    const newCoinsPerClick = parseInt(adminCoinsPerClickInput.value) || 1;
                     coinsPerClick = newCoinsPerClick;
                     autosave();
                 });
@@ -537,7 +540,7 @@
 
             if (setUpgradesButton) {
                 setUpgradesButton.addEventListener('click', function() {
-                    const newUpgrades = parseInt(adminUpgradesInput.value) || 0; // Allow any value
+                    const newUpgrades = parseInt(adminUpgradesInput.value) || 0;
                     upgradeLevel = newUpgrades;
                     if (upgradeCountLabel) upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
                     autosave();
@@ -546,7 +549,7 @@
 
             if (setUpgradeCostButton) {
                 setUpgradeCostButton.addEventListener('click', function() {
-                    const newUpgradeCost = parseInt(adminUpgradeCostInput.value) || 0; // Allow any value
+                    const newUpgradeCost = parseInt(adminUpgradeCostInput.value) || 0;
                     upgradeCost = newUpgradeCost;
                     if (upgradeCostLabel) upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
                     if (upgradeButton) upgradeButton.disabled = count < upgradeCost;
@@ -556,7 +559,7 @@
 
             if (setRebirthsButton) {
                 setRebirthsButton.addEventListener('click', function() {
-                    const newRebirths = parseInt(adminRebirthsInput.value) || 0; // Allow any value
+                    const newRebirths = parseInt(adminRebirthsInput.value) || 0;
                     rebirths = newRebirths;
                     if (rebirthCountLabel) rebirthCountLabel.textContent = `Count: ${rebirths} (x${rebirths + 1})`;
                     autosave();
@@ -565,7 +568,7 @@
 
             if (setRebirthCostButton) {
                 setRebirthCostButton.addEventListener('click', function() {
-                    const newRebirthCost = parseInt(adminRebirthCostInput.value) || 0; // Allow any value
+                    const newRebirthCost = parseInt(adminRebirthCostInput.value) || 0;
                     rebirthCost = newRebirthCost;
                     if (rebirthCostLabel) rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
                     if (rebirthButton) rebirthButton.disabled = count < rebirthCost;
