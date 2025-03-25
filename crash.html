@@ -36,8 +36,9 @@
             var mx = 0, my = 0, mx1 = 0, my1 = 0, lasttimen = 0;
             var ml = 0, mr = 0, mm = 0;
             var len = 1.6;
-            var ang1 = 2.8;
-            var ang2 = 0.4;
+            var ang1 = 2.8; // Yaw (horizontal rotation)
+            var ang2 = 0.4; // Pitch (vertical rotation)
+            var ang3 = 0.0; // Roll (new rotation around Z-axis)
             var cenx = 0.0;
             var ceny = 0.0;
             var cenz = 0.0;
@@ -65,25 +66,53 @@
                 var deltaTime = (t2 - t1) / 1000; // Time difference in seconds
                 t1 = t2;
 
-                // Automatic movement
-                ang1 += 0.02 * deltaTime; // Rotate horizontally
-                ang2 += 0.015 * deltaTime; // Rotate vertically (slower)
-                cenx += Math.sin(t2 * 0.001) * 0.01; // Oscillate X position
-                ceny += Math.cos(t2 * 0.001) * 0.01; // Oscillate Y position
-                cenz += Math.sin(t2 * 0.0005) * 0.01; // Oscillate Z position (slower)
+                // Automatic movement and rotation
+                ang1 += 0.02 * deltaTime; // Yaw
+                ang2 += 0.015 * deltaTime; // Pitch
+                ang3 += 0.01 * deltaTime; // Roll (new rotation)
+                cenx += Math.sin(t2 * 0.001) * 0.01; // Oscillate X
+                ceny += Math.cos(t2 * 0.001) * 0.01; // Oscillate Y
+                cenz += Math.sin(t2 * 0.0005) * 0.01; // Oscillate Z
 
                 draw();
                 window.requestAnimationFrame(ontimer);
             }
 
             function draw() {
+                // Calculate base vectors with yaw (ang1) and pitch (ang2)
+                var forwardX = -Math.cos(ang1) * Math.cos(ang2);
+                var forwardY = -Math.sin(ang2);
+                var forwardZ = -Math.sin(ang1) * Math.cos(ang2);
+                
+                var rightX = Math.sin(ang1);
+                var rightY = 0;
+                var rightZ = -Math.cos(ang1);
+                
+                var upX = -Math.sin(ang2) * Math.cos(ang1);
+                var upY = Math.cos(ang2);
+                var upZ = -Math.sin(ang2) * Math.sin(ang1);
+
+                // Apply roll (ang3) by rotating right and up vectors around forward
+                var cosRoll = Math.cos(ang3);
+                var sinRoll = Math.sin(ang3);
+
+                // Rotate right and up vectors around forward axis
+                var newRightX = rightX * cosRoll + upX * sinRoll;
+                var newRightY = rightY * cosRoll + upY * sinRoll;
+                var newRightZ = rightZ * cosRoll + upZ * sinRoll;
+
+                var newUpX = -rightX * sinRoll + upX * cosRoll;
+                var newUpY = -rightY * sinRoll + upY * cosRoll;
+                var newUpZ = -rightZ * sinRoll + upZ * cosRoll;
+
+                // Update WebGL uniforms
                 gl.uniform1f(glx, cx * 2.0 / (cx + cy));
                 gl.uniform1f(gly, cy * 2.0 / (cx + cy));
                 gl.uniform1f(gllen, len);
                 gl.uniform3f(glorigin, len * Math.cos(ang1) * Math.cos(ang2) + cenx, len * Math.sin(ang2) + ceny, len * Math.sin(ang1) * Math.cos(ang2) + cenz);
-                gl.uniform3f(glright, Math.sin(ang1), 0, -Math.cos(ang1));
-                gl.uniform3f(glup, -Math.sin(ang2) * Math.cos(ang1), Math.cos(ang2), -Math.sin(ang2) * Math.sin(ang1));
-                gl.uniform3f(glforward, -Math.cos(ang1) * Math.cos(ang2), -Math.sin(ang2), -Math.sin(ang1) * Math.cos(ang2));
+                gl.uniform3f(glright, newRightX, newRightY, newRightZ);
+                gl.uniform3f(glup, newUpX, newUpY, newUpZ);
+                gl.uniform3f(glforward, forwardX, forwardY, forwardZ);
                 gl.drawArrays(gl.TRIANGLES, 0, 6);
                 gl.finish();
             }
@@ -274,7 +303,7 @@
                 "               r4 = r3;\n" +
                 "               r3 = r2;\n" +
                 "               r2 = r4 * M_L + r1 * M_R;\n" +
-                "               m3 = m3;\n" +
+                "               m3 = m2;\n" +
                 "               m2 = kernal(origin + dir * r2);\n" +
                 "            }\n" +
                 "            else {\n" +
