@@ -383,6 +383,13 @@
             window.requestAnimationFrame(ontimer);
         }
 
+        window.onload = function() {
+            initCanvas('c1');
+            initCanvas('c2');
+            initCanvas('c3');
+            initCanvas('c4');
+        };
+
         window.onresize = function() {
             var canvases = ['c1', 'c2', 'c3', 'c4'];
             canvases.forEach(function(id) {
