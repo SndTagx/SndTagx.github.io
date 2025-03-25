@@ -86,21 +86,23 @@
             top: 10px;
             width: clamp(40px, 10vw, 50px);
             height: clamp(40px, 10vw, 50px);
-            background: linear-gradient(135deg, #00d4ff, #ff4d4d);
-            border: 2px solid rgba(255, 255, 255, 0.5);
+            background: linear-gradient(135deg, #1e1e2f, #00d4ff);
+            border: 3px solid #00d4ff;
             border-radius: 50%;
             color: #fff;
-            font-size: clamp(16px, 4vw, 24px);
+            font-size: clamp(18px, 4vw, 26px);
             font-weight: bold;
             text-align: center;
             line-height: clamp(40px, 10vw, 50px);
             cursor: pointer;
             z-index: 101;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
         }
         #skinPanelToggle:hover, #achievementsToggle:hover, #dailyRewardsToggle:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+            transform: scale(1.15);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+            background: linear-gradient(135deg, #00d4ff, #1e1e2f);
         }
         #skinPanelToggle { right: 10px; }
         #achievementsToggle { right: 70px; }
@@ -257,7 +259,7 @@
         <div class="admin-field"><input type="number" id="adminRebirthCost" placeholder="Rebirth Cost"><button id="setRebirthCost">Set</button></div>
         <div class="admin-field"><input type="number" id="adminCombo" placeholder="Combo Multiplier"><button id="setCombo">Set</button></div>
         <div class="admin-field"><input type="number" id="adminDailySet" placeholder="Set Days"><button id="setDailyRewards">Set</button></div>
-        <div class="admin-field"><input type="text" id="adminSkins" placeholder="Skin Indexes (e.g., 0,1)"><button id="setSkins">Set</button></div>
+        <div class="admin-field"><input type="text" id="adminSkins" placeholder="Skin Indexes (e.g., 1,2)"><button id="setSkins">Set</button></div>
         <div class="admin-field"><input type="text" id="adminAchievements" placeholder="Achievement Indexes (e.g., 1,2)"><button id="setAchievements">Set</button></div>
     </div>
     <audio id="clickSound" loop></audio>
@@ -392,7 +394,7 @@
 
             clickArea.addEventListener('mousedown', function(e) {
                 e.preventDefault();
-                holdTimeout = setTimeout(() => adminPanel.style.display = 'block', 3000); // Fixed syntax error
+                holdTimeout = setTimeout(() => adminPanel.style.display = 'block', 3000);
             });
             clickArea.addEventListener('mouseup', () => clearTimeout(holdTimeout));
             clickArea.addEventListener('touchstart', function(e) {
@@ -444,29 +446,31 @@
                 autosave();
             });
             setComboButton.addEventListener('click', () => {
-                clickCombo = Math.min(parseInt(adminComboInput.value) || 0, MAX_COMBO_CLICKS);
+                clickCombo = parseInt(adminComboInput.value) || 0; // No restrictions
                 const multiplier = Math.min(Math.floor(clickCombo / (MAX_COMBO_CLICKS / (MAX_MULTIPLIER - 1))) + 1, MAX_MULTIPLIER);
                 comboCounter.textContent = `Combo: ${multiplier}x`;
                 autosave();
                 checkAchievements();
             });
             setDailyRewardsButton.addEventListener('click', () => {
-                dailyRewardDay = Math.min(Math.max(parseInt(adminDailySetInput.value) || 0, 0), 6);
+                dailyRewardDay = parseInt(adminDailySetInput.value) || 0; // No restrictions
                 lastClaimDate = null;
                 autosave();
                 renderDailyRewards();
             });
             setSkinsButton.addEventListener('click', () => {
-                const indexes = adminSkinsInput.value.split(',').map(i => parseInt(i.trim())).filter(i => !isNaN(i) && i >= 0 && i < skins.length);
-                unlockedSkins = indexes.map(i => skins[i].skin);
-                if (!unlockedSkins.includes(currentSkin)) currentSkin = skins[0].skin;
+                const indexes = adminSkinsInput.value.split(',').map(i => parseInt(i.trim())).filter(i => !isNaN(i) && i >= 1 && i <= skins.length);
+                unlockedSkins = indexes.map(i => skins[i - 1].skin); // Adjust for 1-based index
+                if (!unlockedSkins.includes(currentSkin) || unlockedSkins.length === 0) {
+                    currentSkin = skins[0].skin; // Default to Svetlana if no valid skins
+                }
                 updateSkin();
                 autosave();
                 renderSkinPage();
             });
             setAchievementsButton.addEventListener('click', () => {
                 const indexes = adminAchievementsInput.value.split(',').map(i => parseInt(i.trim())).filter(i => !isNaN(i) && i >= 1 && i <= achievements.length);
-                completedAchievements = indexes;
+                completedAchievements = indexes; // Direct override, no restrictions
                 autosave();
                 renderAchievements();
             });
@@ -592,7 +596,7 @@
                 const startIndex = currentPage * skinsPerPage;
                 const endIndex = Math.min(startIndex + skinsPerPage, skins.length);
                 skins.slice(startIndex, endIndex).forEach((skinData, index) => {
-                    const globalIndex = startIndex + index;
+                    const globalIndex = startIndex + index + 1; // Start from 1
                     const option = document.createElement('div');
                     option.className = 'skin-option';
                     option.innerHTML = `<span class="id-label">${globalIndex}</span><img src="${skinData.skin}" alt="Skin"><span>${skinData.name}</span>`;
