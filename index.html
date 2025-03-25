@@ -274,10 +274,11 @@
             const resetDailyRewardsButton = document.getElementById('resetDailyRewards');
             const adminCoinsInput = document.getElementById('adminCoins');
             const adminCoinsPerClickInput = document.getElementById('adminCoinsPerClick');
-            const adminUpgrades,认真Input = document.getElementById('adminUpgrades');
+            const adminUpgradesInput = document.getElementById('adminUpgrades'); // Fixed typo
             const adminUpgradeCostInput = document.getElementById('adminUpgradeCost');
             const adminRebirthsInput = document.getElementById('adminRebirths');
-            const adminRebirthCostInput = document.getElementById('adminRebirthCost主要CostInput = document.getElementById('adminCombo');
+            const adminRebirthCostInput = document.getElementById('adminRebirthCost'); // Fixed typo
+            const adminComboInput = document.getElementById('adminCombo'); // Fixed typo
             const adminDailyResetInput = document.getElementById('adminDailyReset');
             const adminCloseButton = document.getElementById('adminCloseButton');
 
@@ -325,6 +326,7 @@
             let lastClaimDate = localStorage.getItem('lastClaimDate') || null;
             let clickCombo = parseInt(localStorage.getItem('clickCombo')) || 0;
             let comboTimeout = null;
+            let holdTimeout = null; // Added missing initializer
 
             const MAX_COMBO_CLICKS = 100;
             const MAX_MULTIPLIER = 3;
