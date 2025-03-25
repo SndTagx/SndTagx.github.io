@@ -2,18 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SndTagXCrasher</title>
     <style>
         body { 
             margin: 0; 
-            padding: 0;
             overflow: hidden; 
             display: grid; 
-            grid-template-columns: 1fr 1fr; /* Two columns */
-            grid-template-rows: 1fr 1fr; /* Two rows */
-            height: 100vh; /* Full viewport height */
-            width: 100vw; /* Full viewport width */
+            grid-template-columns: repeat(2, 1fr); 
+            grid-template-rows: repeat(2, 1fr); 
+            height: 100vh; 
+            width: 100vw; 
         }
         canvas { 
             width: 100%; 
@@ -28,23 +26,19 @@
     <canvas id="c3"></canvas>
     <canvas id="c4"></canvas>
     <script>
-        function initCanvas(canvasId, direction) {
+        function initCanvas(canvasId, ang1Speed, ang2Speed, moveXSpeed, moveYSpeed, moveZSpeed) {
             var cx, cy;
             var glposition, glright, glforward, glup, glorigin, glx, gly, gllen;
             var canvas = document.getElementById(canvasId);
             var gl = canvas.getContext('webgl');
             var date = new Date();
             var t1 = date.getTime();
-            var mx = 0, my = 0, mx1 = 0, my1 = 0, lasttimen = 0;
-            var ml = 0, mr = 0, mm = 0;
             var len = 1.6;
-            var ang1 = 2.8; // Yaw
-            var ang2 = 0.4; // Pitch
-            var ang3 = 0.0; // Roll
+            var ang1 = 2.8;
+            var ang2 = 0.4;
             var cenx = 0.0;
             var ceny = 0.0;
             var cenz = 0.0;
-            var dir = direction; // Direction multiplier (e.g., 1, -1, 0.5, -0.5)
             var KERNEL = "float kernal(vec3 ver){\n" +
                 "   vec3 a;\n" +
                 "   float b,c,d,e;\n" +
@@ -66,161 +60,34 @@
             function ontimer() {
                 date = new Date();
                 var t2 = date.getTime();
-                var deltaTime = (t2 - t1) / 1000; // Time difference in seconds
+                var dt = (t2 - t1) * 0.001; // Time delta in seconds
                 t1 = t2;
 
-                // Automatic movement and rotation with direction multiplier
-                ang1 += dir * 0.1 * deltaTime; // Fast yaw
-                ang2 += dir * 0.08 * deltaTime; // Fast pitch
-                ang3 += dir * 0.05 * deltaTime; // Fast roll
-                cenx += dir * Math.sin(t2 * 0.001) * 0.02; // X oscillation
-                ceny += dir * Math.cos(t2 * 0.0015) * 0.02; // Y oscillation
-                cenz += dir * Math.sin(t2 * 0.0008) * 0.02; // Z oscillation
+                // Auto-rotation and auto-movement, unique per canvas
+                ang1 += ang1Speed * dt;  // Different rotation speeds
+                ang2 += ang2Speed * dt;
+                cenx += moveXSpeed * dt; // Different movement directions
+                ceny += moveYSpeed * dt;
+                cenz += moveZSpeed * dt;
 
                 draw();
                 window.requestAnimationFrame(ontimer);
             }
 
             function draw() {
-                var forwardX = -Math.cos(ang1) * Math.cos(ang2);
-                var forwardY = -Math.sin(ang2);
-                var forwardZ = -Math.sin(ang1) * Math.cos(ang2);
-                
-                var rightX = Math.sin(ang1);
-                var rightY = 0;
-                var rightZ = -Math.cos(ang1);
-                
-                var upX = -Math.sin(ang2) * Math.cos(ang1);
-                var upY = Math.cos(ang2);
-                var upZ = -Math.sin(ang2) * Math.sin(ang1);
-
-                var cosRoll = Math.cos(ang3);
-                var sinRoll = Math.sin(ang3);
-
-                var newRightX = rightX * cosRoll + upX * sinRoll;
-                var newRightY = rightY * cosRoll + upY * sinRoll;
-                var newRightZ = rightZ * cosRoll + upZ * sinRoll;
-
-                var newUpX = -rightX * sinRoll + upX * cosRoll;
-                var newUpY = -rightY * sinRoll + upY * cosRoll;
-                var newUpZ = -rightZ * sinRoll + upZ * cosRoll;
-
                 gl.uniform1f(glx, cx * 2.0 / (cx + cy));
                 gl.uniform1f(gly, cy * 2.0 / (cx + cy));
                 gl.uniform1f(gllen, len);
                 gl.uniform3f(glorigin, len * Math.cos(ang1) * Math.cos(ang2) + cenx, len * Math.sin(ang2) + ceny, len * Math.sin(ang1) * Math.cos(ang2) + cenz);
-                gl.uniform3f(glright, newRightX, newRightY, newRightZ);
-                gl.uniform3f(glup, newUpX, newUpY, newUpZ);
-                gl.uniform3f(glforward, forwardX, forwardY, forwardZ);
+                gl.uniform3f(glright, Math.sin(ang1), 0, -Math.cos(ang1));
+                gl.uniform3f(glup, -Math.sin(ang2) * Math.cos(ang1), Math.cos(ang2), -Math.sin(ang2) * Math.sin(ang1));
+                gl.uniform3f(glforward, -Math.cos(ang1) * Math.cos(ang2), -Math.sin(ang2), -Math.sin(ang1) * Math.cos(ang2));
                 gl.drawArrays(gl.TRIANGLES, 0, 6);
                 gl.finish();
             }
 
-            document.addEventListener("mousedown", function(ev) {
-                var oEvent = ev || event;
-                if (oEvent.button == 0) { ml = 1; mm = 0; }
-                if (oEvent.button == 2) { mr = 1; mm = 0; }
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-            }, false);
-
-            document.addEventListener("mouseup", function(ev) {
-                var oEvent = ev || event;
-                if (oEvent.button == 0) { ml = 0; }
-                if (oEvent.button == 2) { mr = 0; }
-            }, false);
-
-            document.addEventListener("mousemove", function(ev) {
-                var oEvent = ev || event;
-                if (ml == 1) {
-                    ang1 += (oEvent.clientX - mx) * 0.002;
-                    ang2 += (oEvent.clientY - my) * 0.002;
-                    if (oEvent.clientX != mx || oEvent.clientY != my) { mm = 1; }
-                }
-                if (mr == 1) {
-                    var l = len * 4.0 / (cx + cy);
-                    cenx += l * (-(oEvent.clientX - mx) * Math.sin(ang1) - (oEvent.clientY - my) * Math.sin(ang2) * Math.cos(ang1));
-                    ceny += l * ((oEvent.clientY - my) * Math.cos(ang2));
-                    cenz += l * ((oEvent.clientX - mx) * Math.cos(ang1) - (oEvent.clientY - my) * Math.sin(ang2) * Math.sin(ang1));
-                    if (oEvent.clientX != mx || oEvent.clientY != my) { mm = 1; }
-                }
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-            }, false);
-
-            document.addEventListener("mousewheel", function(ev) {
-                ev.preventDefault();
-                var oEvent = ev || event;
-                len *= Math.exp(-0.001 * oEvent.wheelDelta);
-            }, false);
-
-            document.addEventListener("touchstart", function(ev) {
-                var n = ev.touches.length;
-                if (n == 1) {
-                    var oEvent = ev.touches[0];
-                    mx = oEvent.clientX;
-                    my = oEvent.clientY;
-                } else if (n == 2) {
-                    var oEvent = ev.touches[0];
-                    mx = oEvent.clientX;
-                    my = oEvent.clientY;
-                    oEvent = ev.touches[1];
-                    mx1 = oEvent.clientX;
-                    my1 = oEvent.clientY;
-                }
-                lasttimen = n;
-            }, false);
-
-            document.addEventListener("touchend", function(ev) {
-                var n = ev.touches.length;
-                if (n == 1) {
-                    var oEvent = ev.touches[0];
-                    mx = oEvent.clientX;
-                    my = oEvent.clientY;
-                } else if (n == 2) {
-                    var oEvent = ev.touches[0];
-                    mx = oEvent.clientX;
-                    my = oEvent.clientY;
-                    oEvent = ev.touches[1];
-                    mx1 = oEvent.clientX;
-                    my1 = oEvent.clientY;
-                }
-                lasttimen = n;
-            }, false);
-
-            document.addEventListener("touchmove", function(ev) {
-                ev.preventDefault();
-                var n = ev.touches.length;
-                if (n == 1 && lasttimen == 1) {
-                    var oEvent = ev.touches[0];
-                    ang1 += (oEvent.clientX - mx) * 0.002;
-                    ang2 += (oEvent.clientY - my) * 0.002;
-                    mx = oEvent.clientX;
-                    my = oEvent.clientY;
-                } else if (n == 2) {
-                    var oEvent = ev.touches[0];
-                    var oEvent1 = ev.touches[1];
-                    var l = len * 2.0 / (cx + cy), l1;
-                    cenx += l * (-(oEvent.clientX + oEvent1.clientX - mx - mx1) * Math.sin(ang1) - (oEvent.clientY + oEvent1.clientY - my - my1) * Math.sin(ang2) * Math.cos(ang1));
-                    ceny += l * ((oEvent.clientY + oEvent1.clientY - my - my1) * Math.cos(ang2));
-                    cenz += l * ((oEvent.clientX + oEvent1.clientX - mx - mx1) * Math.cos(ang1) - (oEvent.clientY + oEvent1.clientY - my - my1) * Math.sin(ang2) * Math.sin(ang1));
-                    l1 = Math.sqrt((mx - mx1) * (mx - mx1) + (my - my1) * (my - my1) + 1.0);
-                    mx = oEvent.clientX;
-                    my = oEvent.clientY;
-                    mx1 = oEvent1.clientX;
-                    my1 = oEvent1.clientY;
-                    l = Math.sqrt((mx - mx1) * (mx - mx1) + (my - my1) * (my - my1) + 1.0);
-                    len *= l1 / l;
-                }
-                lasttimen = n;
-            }, false);
-
-            document.oncontextmenu = function(event) {
-                if (mm == 1) { event.preventDefault(); }
-            };
-
-            cx = canvas.clientWidth;
-            cy = canvas.clientHeight;
+            cx = window.innerWidth / 2;
+            cy = window.innerHeight / 2;
             canvas.width = cx;
             canvas.height = cy;
 
@@ -328,6 +195,7 @@
                 "               else {\n" +
                 "                  r1 = r3;\n" +
                 "                  m1 = m3;\n" +
+                "               }\n" +
                 "            }\n" +
                 "            if (r3 < 2.0 * len&&r3> step*len) {\n" +
                 "               sign=1;" +
@@ -419,20 +287,22 @@
         }
 
         window.onload = function() {
-            initCanvas('c1', 1);    // Top-left, positive direction
-            initCanvas('c2', -1);   // Top-right, opposite direction
-            initCanvas('c3', 0.5);  // Bottom-left, slower positive direction
-            initCanvas('c4', -0.5); // Bottom-right, slower opposite direction
+            // Canvas 1: Rotate fast clockwise, move right and up
+            initCanvas('c1', 1.0, 0.5, 0.2, 0.1, -0.15);
+            // Canvas 2: Rotate slow counterclockwise, move left and down
+            initCanvas('c2', -0.3, -0.7, -0.25, -0.2, 0.1);
+            // Canvas 3: Rotate medium speed clockwise, move up and back
+            initCanvas('c3', 0.6, 0.4, 0.15, 0.3, -0.2);
+            // Canvas 4: Rotate fast counterclockwise, move down and forward
+            initCanvas('c4', -1.2, -0.5, -0.1, -0.15, 0.25);
         };
 
         window.onresize = function() {
             var canvases = ['c1', 'c2', 'c3', 'c4'];
             canvases.forEach(function(id) {
                 var canvas = document.getElementById(id);
-                var gl = canvas.getContext('webgl');
-                canvas.width = canvas.clientWidth;
-                canvas.height = canvas.clientHeight;
-                gl.viewport(0, 0, canvas.width, canvas.height);
+                canvas.width = window.innerWidth / 2;
+                canvas.height = window.innerHeight / 2;
             });
         };
     </script>
