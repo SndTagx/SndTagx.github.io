@@ -26,7 +26,7 @@
     <canvas id="c3"></canvas>
     <canvas id="c4"></canvas>
     <script>
-        function initCanvas(canvasId, ang1Speed, ang2Speed, moveXSpeed, moveYSpeed, moveZSpeed) {
+        function initCanvas(canvasId, ang1Speed, ang2Speed, orbitXSpeed, orbitYSpeed, orbitZSpeed) {
             var cx, cy;
             var glposition, glright, glforward, glup, glorigin, glx, gly, gllen;
             var canvas = document.getElementById(canvasId);
@@ -36,9 +36,12 @@
             var len = 1.6;
             var ang1 = 2.8;
             var ang2 = 0.4;
-            var cenx = 0.0;
-            var ceny = 0.0;
-            var cenz = 0.0;
+            var orbitAngle = 0.0; // For orbiting around the anchor
+            var anchorX = 0.0;    // Fixed anchor point
+            var anchorY = 0.0;
+            var anchorZ = 0.0;
+            var orbitRadius = 0.5; // Distance from anchor
+            var cenx, ceny, cenz;  // Current position orbiting the anchor
             var KERNEL = "float kernal(vec3 ver){\n" +
                 "   vec3 a;\n" +
                 "   float b,c,d,e;\n" +
@@ -63,12 +66,15 @@
                 var dt = (t2 - t1) * 0.001; // Time delta in seconds
                 t1 = t2;
 
-                // Auto-rotation and auto-movement, unique per canvas
-                ang1 += ang1Speed * dt;  // Different rotation speeds
+                // Auto-rotation
+                ang1 += ang1Speed * dt;
                 ang2 += ang2Speed * dt;
-                cenx += moveXSpeed * dt; // Different movement directions
-                ceny += moveYSpeed * dt;
-                cenz += moveZSpeed * dt;
+
+                // Auto-orbit around anchor point
+                orbitAngle += dt;
+                cenx = anchorX + orbitRadius * Math.cos(orbitAngle * orbitXSpeed);
+                ceny = anchorY + orbitRadius * Math.sin(orbitAngle * orbitYSpeed);
+                cenz = anchorZ + orbitRadius * Math.sin(orbitAngle * orbitZSpeed);
 
                 draw();
                 window.requestAnimationFrame(ontimer);
@@ -287,14 +293,14 @@
         }
 
         window.onload = function() {
-            // Canvas 1: Rotate fast clockwise, move right and up
-            initCanvas('c1', 1.0, 0.5, 0.2, 0.1, -0.15);
-            // Canvas 2: Rotate slow counterclockwise, move left and down
-            initCanvas('c2', -0.3, -0.7, -0.25, -0.2, 0.1);
-            // Canvas 3: Rotate medium speed clockwise, move up and back
-            initCanvas('c3', 0.6, 0.4, 0.15, 0.3, -0.2);
-            // Canvas 4: Rotate fast counterclockwise, move down and forward
-            initCanvas('c4', -1.2, -0.5, -0.1, -0.15, 0.25);
+            // Canvas 1: Fast clockwise rotation, orbit in XZ plane
+            initCanvas('c1', 1.0, 0.5, 1.0, 0.0, 0.7);
+            // Canvas 2: Slow counterclockwise rotation, orbit in YZ plane
+            initCanvas('c2', -0.3, -0.7, 0.0, 1.2, 0.5);
+            // Canvas 3: Medium clockwise rotation, orbit in XY plane
+            initCanvas('c3', 0.6, 0.4, 0.8, 0.6, 0.0);
+            // Canvas 4: Fast counterclockwise rotation, orbit in mixed directions
+            initCanvas('c4', -1.2, -0.5, -0.9, 0.7, 1.1);
         };
 
         window.onresize = function() {
