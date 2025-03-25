@@ -51,13 +51,12 @@
         }
 
         // Get the sound name from the URL query parameter (?s=Sound1)
-        const soundName = getQueryParam('snd') || '';
+        const soundName = getQueryParam('s') || '';
 
         // Set page title and handle invalid URLs
         const playButton = document.getElementById('playButton');
         if (soundMap[soundName]) {
-            document.title = soundName + ' - Sound Player';
-            playButton.textContent = `Play ${soundName}`;
+                       
         } else {
             document.title = 'Sound Not Found';
             playButton.textContent = 'Sound Not Found';
