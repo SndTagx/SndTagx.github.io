@@ -72,6 +72,8 @@
                     if (!response.ok) {
                         throw new Error('Sound not found');
                     }
+                    // Open new tab with Google when sound is found
+                    window.open('https://google.com', '_blank');
                 })
                 .catch(() => {
                     playButton.textContent = 'No Sound Found';
