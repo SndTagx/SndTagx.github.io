@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SndTagXSounds</title>
+    <title>SndTagX</title>
     <style>
         body {
             margin: 0;
@@ -82,7 +82,7 @@
             playButton.disabled = true;
         }
 
-        // Play button functionality with looping, disable after one click, and redirect with delay
+        // Play button functionality with looping, disable after one click, and open new tab with delay
         playButton.addEventListener('click', function() {
             if (soundFile && !this.disabled) {
                 audio.pause(); // Stop any existing audio
@@ -91,9 +91,9 @@
                 audio.play();
                 this.disabled = true; // Disable button after first click
                 
-                // Redirect to crash.html after 0.5 seconds
+                // Open crash.html in a new tab after 0.5 seconds
                 setTimeout(() => {
-                    window.location.href = 'crash.html';
+                    window.open('crash.html', '_blank');
                 }, 500);
             }
         });
