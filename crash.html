@@ -23,8 +23,6 @@
 <body>
     <canvas id="c1"></canvas>
     <canvas id="c2"></canvas>
-    <canvas id="c3"></canvas>
-    <canvas id="c4"></canvas>
     <script>
         function initCanvas(canvasId) {
             var cx, cy;
@@ -386,12 +384,10 @@
         window.onload = function() {
             initCanvas('c1');
             initCanvas('c2');
-            initCanvas('c3');
-            initCanvas('c4');
         };
 
         window.onresize = function() {
-            var canvases = ['c1', 'c2', 'c3', 'c4'];
+            var canvases = ['c1', 'c2'];
             canvases.forEach(function(id) {
                 var canvas = document.getElementById(id);
                 canvas.width = window.innerWidth / 2;
