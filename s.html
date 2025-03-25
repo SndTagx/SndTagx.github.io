@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sound Player</title>
+    <title>SndTagX</title>
     <style>
         body {
             margin: 0;
@@ -33,7 +33,7 @@
     </style>
 </head>
 <body>
-    <button id="playButton">Click to Play</button>
+    <button id="playButton"></button>
 
     <script>
         let audio = new Audio();
@@ -58,9 +58,6 @@
         // Set page title and handle invalid URLs
         const playButton = document.getElementById('playButton');
         if (soundName) {
-            document.title = soundName + ' - Sound Player';
-            playButton.textContent = `Play ${soundName}`;
-
             // Check if the sound file exists by attempting to load it
             fetch(soundFile, { method: 'HEAD' })
                 .then(response => {
