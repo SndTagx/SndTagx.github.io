@@ -110,6 +110,7 @@
         #achievementsPanel { right: 70px; max-height: 50vh; overflow-y: auto; }
         #dailyRewardsPanel { right: 130px; }
         .skin-option, .achievement-option, .daily-reward-option {
+            position: relative;
             display: flex;
             align-items: center;
             padding: 8px;
@@ -127,6 +128,16 @@
         .skin-option.locked, .achievement-option.completed, .daily-reward-option.claimed {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+        .id-label {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 10px;
+            color: #ff4d4d;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 1px 3px;
+            border-radius: 3px;
         }
         #comboCounter {
             position: absolute;
@@ -235,7 +246,9 @@
         <div class="admin-field"><input type="number" id="adminRebirths" placeholder="Rebirths"><button id="setRebirths">Set</button></div>
         <div class="admin-field"><input type="number" id="adminRebirthCost" placeholder="Rebirth Cost"><button id="setRebirthCost">Set</button></div>
         <div class="admin-field"><input type="number" id="adminCombo" placeholder="Combo Multiplier"><button id="setCombo">Set</button></div>
-        <div class="admin-field"><input type="number" id="adminDailyReset" placeholder="Reset Days"><button id="resetDailyRewards">Reset</button></div>
+        <div class="admin-field"><input type="number" id="adminDailySet" placeholder="Set Days"><button id="setDailyRewards">Set</button></div>
+        <div class="admin-field"><input type="text" id="adminSkins" placeholder="Skin Indexes (e.g., 0,1)"><button id="setSkins">Set</button></div>
+        <div class="admin-field"><input type="text" id="adminAchievements" placeholder="Achievement Indexes (e.g., 1,2)"><button id="setAchievements">Set</button></div>
     </div>
     <audio id="clickSound" loop></audio>
 
@@ -271,15 +284,19 @@
             const setRebirthsButton = document.getElementById('setRebirths');
             const setRebirthCostButton = document.getElementById('setRebirthCost');
             const setComboButton = document.getElementById('setCombo');
-            const resetDailyRewardsButton = document.getElementById('resetDailyRewards');
+            const setDailyRewardsButton = document.getElementById('setDailyRewards');
+            const setSkinsButton = document.getElementById('setSkins');
+            const setAchievementsButton = document.getElementById('setAchievements');
             const adminCoinsInput = document.getElementById('adminCoins');
             const adminCoinsPerClickInput = document.getElementById('adminCoinsPerClick');
-            const adminUpgradesInput = document.getElementById('adminUpgrades'); // Fixed typo
+            const adminUpgradesInput = document.getElementById('adminUpgrades');
             const adminUpgradeCostInput = document.getElementById('adminUpgradeCost');
             const adminRebirthsInput = document.getElementById('adminRebirths');
-            const adminRebirthCostInput = document.getElementById('adminRebirthCost'); // Fixed typo
-            const adminComboInput = document.getElementById('adminCombo'); // Fixed typo
-            const adminDailyResetInput = document.getElementById('adminDailyReset');
+            const adminRebirthCostInput = document.getElementById('adminRebirthCost');
+            const adminComboInput = document.getElementById('adminCombo');
+            const adminDailySetInput = document.getElementById('adminDailySet');
+            const adminSkinsInput = document.getElementById('adminSkins');
+            const adminAchievementsInput = document.getElementById('adminAchievements');
             const adminCloseButton = document.getElementById('adminCloseButton');
 
             const skins = [
@@ -326,7 +343,7 @@
             let lastClaimDate = localStorage.getItem('lastClaimDate') || null;
             let clickCombo = parseInt(localStorage.getItem('clickCombo')) || 0;
             let comboTimeout = null;
-            let holdTimeout = null; // Added missing initializer
+            let holdTimeout = null;
 
             const MAX_COMBO_CLICKS = 100;
             const MAX_MULTIPLIER = 3;
@@ -365,7 +382,7 @@
 
             clickArea.addEventListener('mousedown', function(e) {
                 e.preventDefault();
-                holdTimeout = setTimeout(() => adminPanel.style.display = 'block', 3000);
+                holdTimeout = setTimeout(() => adminPanel.style.display = uncompressed'block', 3000);
             });
             clickArea.addEventListener('mouseup', () => clearTimeout(holdTimeout));
             clickArea.addEventListener('touchstart', function(e) {
@@ -423,11 +440,25 @@
                 autosave();
                 checkAchievements();
             });
-            resetDailyRewardsButton.addEventListener('click', () => {
-                dailyRewardDay = Math.min(Math.max(parseInt(adminDailyResetInput.value) || 0, 0), 6);
+            setDailyRewardsButton.addEventListener('click', () => {
+                dailyRewardDay = Math.min(Math.max(parseInt(adminDailySetInput.value) || 0, 0), 6);
                 lastClaimDate = null;
                 autosave();
                 renderDailyRewards();
+            });
+            setSkinsButton.addEventListener('click', () => {
+                const indexes = adminSkinsInput.value.split(',').map(i => parseInt(i.trim())).filter(i => !isNaN(i) && i >= 0 && i < skins.length);
+                unlockedSkins = indexes.map(i => skins[i].skin);
+                if (!unlockedSkins.includes(currentSkin)) currentSkin = skins[0].skin;
+                updateSkin();
+                autosave();
+                renderSkinPage();
+            });
+            setAchievementsButton.addEventListener('click', () => {
+                const indexes = adminAchievementsInput.value.split(',').map(i => parseInt(i.trim())).filter(i => !isNaN(i) && i >= 1 && i <= achievements.length);
+                completedAchievements = indexes;
+                autosave();
+                renderAchievements();
             });
             adminCloseButton.addEventListener('click', () => adminPanel.style.display = 'none');
 
@@ -550,10 +581,11 @@
                 skinPages.innerHTML = '';
                 const startIndex = currentPage * skinsPerPage;
                 const endIndex = Math.min(startIndex + skinsPerPage, skins.length);
-                skins.slice(startIndex, endIndex).forEach(skinData => {
+                skins.slice(startIndex, endIndex).forEach((skinData, index) => {
+                    const globalIndex = startIndex + index;
                     const option = document.createElement('div');
                     option.className = 'skin-option';
-                    option.innerHTML = `<img src="${skinData.skin}" alt="Skin"><span>${skinData.name}</span>`;
+                    option.innerHTML = `<span class="id-label">${globalIndex}</span><img src="${skinData.skin}" alt="Skin"><span>${skinData.name}</span>`;
                     if (!unlockedSkins.includes(skinData.skin) && count < skinData.cost) option.classList.add('locked');
                     option.addEventListener('click', function() {
                         if (unlockedSkins.includes(skinData.skin)) {
@@ -604,7 +636,7 @@
                 achievements.forEach(ach => {
                     const option = document.createElement('div');
                     option.className = 'achievement-option';
-                    option.innerHTML = `<img src="${currentSkin}" alt="Ach"><span>${ach.name} (${ach.reward} монет)<br>${ach.desc}</span>`;
+                    option.innerHTML = `<span class="id-label">${ach.id}</span><img src="${currentSkin}" alt="Ach"><span>${ach.name} (${ach.reward} монет)<br>${ach.desc}</span>`;
                     if (completedAchievements.includes(ach.id)) option.classList.add('completed');
                     achievementsPanel.appendChild(option);
                 });
@@ -645,7 +677,7 @@
                 if (!skinPanel.contains(e.target) && e.target !== skinPanelToggle) skinPanel.style.display = 'none';
                 if (!achievementsPanel.contains(e.target) && e.target !== achievementsToggle) achievementsPanel.style.display = 'none';
                 if (!dailyRewardsPanel.contains(e.target) && e.target !== dailyRewardsToggle) dailyRewardsPanel.style.display = 'none';
-                if (!adminPanel.contains(e.target) && e.target !== clickArea) adminPanel.style.display = 'none';
+                // Removed adminPanel closing on outside click
             });
 
             renderSkinPage();
