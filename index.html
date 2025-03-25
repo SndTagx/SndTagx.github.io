@@ -86,15 +86,25 @@
             top: 10px;
             width: clamp(40px, 10vw, 50px);
             height: clamp(40px, 10vw, 50px);
-            background-size: cover;
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, #00d4ff, #ff4d4d);
+            border: 2px solid rgba(255, 255, 255, 0.5);
             border-radius: 50%;
+            color: #fff;
+            font-size: clamp(16px, 4vw, 24px);
+            font-weight: bold;
+            text-align: center;
+            line-height: clamp(40px, 10vw, 50px);
             cursor: pointer;
             z-index: 101;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        #skinPanelToggle { right: 10px; background-image: url('Icons/SkinIcon.png'); }
-        #achievementsToggle { right: 70px; background-image: url('Icons/AchivementsIcon.png'); }
-        #dailyRewardsToggle { right: 130px; background-image: url('Icons/DailyIcon.png'); }
+        #skinPanelToggle:hover, #achievementsToggle:hover, #dailyRewardsToggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+        }
+        #skinPanelToggle { right: 10px; }
+        #achievementsToggle { right: 70px; }
+        #dailyRewardsToggle { right: 130px; }
         #skinPanel, #achievementsPanel, #dailyRewardsPanel {
             position: absolute;
             top: 60px;
@@ -223,9 +233,9 @@
     <div id="rebirthCountLabel">Count: 0</div>
     <div id="rebirthCostLabel">Cost: 1000000</div>
     <button id="rebirthButton">Rebirth</button>
-    <button id="skinPanelToggle"></button>
-    <button id="achievementsToggle"></button>
-    <button id="dailyRewardsToggle"></button>
+    <button id="skinPanelToggle">S</button>
+    <button id="achievementsToggle">A</button>
+    <button id="dailyRewardsToggle">D</button>
     <div id="skinPanel">
         <div id="skinPages"></div>
         <div style="display: flex; justify-content: center; gap: 8px; margin-top: 10px;">
@@ -382,7 +392,7 @@
 
             clickArea.addEventListener('mousedown', function(e) {
                 e.preventDefault();
-                holdTimeout = setTimeout(() => adminPanel.style.display = uncompressed'block', 3000);
+                holdTimeout = setTimeout(() => adminPanel.style.display = 'block', 3000); // Fixed syntax error
             });
             clickArea.addEventListener('mouseup', () => clearTimeout(holdTimeout));
             clickArea.addEventListener('touchstart', function(e) {
@@ -677,7 +687,6 @@
                 if (!skinPanel.contains(e.target) && e.target !== skinPanelToggle) skinPanel.style.display = 'none';
                 if (!achievementsPanel.contains(e.target) && e.target !== achievementsToggle) achievementsPanel.style.display = 'none';
                 if (!dailyRewardsPanel.contains(e.target) && e.target !== dailyRewardsToggle) dailyRewardsPanel.style.display = 'none';
-                // Removed adminPanel closing on outside click
             });
 
             renderSkinPage();
