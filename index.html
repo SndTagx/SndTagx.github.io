@@ -135,19 +135,28 @@
             box-shadow: none;
             background: linear-gradient(135deg, #555, #333);
         }
-        #upgradeCounter, #rebirthCounter {
+        #upgradeCostLabel, #rebirthCostLabel, #upgradeCountLabel, #rebirthCountLabel {
             position: absolute;
-            font-size: 14px;
-            color: #00d4ff;
+            font-size: 12px;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
-        #upgradeCounter {
+        #upgradeCostLabel {
             bottom: 125px;
             left: 20px;
             color: #00b4db;
         }
-        #rebirthCounter {
+        #upgradeCountLabel {
+            bottom: 140px;
+            left: 20px;
+            color: #00b4db;
+        }
+        #rebirthCostLabel {
             bottom: 135px;
+            right: 20px;
+            color: #ff4d4d;
+        }
+        #rebirthCountLabel {
+            bottom: 150px;
             right: 20px;
             color: #ff4d4d;
         }
@@ -221,70 +230,82 @@
         }
         #adminPanel {
             position: absolute;
-            top: 50px;
+            top: 60px;
             left: 15px;
             width: 260px;
-            background: rgba(20, 20, 40, 0.95);
+            background: linear-gradient(135deg, #2a2a4a, #1e1e2f);
             border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(6px);
+            padding: 20px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
             display: none;
             z-index: 20;
         }
         #adminPanel h2 {
-            margin: 0 0 12px;
-            font-size: 18px;
+            margin: 0 0 15px;
+            font-size: 20px;
             text-align: center;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+            color: #00d4ff;
         }
         #adminPanel input {
             width: 100%;
-            padding: 8px;
-            margin: 5px 0;
-            border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
             color: #e0e0e0;
             font-size: 14px;
             box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+        #adminPanel input:focus {
+            border-color: #00d4ff;
+            outline: none;
         }
         #adminPanel button {
             width: 100%;
-            padding: 8px;
-            margin: 5px 0;
-            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            margin: 8px 0;
+            background: linear-gradient(135deg, #00b4db, #0083b0);
             border: none;
-            border-radius: 6px;
-            color: #e0e0e0;
+            border-radius: 8px;
+            color: #fff;
             font-size: 14px;
+            font-weight: bold;
             cursor: pointer;
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
         #adminPanel button:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, #00d4ff, #00a3cc);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
         #adminCloseButton {
             position: absolute;
-            top: 5px;
-            right: 5px;
-            width: 16px;
-            height: 16px;
-            background: #ff4d4d;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #ff4d4d, #b00000);
             border: none;
             border-radius: 50%;
             color: #fff;
-            font-size: 10px;
+            font-size: 14px;
             font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
         }
         #adminCloseButton:hover {
-            background: #ff6666;
+            background: linear-gradient(135deg, #ff6666, #cc0000);
+            transform: scale(1.1);
         }
     </style>
 </head>
@@ -294,9 +315,11 @@
         <img id="coinIcon" alt="Coin">
         <span id="coinCount">0</span>
     </div>
-    <div id="upgradeCounter">Upgrades: 0</div>
-    <button id="upgradeButton">Upgrade (10 coins)</button>
-    <div id="rebirthCounter">Rebirths: 0</div>
+    <div id="upgradeCountLabel">Count: 0</div>
+    <div id="upgradeCostLabel">Cost: 10</div>
+    <button id="upgradeButton">Upgrade</button>
+    <div id="rebirthCountLabel">Count: 0</div>
+    <div id="rebirthCostLabel">Cost: 1000000</div>
     <button id="rebirthButton">Rebirth</button>
     <button id="skinPanelToggle">Скины</button>
     <div id="skinPanel">
@@ -312,7 +335,7 @@
         <button id="adminCloseButton">X</button>
         <input type="number" id="adminCoins" placeholder="Set Coins">
         <button id="setCoins">Set Coins</button>
-        <input type="number" id="adminUpgrades" placeholder="Set Coins Per Click">
+        <input type="number" id="adminUpgrades" placeholder="Set Upgrades">
         <button id="setUpgrades">Set Upgrades</button>
         <input type="number" id="adminRebirths" placeholder="Set Rebirths">
         <button id="setRebirths">Set Rebirths</button>
@@ -324,8 +347,10 @@
             const mainButton = document.getElementById('mainButton');
             const upgradeButton = document.getElementById('upgradeButton');
             const rebirthButton = document.getElementById('rebirthButton');
-            const upgradeCounter = document.getElementById('upgradeCounter');
-            const rebirthCounter = document.getElementById('rebirthCounter');
+            const upgradeCostLabel = document.getElementById('upgradeCostLabel');
+            const upgradeCountLabel = document.getElementById('upgradeCountLabel');
+            const rebirthCostLabel = document.getElementById('rebirthCostLabel');
+            const rebirthCountLabel = document.getElementById('rebirthCountLabel');
             const clickSound = document.getElementById('clickSound');
             const coinCount = document.getElementById('coinCount');
             const coinIcon = document.getElementById('coinIcon');
@@ -384,10 +409,10 @@
 
             // Initialize display
             coinCount.textContent = count;
-            upgradeButton.textContent = `Upgrade (${upgradeCost} coins)`;
-            rebirthButton.textContent = `Rebirth (${rebirthCost} coins)`;
-            upgradeCounter.textContent = `Upgrades: ${upgradeLevel}`;
-            rebirthCounter.textContent = `Rebirths: ${rebirths} (x${rebirths + 1})`;
+            upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
+            upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
+            rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
+            rebirthCountLabel.textContent = `Count: ${rebirths} (x${rebirths + 1})`;
             upgradeButton.disabled = count < upgradeCost;
             rebirthButton.disabled = count < rebirthCost;
 
@@ -458,8 +483,8 @@
                     coinsPerClick = newUpgrades + 1;
                     upgradeLevel = newUpgrades;
                     upgradeCost = Math.floor(10 * Math.pow(1.15, upgradeLevel));
-                    upgradeButton.textContent = `Upgrade (${upgradeCost} coins)`;
-                    upgradeCounter.textContent = `Upgrades: ${upgradeLevel}`;
+                    upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
+                    upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
                     upgradeButton.disabled = count < upgradeCost;
                     autosave();
                 }
@@ -470,8 +495,8 @@
                 if (!isNaN(newRebirths) && newRebirths >= 0) {
                     rebirths = newRebirths;
                     rebirthCost = Math.floor(1000000 * Math.pow(2, rebirths));
-                    rebirthButton.textContent = `Rebirth (${rebirthCost} coins)`;
-                    rebirthCounter.textContent = `Rebirths: ${rebirths} (x${rebirths + 1})`;
+                    rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
+                    rebirthCountLabel.textContent = `Count: ${rebirths} (x${rebirths + 1})`;
                     rebirthButton.disabled = count < rebirthCost;
                     autosave();
                 }
@@ -536,8 +561,8 @@
                     coinsPerClick++;
                     upgradeLevel++;
                     upgradeCost = Math.floor(10 * Math.pow(1.15, upgradeLevel));
-                    upgradeButton.textContent = `Upgrade (${upgradeCost} coins)`;
-                    upgradeCounter.textContent = `Upgrades: ${upgradeLevel}`;
+                    upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
+                    upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
                     coinCount.textContent = count;
                     upgradeButton.disabled = count < upgradeCost;
                     rebirthButton.disabled = count < rebirthCost;
@@ -565,10 +590,10 @@
                     clickSound.src = defaultSkinData.sound;
 
                     coinCount.textContent = count;
-                    upgradeButton.textContent = `Upgrade (${upgradeCost} coins)`;
-                    rebirthButton.textContent = `Rebirth (${rebirthCost} coins)`;
-                    upgradeCounter.textContent = `Upgrades: ${upgradeLevel}`;
-                    rebirthCounter.textContent = `Rebirths: ${rebirths} (x${rebirths + 1})`;
+                    upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
+                    upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
+                    rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
+                    rebirthCountLabel.textContent = `Count: ${rebirths} (x${rebirths + 1})`;
                     upgradeButton.disabled = count < upgradeCost;
                     rebirthButton.disabled = count < rebirthCost;
                     autosave();
