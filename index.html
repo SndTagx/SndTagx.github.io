@@ -30,22 +30,22 @@
         button#mainButton:active { transform: scale(0.98); }
         #clickArea {
             position: absolute;
-            top: 15px;
-            left: 15px;
-            font-size: 26px;
+            top: 10px;
+            left: 10px;
+            font-size: clamp(16px, 4vw, 26px);
             display: flex;
             align-items: center;
             background: rgba(20, 20, 40, 0.9);
-            padding: 12px 18px;
-            border-radius: 12px;
+            padding: 8px 12px;
+            border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
             z-index: 100;
         }
-        #coinIcon { width: 32px; height: 32px; margin-right: 12px; }
+        #coinIcon { width: clamp(20px, 5vw, 32px); height: clamp(20px, 5vw, 32px); margin-right: 10px; }
         .flying-coin {
             position: absolute;
-            width: 32px;
-            height: 32px;
+            width: clamp(20px, 5vw, 32px);
+            height: clamp(20px, 5vw, 32px);
             pointer-events: none;
             animation: flyUp 1s ease-out forwards;
         }
@@ -56,71 +56,72 @@
         }
         #upgradeButton, #rebirthButton {
             position: absolute;
-            bottom: 20px;
-            padding: 10px 15px;
+            bottom: 10px;
+            padding: 8px 12px;
             background-size: cover;
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             color: #fff;
-            font-size: 16px;
+            font-size: clamp(12px, 3vw, 16px);
             cursor: pointer;
-            width: 150px;
-            height: 45px;
+            width: clamp(100px, 25vw, 150px);
+            height: clamp(30px, 8vw, 45px);
         }
-        #upgradeButton { left: 20px; }
-        #rebirthButton { right: 20px; }
+        #upgradeButton { left: 10px; }
+        #rebirthButton { right: 10px; }
         #upgradeButton:disabled, #rebirthButton:disabled { opacity: 0.6; cursor: not-allowed; }
         #upgradeCostLabel, #rebirthCostLabel, #upgradeCountLabel, #rebirthCountLabel {
             position: absolute;
-            font-size: 12px;
-            padding: 4px 8px;
+            font-size: clamp(10px, 2.5vw, 12px);
+            padding: 4px 6px;
             border-radius: 8px;
             background: #000;
         }
-        #upgradeCostLabel { bottom: 70px; left: 20px; color: #00b4db; }
-        #upgradeCountLabel { bottom: 90px; left: 20px; color: #00b4db; }
-        #rebirthCostLabel { bottom: 70px; right: 20px; color: #ff4d4d; }
-        #rebirthCountLabel { bottom: 90px; right: 20px; color: #ff4d4d; }
+        #upgradeCostLabel { bottom: 60px; left: 10px; color: #00b4db; }
+        #upgradeCountLabel { bottom: 80px; left: 10px; color: #00b4db; }
+        #rebirthCostLabel { bottom: 60px; right: 10px; color: #ff4d4d; }
+        #rebirthCountLabel { bottom: 80px; right: 10px; color: #ff4d4d; }
         #skinPanelToggle, #achievementsToggle, #dailyRewardsToggle {
             position: absolute;
-            top: 15px;
-            padding: 8px 16px;
-            background: linear-gradient(45deg, #3b3b5e, #5e5e8d);
+            top: 10px;
+            width: clamp(40px, 10vw, 50px);
+            height: clamp(40px, 10vw, 50px);
+            background-size: cover;
             border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            color: #e0e0e0;
+            border-radius: 50%;
             cursor: pointer;
             z-index: 101;
         }
-        #skinPanelToggle { right: 15px; }
-        #achievementsToggle { right: 100px; }
-        #dailyRewardsToggle { right: 185px; }
+        #skinPanelToggle { right: 10px; background-image: url('Skins/SvetlanaSkin.jpg'); }
+        #achievementsToggle { right: 70px; background-image: url('Skins/LeshaSkin.jpg'); }
+        #dailyRewardsToggle { right: 130px; background-image: url('Skins/RomanSkin.jpg'); }
         #skinPanel, #achievementsPanel, #dailyRewardsPanel {
             position: absolute;
             top: 60px;
-            width: 260px;
+            width: clamp(200px, 60vw, 260px);
             background: rgba(20, 20, 40, 0.95);
             border-radius: 12px;
-            padding: 15px;
+            padding: 10px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
             display: none;
             z-index: 100;
         }
-        #skinPanel { right: 15px; }
-        #achievementsPanel { right: 100px; max-height: 400px; overflow-y: auto; }
-        #dailyRewardsPanel { right: 185px; }
+        #skinPanel { right: 10px; }
+        #achievementsPanel { right: 70px; max-height: 50vh; overflow-y: auto; }
+        #dailyRewardsPanel { right: 130px; }
         .skin-option, .achievement-option, .daily-reward-option {
             display: flex;
             align-items: center;
-            padding: 10px;
-            margin: 5px 0;
+            padding: 8px;
+            margin: 4px 0;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
+            font-size: clamp(12px, 3vw, 15px);
         }
         .skin-option img, .achievement-option img {
-            width: 48px;
-            height: 48px;
-            margin-right: 12px;
+            width: clamp(30px, 8vw, 48px);
+            height: clamp(30px, 8vw, 48px);
+            margin-right: 10px;
             border-radius: 6px;
         }
         .skin-option.locked, .achievement-option.completed, .daily-reward-option.claimed {
@@ -130,12 +131,71 @@
         #comboCounter {
             position: absolute;
             top: 60px;
-            left: 15px;
-            font-size: 18px;
+            left: 10px;
+            font-size: clamp(14px, 3.5vw, 18px);
             background: rgba(20, 20, 40, 0.9);
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-radius: 8px;
             z-index: 100;
+        }
+        #adminPanel {
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: clamp(250px, 80vw, 320px);
+            max-height: 80vh;
+            background: rgba(30, 30, 50, 0.95);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
+            border: 2px solid #00d4ff;
+            display: none;
+            z-index: 200;
+            overflow-y: auto;
+        }
+        #adminPanel h2 {
+            margin: 0 0 15px;
+            font-size: clamp(18px, 4vw, 22px);
+            text-align: center;
+            color: #00d4ff;
+        }
+        .admin-field {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        #adminPanel input {
+            flex: 1;
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+            font-size: clamp(12px, 3vw, 14px);
+        }
+        #adminPanel button {
+            padding: 6px 10px;
+            background: linear-gradient(135deg, #ff4d4d, #b00000);
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-size: clamp(12px, 3vw, 14px);
+            cursor: pointer;
+        }
+        #adminCloseButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            background: #ff4d4d;
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 12px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -152,19 +212,31 @@
     <div id="rebirthCountLabel">Count: 0</div>
     <div id="rebirthCostLabel">Cost: 1000000</div>
     <button id="rebirthButton">Rebirth</button>
-    <button id="skinPanelToggle">Скины</button>
-    <button id="achievementsToggle">Достижения</button>
-    <button id="dailyRewardsToggle">Ежедневки</button>
+    <button id="skinPanelToggle"></button>
+    <button id="achievementsToggle"></button>
+    <button id="dailyRewardsToggle"></button>
     <div id="skinPanel">
         <div id="skinPages"></div>
-        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 12px;">
-            <button id="prevPage" style="padding: 5px 10px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: #e0e0e0; cursor: pointer;"><-</button>
-            <span id="pageIndicator" style="font-size: 15px; align-self: center;"></span>
-            <button id="nextPage" style="padding: 5px 10px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: #e0e0e0; cursor: pointer;">-></button>
+        <div style="display: flex; justify-content: center; gap: 8px; margin-top: 10px;">
+            <button id="prevPage" style="padding: 4px 8px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: #e0e0e0; cursor: pointer; font-size: clamp(10px, 2.5vw, 12px);">Previous</button>
+            <span id="pageIndicator" style="font-size: clamp(12px, 3vw, 15px); align-self: center;"></span>
+            <button id="nextPage" style="padding: 4px 8px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: #e0e0e0; cursor: pointer; font-size: clamp(10px, 2.5vw, 12px);">Next</button>
         </div>
     </div>
     <div id="achievementsPanel"></div>
     <div id="dailyRewardsPanel"></div>
+    <div id="adminPanel">
+        <h2>Admin Control</h2>
+        <button id="adminCloseButton">X</button>
+        <div class="admin-field"><input type="number" id="adminCoins" placeholder="Coins"><button id="setCoins">Set</button></div>
+        <div class="admin-field"><input type="number" id="adminCoinsPerClick" placeholder="Coins Per Click"><button id="setCoinsPerClick">Set</button></div>
+        <div class="admin-field"><input type="number" id="adminUpgrades" placeholder="Upgrade Level"><button id="setUpgrades">Set</button></div>
+        <div class="admin-field"><input type="number" id="adminUpgradeCost" placeholder="Upgrade Cost"><button id="setUpgradeCost">Set</button></div>
+        <div class="admin-field"><input type="number" id="adminRebirths" placeholder="Rebirths"><button id="setRebirths">Set</button></div>
+        <div class="admin-field"><input type="number" id="adminRebirthCost" placeholder="Rebirth Cost"><button id="setRebirthCost">Set</button></div>
+        <div class="admin-field"><input type="number" id="adminCombo" placeholder="Combo Multiplier"><button id="setCombo">Set</button></div>
+        <div class="admin-field"><input type="number" id="adminDailyReset" placeholder="Reset Days"><button id="resetDailyRewards">Reset</button></div>
+    </div>
     <audio id="clickSound" loop></audio>
 
     <script>
@@ -190,6 +262,24 @@
             const dailyRewardsPanel = document.getElementById('dailyRewardsPanel');
             const clickSound = document.getElementById('clickSound');
             const comboCounter = document.getElementById('comboCounter');
+            const adminPanel = document.getElementById('adminPanel');
+            const clickArea = document.getElementById('clickArea');
+            const setCoinsButton = document.getElementById('setCoins');
+            const setCoinsPerClickButton = document.getElementById('setCoinsPerClick');
+            const setUpgradesButton = document.getElementById('setUpgrades');
+            const setUpgradeCostButton = document.getElementById('setUpgradeCost');
+            const setRebirthsButton = document.getElementById('setRebirths');
+            const setRebirthCostButton = document.getElementById('setRebirthCost');
+            const setComboButton = document.getElementById('setCombo');
+            const resetDailyRewardsButton = document.getElementById('resetDailyRewards');
+            const adminCoinsInput = document.getElementById('adminCoins');
+            const adminCoinsPerClickInput = document.getElementById('adminCoinsPerClick');
+            const adminUpgrades,认真Input = document.getElementById('adminUpgrades');
+            const adminUpgradeCostInput = document.getElementById('adminUpgradeCost');
+            const adminRebirthsInput = document.getElementById('adminRebirths');
+            const adminRebirthCostInput = document.getElementById('adminRebirthCost主要CostInput = document.getElementById('adminCombo');
+            const adminDailyResetInput = document.getElementById('adminDailyReset');
+            const adminCloseButton = document.getElementById('adminCloseButton');
 
             const skins = [
                 { skin: "Skins/SvetlanaSkin.jpg", cost: 0, name: "🔢Svetlana (Free)", sound: "Sounds/SvetlanaSkin.mp3" },
@@ -204,13 +294,12 @@
                 { skin: "Skins/DuraSkin.jpg", cost: 200000, name: "📑Dura (200000)", sound: "Sounds/DuraSkin.mp3" },
             ];
 
-            // Updated achievements with higher goals and easier editing structure
             const achievements = [
-                { id: 1, name: "Новичок", type: "coins", goal: 10000, reward: 5000, desc: "Собери 10000 монет" },
-                { id: 2, name: "Кликовый мастер", type: "coins", goal: 100000, reward: 20000, desc: "Собери 100000 монет" },
-                { id: 3, name: "Улучшатор", type: "upgrades", goal: 25, reward: 7500, desc: "Купи 25 улучшений" },
-                { id: 4, name: "Возрождённый", type: "rebirths", goal: 1, reward: 100000, desc: "Соверши 1 перерождения" },
-                { id: 5, name: "Комбо-гуру", type: "combo", goal: 3, reward: 15000, desc: "Достигни комбо 3x" },
+                { id: 1, name: "Новичок", type: "coins", goal: 1000, reward: 500, desc: "Собери 1000 монет" },
+                { id: 2, name: "Кликовый мастер", type: "coins", goal: 10000, reward: 2000, desc: "Собери 10000 монет" },
+                { id: 3, name: "Улучшатор", type: "upgrades", goal: 25, reward: 5000, desc: "Купи 25 улучшений" },
+                { id: 4, name: "Возрождённый", type: "rebirths", goal: 3, reward: 10000, desc: "Соверши 3 перерождения" },
+                { id: 5, name: "Комбо-гуру", type: "combo", goal: 100, reward: 15000, desc: "Достигни комбо 100x" },
             ];
 
             const dailyRewards = [
@@ -272,6 +361,79 @@
                 localStorage.setItem('clickCombo', clickCombo);
             }
 
+            clickArea.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                holdTimeout = setTimeout(() => adminPanel.style.display = 'block', 3000);
+            });
+            clickArea.addEventListener('mouseup', () => clearTimeout(holdTimeout));
+            clickArea.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                holdTimeout = setTimeout(() => adminPanel.style.display = 'block', 3000);
+            });
+            clickArea.addEventListener('touchend', () => clearTimeout(holdTimeout));
+
+            setCoinsButton.addEventListener('click', () => {
+                count = parseInt(adminCoinsInput.value) || 0;
+                coinCount.textContent = count;
+                updateButtons();
+                autosave();
+                renderSkinPage();
+                checkAchievements();
+            });
+            setCoinsPerClickButton.addEventListener('click', () => {
+                coinsPerClick = parseInt(adminCoinsPerClickInput.value) || 1;
+                autosave();
+            });
+            setUpgradesButton.addEventListener('click', () => {
+                upgradeLevel = parseInt(adminUpgradesInput.value) || 0;
+                upgradeCost = Math.floor(10 * Math.pow(upgradeLevel, 2)) || 10;
+                upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
+                upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
+                updateButtons();
+                autosave();
+                checkAchievements();
+            });
+            setUpgradeCostButton.addEventListener('click', () => {
+                upgradeCost = parseInt(adminUpgradeCostInput.value) || 10;
+                upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
+                updateButtons();
+                autosave();
+            });
+            setRebirthsButton.addEventListener('click', () => {
+                rebirths = parseInt(adminRebirthsInput.value) || 0;
+                rebirthCost = Math.floor(1000000 * Math.pow(2, rebirths));
+                rebirthCountLabel.textContent = `Count: ${rebirths} (x${rebirths + 1})`;
+                rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
+                updateButtons();
+                autosave();
+                checkAchievements();
+            });
+            setRebirthCostButton.addEventListener('click', () => {
+                rebirthCost = parseInt(adminRebirthCostInput.value) || 1000000;
+                rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
+                updateButtons();
+                autosave();
+            });
+            setComboButton.addEventListener('click', () => {
+                clickCombo = Math.min(parseInt(adminComboInput.value) || 0, MAX_COMBO_CLICKS);
+                const multiplier = Math.min(Math.floor(clickCombo / (MAX_COMBO_CLICKS / (MAX_MULTIPLIER - 1))) + 1, MAX_MULTIPLIER);
+                comboCounter.textContent = `Combo: ${multiplier}x`;
+                autosave();
+                checkAchievements();
+            });
+            resetDailyRewardsButton.addEventListener('click', () => {
+                dailyRewardDay = Math.min(Math.max(parseInt(adminDailyResetInput.value) || 0, 0), 6);
+                lastClaimDate = null;
+                autosave();
+                renderDailyRewards();
+            });
+            adminCloseButton.addEventListener('click', () => adminPanel.style.display = 'none');
+
+            function updateButtons() {
+                upgradeButton.disabled = count < upgradeCost;
+                rebirthButton.disabled = count < rebirthCost;
+            }
+
             function updateCombo() {
                 clickCombo = Math.min(clickCombo + 1, MAX_COMBO_CLICKS);
                 const multiplier = Math.min(Math.floor(clickCombo / (MAX_COMBO_CLICKS / (MAX_MULTIPLIER - 1))) + 1, MAX_MULTIPLIER);
@@ -301,8 +463,7 @@
                 coin.style.top = (e.clientY - rect.top - 16) + 'px';
                 document.body.appendChild(coin);
                 setTimeout(() => coin.remove(), 1000);
-                upgradeButton.disabled = count < upgradeCost;
-                rebirthButton.disabled = count < rebirthCost;
+                updateButtons();
                 autosave();
                 renderSkinPage();
                 checkAchievements();
@@ -317,8 +478,7 @@
                     upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
                     upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
                     coinCount.textContent = count;
-                    upgradeButton.disabled = count < upgradeCost;
-                    rebirthButton.disabled = count < rebirthCost;
+                    updateButtons();
                     autosave();
                     checkAchievements();
                 }
@@ -342,8 +502,7 @@
                     rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
                     rebirthCountLabel.textContent = `Count: ${rebirths} (x${rebirths + 1})`;
                     comboCounter.textContent = `Combo: 0x`;
-                    upgradeButton.disabled = true;
-                    rebirthButton.disabled = true;
+                    updateButtons();
                     autosave();
                     renderSkinPage();
                     checkAchievements();
@@ -354,14 +513,14 @@
             achievementsToggle.addEventListener('click', togglePanel.bind(null, achievementsPanel, renderAchievements));
             dailyRewardsToggle.addEventListener('click', togglePanel.bind(null, dailyRewardsPanel, renderDailyRewards));
 
-            prevPage.addEventListener('click', function() {
+            prevPage.addEventListener('click', () => {
                 if (currentPage > 0) {
                     currentPage--;
                     renderSkinPage();
                 }
             });
 
-            nextPage.addEventListener('click', function() {
+            nextPage.addEventListener('click', () => {
                 if (currentPage < totalPages - 1) {
                     currentPage++;
                     renderSkinPage();
@@ -406,8 +565,7 @@
                             currentSkin = skinData.skin;
                             updateSkin();
                             coinCount.textContent = count;
-                            upgradeButton.disabled = count < upgradeCost;
-                            rebirthButton.disabled = count < rebirthCost;
+                            updateButtons();
                             autosave();
                             skinPanel.style.display = 'none';
                             renderSkinPage();
@@ -485,6 +643,7 @@
                 if (!skinPanel.contains(e.target) && e.target !== skinPanelToggle) skinPanel.style.display = 'none';
                 if (!achievementsPanel.contains(e.target) && e.target !== achievementsToggle) achievementsPanel.style.display = 'none';
                 if (!dailyRewardsPanel.contains(e.target) && e.target !== dailyRewardsToggle) dailyRewardsPanel.style.display = 'none';
+                if (!adminPanel.contains(e.target) && e.target !== clickArea) adminPanel.style.display = 'none';
             });
 
             renderSkinPage();
