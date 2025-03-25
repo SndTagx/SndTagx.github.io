@@ -11,7 +11,6 @@
             height: 100vh;
             background-color: black;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             font-family: Arial, sans-serif;
@@ -31,74 +30,51 @@
         #playButton:hover {
             background-color: #333;
         }
-
-        #soundSelect {
-            position: absolute;
-            top: 20px;
-            padding: 10px;
-            font-size: 16px;
-            background-color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
-    <select id="soundSelect"></select>
     <button id="playButton">Click to Play</button>
 
     <script>
-        // Hardcoded sound map since we can't dynamically scan directory with pure HTML
+        // Hardcoded sound map (custom URL name to actual file)
         const soundMap = {
             'S1': 'Sounds/ElenaSkin.mp3',
-            'S2': 'Sounds/SobakaSkin.mp3'
+            'S2': 'Sounds/SvetlanaSkin.mp3'
         };
         
         let audio = new Audio();
         const baseUrl = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1) + 's/';
 
-        function loadSounds() {
-            const select = document.getElementById('soundSelect');
-            
-            Object.keys(soundMap).forEach(customName => {
-                const option = document.createElement('option');
-                option.value = baseUrl + customName;
-                option.text = customName;
-                select.appendChild(option);
-            });
+        // Get the sound name from the URL
+        const currentUrl = window.location.href;
+        let soundName = '';
+        if (currentUrl.includes('/s/')) {
+            soundName = currentUrl.split('/s/')[1];
+        }
 
-            // Update URL based on selection
-            select.addEventListener('change', function() {
-                window.history.pushState({}, document.title, this.value);
-            });
-
-            // Check if URL has a sound parameter and select it
-            const currentUrl = window.location.href;
-            if (currentUrl.includes('/s/')) {
-                const soundName = currentUrl.split('/s/')[1];
-                if (soundMap[soundName]) {
-                    select.value = baseUrl + soundName;
-                }
-            }
+        // Set page title and handle invalid URLs
+        if (soundMap[soundName]) {
+            document.title = soundName + ' - Sound Player';
+        } else {
+            document.title = 'Sound Not Found';
+            document.getElementById('playButton').textContent = 'Sound Not Found';
+            document.getElementById('playButton').disabled = true;
         }
 
         // Play button functionality
         document.getElementById('playButton').addEventListener('click', function() {
-            const select = document.getElementById('soundSelect');
-            const selectedUrl = select.value;
-            const soundName = selectedUrl.split('/s/')[1];
-            
             if (soundMap[soundName]) {
                 audio.pause();
                 audio = new Audio(soundMap[soundName]);
                 audio.play();
-                window.history.pushState({}, document.title, selectedUrl);
             }
         });
 
-        // Load sounds when page loads
-        window.onload = loadSounds;
+        // Auto-play if sound exists (optional, comment out if not wanted)
+        if (soundMap[soundName]) {
+            audio = new Audio(soundMap[soundName]);
+            audio.play();
+        }
     </script>
 </body>
 </html>
