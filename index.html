@@ -27,15 +27,13 @@
             cursor: pointer;
             outline: none;
             -webkit-tap-highlight-color: transparent;
-            transition: transform 0.2s ease, filter 0.3s ease;
+            transition: transform 0.2s ease;
         }
         button#mainButton:hover {
             transform: scale(1.02);
-            filter: brightness(115%);
         }
         button#mainButton:active {
             transform: scale(0.98);
-            filter: brightness(90%);
         }
         #clickArea {
             position: absolute;
@@ -78,10 +76,8 @@
             bottom: 80px;
             left: 20px;
             padding: 8px 16px;
-            background: linear-gradient(135deg, #00b4db, #0083b0);
             background-size: cover;
             background-position: center;
-            background-blend-mode: overlay;
             border: none;
             border-radius: 12px;
             color: #fff;
@@ -93,7 +89,7 @@
             outline: none;
             -webkit-tap-highlight-color: transparent;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
         #rebirthButton {
@@ -101,10 +97,8 @@
             bottom: 80px;
             right: 20px;
             padding: 10px 20px;
-            background: linear-gradient(135deg, #ff4d4d, #b00000);
             background-size: cover;
             background-position: center;
-            background-blend-mode: overlay;
             border: none;
             border-radius: 12px;
             color: #fff;
@@ -116,24 +110,22 @@
             outline: none;
             -webkit-tap-highlight-color: transparent;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
         #upgradeButton:hover:not(:disabled), #rebirthButton:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
-            filter: brightness(110%);
         }
         #upgradeButton:active, #rebirthButton:active {
             transform: translateY(1px);
-            filter: brightness(90%);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
         #upgradeButton:disabled, #rebirthButton:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             box-shadow: none;
-            background: linear-gradient(135deg, #555, #333);
+            filter: grayscale(50%);
         }
         #upgradeCostLabel, #rebirthCostLabel, #upgradeCountLabel, #rebirthCountLabel {
             position: absolute;
@@ -143,28 +135,28 @@
             border-radius: 8px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
             background: #000;
-            display: inline-block; /* Autoscales to text size */
-            white-space: nowrap; /* Prevents text wrapping */
+            display: inline-block;
+            white-space: nowrap;
         }
         #upgradeCostLabel {
             bottom: 130px;
             left: 20px;
-            color: #00b4db; /* Blue text */
+            color: #00b4db;
         }
         #upgradeCountLabel {
             bottom: 155px;
             left: 20px;
-            color: #00b4db; /* Blue text */
+            color: #00b4db;
         }
         #rebirthCostLabel {
             bottom: 140px;
             right: 20px;
-            color: #ff4d4d; /* Red text */
+            color: #ff4d4d;
         }
         #rebirthCountLabel {
             bottom: 170px;
             right: 20px;
-            color: #ff4d4d; /* Red text */
+            color: #ff4d4d;
         }
         #skinPanelToggle {
             position: absolute;
@@ -311,6 +303,36 @@
         #adminCloseButton:hover {
             background: #ff6666;
         }
+        #adminSkinsSection {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        #adminSkinsSection .skin-option {
+            justify-content: space-between;
+            padding: 8px;
+            margin: 5px 0;
+        }
+        #adminSkinsSection .skin-option img {
+            width: 32px;
+            height: 32px;
+        }
+        #adminSkinsSection .skin-option button {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        #adminSkinsSection .toggle-unlock {
+            background: linear-gradient(135deg, #00b4db, #0083b0);
+        }
+        #adminSkinsSection .toggle-unlock:hover {
+            background: linear-gradient(135deg, #00cce6, #0099cc);
+        }
+        #adminSkinsSection .set-current {
+            background: linear-gradient(135deg, #ffcc00, #ff9900);
+        }
+        #adminSkinsSection .set-current:hover {
+            background: linear-gradient(135deg, #ffd633, #ffaa33);
+        }
     </style>
 </head>
 <body>
@@ -322,7 +344,7 @@
     <div id="upgradeCountLabel">Count: 0</div>
     <div id="upgradeCostLabel">Cost: 10</div>
     <button id="upgradeButton">Upgrade</button>
-    <div id="rebirthCountLabel">Count: 0</div>
+    <div id="rebirthCountLabel Refs">Count: 0</div>
     <div id="rebirthCostLabel">Cost: 1000000</div>
     <button id="rebirthButton">Rebirth</button>
     <button id="skinPanelToggle">Скины</button>
@@ -348,6 +370,9 @@
         <div class="admin-field">
             <input type="number" id="adminRebirths" placeholder="Rebirths">
             <button id="setRebirths">Set</button>
+        </div>
+        <div id="adminSkinsSection">
+            <h3 style="font-size: 16px; margin: 0 0 10px;">Skin Manager</h3>
         </div>
     </div>
     <audio id="clickSound" loop></audio>
@@ -379,6 +404,7 @@
             const adminUpgradesInput = document.getElementById('adminUpgrades');
             const adminRebirthsInput = document.getElementById('adminRebirths');
             const adminCloseButton = document.getElementById('adminCloseButton');
+            const adminSkinsSection = document.getElementById('adminSkinsSection');
 
             // Skin data with custom sounds
             const skins = [
@@ -445,6 +471,7 @@
                 e.preventDefault();
                 holdTimeout = setTimeout(() => {
                     adminPanel.style.display = 'block';
+                    renderAdminSkins();
                 }, holdDuration);
             });
 
@@ -462,6 +489,7 @@
                 e.preventDefault();
                 holdTimeout = setTimeout(() => {
                     adminPanel.style.display = 'block';
+                    renderAdminSkins();
                 }, holdDuration);
             });
 
@@ -515,6 +543,62 @@
             adminCloseButton.addEventListener('click', function() {
                 adminPanel.style.display = 'none';
             });
+
+            // Render admin skins
+            function renderAdminSkins() {
+                const skinsList = adminSkinsSection.querySelector('.skins-list') || document.createElement('div');
+                skinsList.className = 'skins-list';
+                skinsList.innerHTML = '';
+                skins.forEach(skinData => {
+                    const skinDiv = document.createElement('div');
+                    skinDiv.className = 'skin-option';
+                    const isUnlocked = unlockedSkins.includes(skinData.skin);
+                    skinDiv.innerHTML = `
+                        <img src="${skinData.skin}" alt="${skinData.name}">
+                        <span>${skinData.name}</span>
+                        <button class="toggle-unlock">${isUnlocked ? 'Lock' : 'Unlock'}</button>
+                        <button class="set-current">Set</button>
+                    `;
+                    const toggleButton = skinDiv.querySelector('.toggle-unlock');
+                    const setButton = skinDiv.querySelector('.set-current');
+                    toggleButton.addEventListener('click', () => toggleSkinUnlock(skinData.skin));
+                    setButton.addEventListener('click', () => setCurrentSkin(skinData.skin));
+                    skinsList.appendChild(skinDiv);
+                });
+                if (!adminSkinsSection.contains(skinsList)) adminSkinsSection.appendChild(skinsList);
+            }
+
+            function toggleSkinUnlock(skinPath) {
+                const index = unlockedSkins.indexOf(skinPath);
+                if (index === -1) {
+                    unlockedSkins.push(skinPath);
+                } else {
+                    unlockedSkins.splice(index, 1);
+                    if (currentSkin === skinPath) {
+                        currentSkin = 'Skins/SvetlanaSkin.jpg';
+                        updateSkin();
+                    }
+                }
+                autosave();
+                renderAdminSkins();
+                renderSkinPage();
+            }
+
+            function setCurrentSkin(skinPath) {
+                currentSkin = skinPath;
+                updateSkin();
+                autosave();
+                renderAdminSkins();
+            }
+
+            function updateSkin() {
+                mainButton.style.backgroundImage = `url('${currentSkin}')`;
+                upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
+                rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
+                coinIcon.src = currentSkin;
+                const skinData = skins.find(s => s.skin === currentSkin);
+                clickSound.src = skinData ? skinData.sound : "ston.mp3";
+            }
 
             // Main button click (mouse)
             mainButton.addEventListener('click', function(e) {
@@ -592,12 +676,7 @@
                     rebirthCost = Math.floor(1000000 * Math.pow(2, rebirths));
                     unlockedSkins = ['Skins/SvetlanaSkin.jpg'];
                     currentSkin = 'Skins/SvetlanaSkin.jpg';
-                    mainButton.style.backgroundImage = `url('${currentSkin}')`;
-                    upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
-                    rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
-                    coinIcon.src = currentSkin;
-                    const defaultSkinData = skins.find(s => s.skin === currentSkin);
-                    clickSound.src = defaultSkinData.sound;
+                    updateSkin();
 
                     coinCount.textContent = count;
                     upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
@@ -663,22 +742,14 @@
 
                         if (unlockedSkins.includes(skin)) {
                             currentSkin = skin;
-                            mainButton.style.backgroundImage = `url('${currentSkin}')`;
-                            upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
-                            rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
-                            coinIcon.src = currentSkin;
-                            clickSound.src = selectedSkinData.sound;
+                            updateSkin();
                             autosave();
                             skinPanel.style.display = 'none';
                         } else if (count >= cost) {
                             count -= cost;
                             unlockedSkins.push(skin);
                             currentSkin = skin;
-                            mainButton.style.backgroundImage = `url('${currentSkin}')`;
-                            upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
-                            rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
-                            coinIcon.src = currentSkin;
-                            clickSound.src = selectedSkinData.sound;
+                            updateSkin();
                             coinCount.textContent = count;
                             upgradeButton.disabled = count < upgradeCost;
                             rebirthButton.disabled = count < rebirthCost;
