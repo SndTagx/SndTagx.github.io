@@ -38,8 +38,8 @@
     <script>
         // Hardcoded sound map (custom URL name to actual file)
         const soundMap = {
-            'S1': 'Sounds/SvetlanaSkin.mp3',
-            'S2': 'Sounds/LeshaSkin.mp3'
+            's1': 'Sounds/SvetlanaSkin.mp3',
+            's2': 'Sounds/LeshaSkin.mp3'
         };
         
         let audio = new Audio();
@@ -51,7 +51,7 @@
         }
 
         // Get the sound name from the URL query parameter (?s=Sound1)
-        const soundName = getQueryParam('s') || '';
+        const soundName = getQueryParam('snd') || '';
 
         // Set page title and handle invalid URLs
         const playButton = document.getElementById('playButton');
