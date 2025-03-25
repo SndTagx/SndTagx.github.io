@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SndTagX</title>
+    <title>Sound Player</title>
     <style>
         body {
             margin: 0;
@@ -52,12 +52,14 @@
             ? soundNameLower.charAt(0).toUpperCase() + soundNameLower.slice(1).toLowerCase() 
             : '';
 
-        // Construct the sound file path dynamically (no curly braces)
+        // Construct the sound file path dynamically
         const soundFile = soundName ? `Sounds/${soundName}Skin.mp3` : '';
 
         // Set page title and handle invalid URLs
         const playButton = document.getElementById('playButton');
         if (soundName) {
+            document.title = soundName + ' - Sound Player';
+            playButton.textContent = `Play ${soundName}`;
 
             // Check if the sound file exists by attempting to load it
             fetch(soundFile, { method: 'HEAD' })
@@ -77,11 +79,12 @@
             playButton.disabled = true;
         }
 
-        // Play button functionality
+        // Play button functionality with looping
         playButton.addEventListener('click', function() {
             if (soundFile && !this.disabled) {
-                audio.pause();
+                audio.pause(); // Stop any currently playing audio
                 audio = new Audio(soundFile);
+                audio.loop = true; // Enable looping
                 audio.play();
             }
         });
