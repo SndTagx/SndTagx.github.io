@@ -38,8 +38,9 @@
     <script>
         // Hardcoded sound map (custom URL name to actual file)
         const soundMap = {
-            'S1': 'Sounds/ElenaSkin.mp3',
-            'S2': 'Sounds/SvetlanaSkin.mp3'
+            'Sound1': 'Sounds/SvetlanaSkin.mp3',
+            'Sound2': 'Sounds/sound2.mp3',
+            'Sound3': 'Sounds/sound3.mp3'
         };
         
         let audio = new Audio();
@@ -53,28 +54,24 @@
         }
 
         // Set page title and handle invalid URLs
+        const playButton = document.getElementById('playButton');
         if (soundMap[soundName]) {
             document.title = soundName + ' - Sound Player';
+            playButton.textContent = `Play ${soundName}`;
         } else {
             document.title = 'Sound Not Found';
-            document.getElementById('playButton').textContent = 'Sound Not Found';
-            document.getElementById('playButton').disabled = true;
+            playButton.textContent = 'Sound Not Found';
+            playButton.disabled = true;
         }
 
         // Play button functionality
-        document.getElementById('playButton').addEventListener('click', function() {
+        playButton.addEventListener('click', function() {
             if (soundMap[soundName]) {
                 audio.pause();
                 audio = new Audio(soundMap[soundName]);
                 audio.play();
             }
         });
-
-        // Auto-play if sound exists (optional, comment out if not wanted)
-        if (soundMap[soundName]) {
-            audio = new Audio(soundMap[soundName]);
-            audio.play();
-        }
     </script>
 </body>
 </html>
