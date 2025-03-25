@@ -71,11 +71,9 @@
             50% { opacity: 0.8; transform: translateY(-60px) scale(1.1) rotate(10deg); }
             100% { opacity: 0; transform: translateY(-120px) scale(0.7) rotate(20deg); }
         }
-        #upgradeButton {
+        #upgradeButton, #rebirthButton {
             position: absolute;
             bottom: 60px;
-            left: 50%;
-            transform: translateX(-50%);
             padding: 12px 25px;
             background-size: cover;
             background-position: center;
@@ -95,18 +93,25 @@
             transition: all 0.3s ease;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
-        
-        #upgradeButton:hover:not(:disabled) {
+        #upgradeButton {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        #rebirthButton {
+            bottom: 130px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-color: #ff6b6b;
+        }
+        #upgradeButton:hover:not(:disabled), #rebirthButton:hover:not(:disabled) {
             box-shadow: 0 8px 25px rgba(255, 255, 255, 0.5);
             filter: brightness(110%);
         }
-        
-        #upgradeButton:active {
+        #upgradeButton:active, #rebirthButton:active {
             filter: brightness(85%);
             box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
         }
-        
-        #upgradeButton:disabled {
+        #upgradeButton:disabled, #rebirthButton:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             box-shadow: none;
@@ -261,6 +266,7 @@
         <span id="coinCount">0</span>
     </div>
     <button id="upgradeButton">Upgrade (10 coins)</button>
+    <button id="rebirthButton">Rebirth (1000000 coins)</button>
     <button id="skinPanelToggle">Скины</button>
     <div id="skinPanel">
         <div id="skinPages"></div>
@@ -277,6 +283,8 @@
         <button id="setCoins">Set Coins</button>
         <input type="number" id="adminUpgrades" placeholder="Set Coins Per Click">
         <button id="setUpgrades">Set Upgrades</button>
+        <input type="number" id="adminRebirths" placeholder="Set Rebirths">
+        <button id="setRebirths">Set Rebirths</button>
     </div>
     <audio id="clickSound" loop></audio>
 
@@ -284,6 +292,7 @@
         window.onload = function() {
             const mainButton = document.getElementById('mainButton');
             const upgradeButton = document.getElementById('upgradeButton');
+            const rebirthButton = document.getElementById('rebirthButton');
             const clickSound = document.getElementById('clickSound');
             const coinCount = document.getElementById('coinCount');
             const coinIcon = document.getElementById('coinIcon');
@@ -297,8 +306,10 @@
             const adminPanel = document.getElementById('adminPanel');
             const setCoinsButton = document.getElementById('setCoins');
             const setUpgradesButton = document.getElementById('setUpgrades');
+            const setRebirthsButton = document.getElementById('setRebirths');
             const adminCoinsInput = document.getElementById('adminCoins');
             const adminUpgradesInput = document.getElementById('adminUpgrades');
+            const adminRebirthsInput = document.getElementById('adminRebirths');
             const adminCloseButton = document.getElementById('adminCloseButton');
 
             // Skin data with custom sounds
@@ -313,15 +324,15 @@
                 { skin: "Skins/SobakaSkin.jpg", cost: 130000, name: "🐻Sobaka (130000)", sound: "Sounds/SobakaSkin.mp3" },
                 { skin: "Skins/KotSkin.jpg", cost: 175000, name: "🦁Kot (175000)", sound: "Sounds/KotSkin.mp3" },
                 { skin: "Skins/DuraSkin.jpg", cost: 200000, name: "📑Dura (200000)", sound: "Sounds/DuraSkin.mp3" },
-                
-                
             ];
 
             // Load saved values from localStorage
             let count = parseInt(localStorage.getItem('coinCount')) || 0;
             let coinsPerClick = parseInt(localStorage.getItem('coinsPerClick')) || 1;
             let upgradeLevel = parseInt(localStorage.getItem('upgradeLevel')) || 1;
+            let rebirths = parseInt(localStorage.getItem('rebirths')) || 0;
             let upgradeCost = Math.floor(10 * Math.pow(upgradeLevel, 2));
+            let rebirthCost = 1000000; // High cost to prevent fast rebirths
             let currentSkin = localStorage.getItem('currentSkin') || 'Skins/SvetlanaSkin.jpg';
             let unlockedSkins = JSON.parse(localStorage.getItem('unlockedSkins')) || ['Skins/SvetlanaSkin.jpg'];
             
@@ -333,6 +344,7 @@
             // Apply initial skin and sound
             mainButton.style.backgroundImage = `url('${currentSkin}')`;
             upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
+            rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
             coinIcon.src = currentSkin;
             const initialSkinData = skins.find(s => s.skin === currentSkin);
             clickSound.src = initialSkinData ? initialSkinData.sound : "ston.mp3";
@@ -340,7 +352,9 @@
             // Initialize display
             coinCount.textContent = count;
             upgradeButton.textContent = `Upgrade (${upgradeCost} coins)`;
+            rebirthButton.textContent = `Rebirth (${rebirthCost} coins) x${rebirths + 1}`;
             upgradeButton.disabled = count < upgradeCost;
+            rebirthButton.disabled = count < rebirthCost;
 
             // Long press detection for admin panel (10 seconds)
             const holdDuration = 10000;
@@ -388,6 +402,7 @@
                     coinCount.textContent = count;
                     localStorage.setItem('coinCount', count);
                     upgradeButton.disabled = count < upgradeCost;
+                    rebirthButton.disabled = count < rebirthCost;
                     renderSkinPage();
                 }
             });
@@ -405,6 +420,16 @@
                 }
             });
 
+            setRebirthsButton.addEventListener('click', function() {
+                const newRebirths = parseInt(adminRebirthsInput.value);
+                if (!isNaN(newRebirths) && newRebirths >= 0) {
+                    rebirths = newRebirths;
+                    rebirthButton.textContent = `Rebirth (${rebirthCost} coins) x${rebirths + 1}`;
+                    localStorage.setItem('rebirths', rebirths);
+                    rebirthButton.disabled = count < rebirthCost;
+                }
+            });
+
             adminCloseButton.addEventListener('click', function() {
                 adminPanel.style.display = 'none';
             });
@@ -414,7 +439,7 @@
                 clickSound.volume = 1.0;
                 clickSound.play().catch((e) => console.error('Ошибка воспроизведения звука:', e));
 
-                count += coinsPerClick;
+                count += coinsPerClick * (rebirths + 1);
                 coinCount.textContent = count;
                 localStorage.setItem('coinCount', count);
 
@@ -428,6 +453,7 @@
                 setTimeout(() => coin.remove(), 1200);
 
                 upgradeButton.disabled = count < upgradeCost;
+                rebirthButton.disabled = count < rebirthCost;
                 renderSkinPage();
             });
 
@@ -437,7 +463,7 @@
                 clickSound.volume = 1.0;
                 clickSound.play().catch((e) => console.error('Ошибка воспроизведения звука:', e));
 
-                count += coinsPerClick;
+                count += coinsPerClick * (rebirths + 1);
                 coinCount.textContent = count;
                 localStorage.setItem('coinCount', count);
 
@@ -452,6 +478,7 @@
                 setTimeout(() => coin.remove(), 1200);
 
                 upgradeButton.disabled = count < upgradeCost;
+                rebirthButton.disabled = count < rebirthCost;
                 renderSkinPage();
             });
 
@@ -465,10 +492,44 @@
                     upgradeButton.textContent = `Upgrade (${upgradeCost} coins)`;
                     coinCount.textContent = count;
                     upgradeButton.disabled = count < upgradeCost;
+                    rebirthButton.disabled = count < rebirthCost;
 
                     localStorage.setItem('coinCount', count);
                     localStorage.setItem('coinsPerClick', coinsPerClick);
                     localStorage.setItem('upgradeLevel', upgradeLevel);
+                    renderSkinPage();
+                }
+            });
+
+            // Rebirth button
+            rebirthButton.addEventListener('click', function() {
+                if (count >= rebirthCost) {
+                    count -= rebirthCost;
+                    rebirths++;
+                    coinsPerClick = 1; // Reset coins per click
+                    upgradeLevel = 1; // Reset upgrade level
+                    upgradeCost = Math.floor(10 * Math.pow(upgradeLevel, 2));
+                    unlockedSkins = ['Skins/SvetlanaSkin.jpg']; // Reset skins
+                    currentSkin = 'Skins/SvetlanaSkin.jpg'; // Reset to default skin
+                    mainButton.style.backgroundImage = `url('${currentSkin}')`;
+                    upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
+                    rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
+                    coinIcon.src = currentSkin;
+                    const defaultSkinData = skins.find(s => s.skin === currentSkin);
+                    clickSound.src = defaultSkinData.sound;
+
+                    coinCount.textContent = count;
+                    upgradeButton.textContent = `Upgrade (${upgradeCost} coins)`;
+                    rebirthButton.textContent = `Rebirth (${rebirthCost} coins) x${rebirths + 1}`;
+                    upgradeButton.disabled = count < upgradeCost;
+                    rebirthButton.disabled = count < rebirthCost;
+
+                    localStorage.setItem('coinCount', count);
+                    localStorage.setItem('coinsPerClick', coinsPerClick);
+                    localStorage.setItem('upgradeLevel', upgradeLevel);
+                    localStorage.setItem('rebirths', rebirths);
+                    localStorage.setItem('unlockedSkins', JSON.stringify(unlockedSkins));
+                    localStorage.setItem('currentSkin', currentSkin);
                     renderSkinPage();
                 }
             });
@@ -527,6 +588,7 @@
                             currentSkin = skin;
                             mainButton.style.backgroundImage = `url('${currentSkin}')`;
                             upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
+                            rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
                             coinIcon.src = currentSkin;
                             clickSound.src = selectedSkinData.sound;
                             localStorage.setItem('currentSkin', currentSkin);
@@ -537,6 +599,7 @@
                             currentSkin = skin;
                             mainButton.style.backgroundImage = `url('${currentSkin}')`;
                             upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
+                            rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
                             coinIcon.src = currentSkin;
                             clickSound.src = selectedSkinData.sound;
                             coinCount.textContent = count;
