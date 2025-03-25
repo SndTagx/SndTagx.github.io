@@ -25,6 +25,7 @@
             cursor: pointer;
             outline: none;
             transition: transform 0.2s ease;
+            -webkit-tap-highlight-color: transparent; /* Removes blue highlight on mobile */
         }
         button#mainButton:hover { transform: scale(1.02); }
         button#mainButton:active { transform: scale(0.98); }
@@ -32,7 +33,7 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            font-size: clamp(16px, 4vw, 26px);
+            font-size: 26px; /* Fixed size, no autoscaling */
             display: flex;
             align-items: center;
             background: rgba(20, 20, 40, 0.9);
@@ -41,11 +42,11 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
             z-index: 100;
         }
-        #coinIcon { width: clamp(20px, 5vw, 32px); height: clamp(20px, 5vw, 32px); margin-right: 10px; }
+        #coinIcon { width: 32px; height: 32px; margin-right: 10px; } /* Fixed size */
         .flying-coin {
             position: absolute;
-            width: clamp(20px, 5vw, 32px);
-            height: clamp(20px, 5vw, 32px);
+            width: 32px; /* Fixed size */
+            height: 32px;
             pointer-events: none;
             animation: flyUp 1s ease-out forwards;
         }
@@ -62,17 +63,17 @@
             border: none;
             border-radius: 10px;
             color: #fff;
-            font-size: clamp(12px, 3vw, 16px);
+            font-size: 16px; /* Fixed size */
             cursor: pointer;
-            width: clamp(100px, 25vw, 150px);
-            height: clamp(30px, 8vw, 45px);
+            width: 150px; /* Fixed size */
+            height: 45px;
         }
         #upgradeButton { left: 10px; }
         #rebirthButton { right: 10px; }
         #upgradeButton:disabled, #rebirthButton:disabled { opacity: 0.6; cursor: not-allowed; }
         #upgradeCostLabel, #rebirthCostLabel, #upgradeCountLabel, #rebirthCountLabel {
             position: absolute;
-            font-size: clamp(10px, 2.5vw, 12px);
+            font-size: 12px; /* Fixed size */
             padding: 4px 6px;
             border-radius: 8px;
             background: #000;
@@ -84,25 +85,25 @@
         #skinPanelToggle, #achievementsToggle, #dailyRewardsToggle {
             position: absolute;
             top: 10px;
-            width: clamp(40px, 10vw, 50px);
+            width: clamp(40px, 10vw, 50px); /* Autoscaled */
             height: clamp(40px, 10vw, 50px);
-            background: linear-gradient(135deg, #1e1e2f, #00d4ff);
-            border: 3px solid #00d4ff;
+            background: linear-gradient(135deg, #1e1e2f 0%, #2e3e5f 100%); /* Subtle gradient */
+            border: 2px solid #173a5b; /* Blended color from #1e1e2f and #00d4ff */
             border-radius: 50%;
             color: #fff;
-            font-size: clamp(18px, 4vw, 26px);
+            font-size: clamp(18px, 4vw, 26px); /* Autoscaled */
             font-weight: bold;
             text-align: center;
             line-height: clamp(40px, 10vw, 50px);
             cursor: pointer;
             z-index: 101;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
-            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.3); /* Subtle glow */
         }
         #skinPanelToggle:hover, #achievementsToggle:hover, #dailyRewardsToggle:hover {
-            transform: scale(1.15);
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
-            background: linear-gradient(135deg, #00d4ff, #1e1e2f);
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+            background: linear-gradient(135deg, #2e3e5f 0%, #1e1e2f 100%); /* Reverse subtle gradient */
         }
         #skinPanelToggle { right: 10px; }
         #achievementsToggle { right: 70px; }
@@ -110,7 +111,7 @@
         #skinPanel, #achievementsPanel, #dailyRewardsPanel {
             position: absolute;
             top: 60px;
-            width: clamp(200px, 60vw, 260px);
+            width: 260px; /* Fixed size */
             background: rgba(20, 20, 40, 0.95);
             border-radius: 12px;
             padding: 10px;
@@ -129,11 +130,11 @@
             margin: 4px 0;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
-            font-size: clamp(12px, 3vw, 15px);
+            font-size: 15px; /* Fixed size */
         }
         .skin-option img, .achievement-option img {
-            width: clamp(30px, 8vw, 48px);
-            height: clamp(30px, 8vw, 48px);
+            width: 48px; /* Fixed size */
+            height: 48px;
             margin-right: 10px;
             border-radius: 6px;
         }
@@ -155,7 +156,7 @@
             position: absolute;
             top: 60px;
             left: 10px;
-            font-size: clamp(14px, 3.5vw, 18px);
+            font-size: 18px; /* Fixed size */
             background: rgba(20, 20, 40, 0.9);
             padding: 6px 10px;
             border-radius: 8px;
@@ -166,7 +167,7 @@
             top: 10%;
             left: 50%;
             transform: translateX(-50%);
-            width: clamp(250px, 80vw, 320px);
+            width: clamp(250px, 80vw, 320px); /* Autoscaled */
             max-height: 80vh;
             background: rgba(30, 30, 50, 0.95);
             border-radius: 15px;
@@ -179,7 +180,7 @@
         }
         #adminPanel h2 {
             margin: 0 0 15px;
-            font-size: clamp(18px, 4vw, 22px);
+            font-size: clamp(18px, 4vw, 22px); /* Autoscaled */
             text-align: center;
             color: #00d4ff;
         }
@@ -196,7 +197,7 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             background: rgba(255, 255, 255, 0.05);
             color: #e0e0e0;
-            font-size: clamp(12px, 3vw, 14px);
+            font-size: clamp(12px, 3vw, 14px); /* Autoscaled */
         }
         #adminPanel button {
             padding: 6px 10px;
@@ -204,7 +205,7 @@
             border: none;
             border-radius: 6px;
             color: #fff;
-            font-size: clamp(12px, 3vw, 14px);
+            font-size: clamp(12px, 3vw, 14px); /* Autoscaled */
             cursor: pointer;
         }
         #adminCloseButton {
@@ -241,9 +242,9 @@
     <div id="skinPanel">
         <div id="skinPages"></div>
         <div style="display: flex; justify-content: center; gap: 8px; margin-top: 10px;">
-            <button id="prevPage" style="padding: 4px 8px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: #e0e0e0; cursor: pointer; font-size: clamp(10px, 2.5vw, 12px);">Previous</button>
-            <span id="pageIndicator" style="font-size: clamp(12px, 3vw, 15px); align-self: center;"></span>
-            <button id="nextPage" style="padding: 4px 8px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: #e0e0e0; cursor: pointer; font-size: clamp(10px, 2.5vw, 12px);">Next</button>
+            <button id="prevPage" style="padding: 4px 8px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: #e0e0e0; cursor: pointer; font-size: 12px;">Previous</button>
+            <span id="pageIndicator" style="font-size: 15px; align-self: center;"></span>
+            <button id="nextPage" style="padding: 4px 8px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: #e0e0e0; cursor: pointer; font-size: 12px;">Next</button>
         </div>
     </div>
     <div id="achievementsPanel"></div>
@@ -446,23 +447,23 @@
                 autosave();
             });
             setComboButton.addEventListener('click', () => {
-                clickCombo = parseInt(adminComboInput.value) || 0; // No restrictions
+                clickCombo = parseInt(adminComboInput.value) || 0;
                 const multiplier = Math.min(Math.floor(clickCombo / (MAX_COMBO_CLICKS / (MAX_MULTIPLIER - 1))) + 1, MAX_MULTIPLIER);
                 comboCounter.textContent = `Combo: ${multiplier}x`;
                 autosave();
                 checkAchievements();
             });
             setDailyRewardsButton.addEventListener('click', () => {
-                dailyRewardDay = parseInt(adminDailySetInput.value) || 0; // No restrictions
+                dailyRewardDay = parseInt(adminDailySetInput.value) || 0;
                 lastClaimDate = null;
                 autosave();
                 renderDailyRewards();
             });
             setSkinsButton.addEventListener('click', () => {
                 const indexes = adminSkinsInput.value.split(',').map(i => parseInt(i.trim())).filter(i => !isNaN(i) && i >= 1 && i <= skins.length);
-                unlockedSkins = indexes.map(i => skins[i - 1].skin); // Adjust for 1-based index
+                unlockedSkins = indexes.map(i => skins[i - 1].skin);
                 if (!unlockedSkins.includes(currentSkin) || unlockedSkins.length === 0) {
-                    currentSkin = skins[0].skin; // Default to Svetlana if no valid skins
+                    currentSkin = skins[0].skin;
                 }
                 updateSkin();
                 autosave();
@@ -470,7 +471,7 @@
             });
             setAchievementsButton.addEventListener('click', () => {
                 const indexes = adminAchievementsInput.value.split(',').map(i => parseInt(i.trim())).filter(i => !isNaN(i) && i >= 1 && i <= achievements.length);
-                completedAchievements = indexes; // Direct override, no restrictions
+                completedAchievements = indexes;
                 autosave();
                 renderAchievements();
             });
@@ -596,7 +597,7 @@
                 const startIndex = currentPage * skinsPerPage;
                 const endIndex = Math.min(startIndex + skinsPerPage, skins.length);
                 skins.slice(startIndex, endIndex).forEach((skinData, index) => {
-                    const globalIndex = startIndex + index + 1; // Start from 1
+                    const globalIndex = startIndex + index + 1;
                     const option = document.createElement('div');
                     option.className = 'skin-option';
                     option.innerHTML = `<span class="id-label">${globalIndex}</span><img src="${skinData.skin}" alt="Skin"><span>${skinData.name}</span>`;
