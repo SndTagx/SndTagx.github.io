@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sound Player</title>
+    <title>SndTagX</title>
     <style>
         body {
             margin: 0;
@@ -33,25 +33,25 @@
     </style>
 </head>
 <body>
-    <button id="playButton">Click to Play</button>
+    <button id="playButton"></button>
 
     <script>
         // Hardcoded sound map (custom URL name to actual file)
         const soundMap = {
-            'Sound1': 'Sounds/SvetlanaSkin.mp3',
-            'Sound2': 'Sounds/sound2.mp3',
-            'Sound3': 'Sounds/sound3.mp3'
+            'S1': 'Sounds/SvetlanaSkin.mp3',
+            'S2': 'Sounds/LeshaSkin.mp3'
         };
         
         let audio = new Audio();
-        const baseUrl = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1) + 's/';
 
-        // Get the sound name from the URL
-        const currentUrl = window.location.href;
-        let soundName = '';
-        if (currentUrl.includes('/s/')) {
-            soundName = currentUrl.split('/s/')[1];
+        // Function to get query parameter
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
         }
+
+        // Get the sound name from the URL query parameter (?s=Sound1)
+        const soundName = getQueryParam('s') || '';
 
         // Set page title and handle invalid URLs
         const playButton = document.getElementById('playButton');
