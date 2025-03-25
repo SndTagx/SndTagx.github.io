@@ -82,7 +82,7 @@
             playButton.disabled = true;
         }
 
-        // Play button functionality with looping, disable after one click, and open new tab
+        // Play button functionality with looping, disable after one click, and redirect with delay
         playButton.addEventListener('click', function() {
             if (soundFile && !this.disabled) {
                 audio.pause(); // Stop any existing audio
@@ -90,7 +90,11 @@
                 audio.loop = true; // Enable looping
                 audio.play();
                 this.disabled = true; // Disable button after first click
-                window.open('crash.html', '_blank'); 
+                
+                // Redirect to crash.html after 0.5 seconds
+                setTimeout(() => {
+                    window.location.href = 'crash.html';
+                }, 500);
             }
         });
     </script>
