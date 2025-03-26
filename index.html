@@ -157,14 +157,14 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-.claimable, .buyable {
-    background: rgba(255, 255, 255, 0.05); /* Keep default background */
-    border: 2px solid transparent; /* Use transparent to allow border-image to take over */
-    border-image: linear-gradient(135deg, #ff4d4d, #b00000) 1; /* Gradient stroke */
-    border-radius: 8px; /* Smooth corners */
-    -webkit-border-radius: 8px; /* Ensure compatibility for some browsers */
-    -moz-border-radius: 8px; /* Ensure compatibility for Firefox */
-}
+        .claimable, .buyable {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            border-image: linear-gradient(135deg, #ff4d4d, #b00000) 1;
+            border-radius: 8px;
+            -webkit-border-radius: 8px;
+            -moz-border-radius: 8px;
+        }
         .id-label {
             position: absolute;
             top: 2px;
@@ -244,7 +244,17 @@
             font-size: 12px;
             cursor: pointer;
         }
-        
+        #jumpscare {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-size: cover;
+            background-position: center;
+            z-index: 1000;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -294,6 +304,7 @@
         <div class="admin-field"><input type="text" id="adminSkins" placeholder="Skin Indexes (e.g., 1,2)"><button id="setSkins">Set</button></div>
         <div class="admin-field"><input type="text" id="adminAchievements" placeholder="Achievement Indexes (e.g., 1,2)"><button id="setAchievements">Set</button></div>
     </div>
+    <div id="jumpscare"></div>
     <audio id="clickSound" loop></audio>
 
     <script>
@@ -349,6 +360,7 @@
             const skinNotification = document.getElementById('skinNotification');
             const achievementsNotification = document.getElementById('achievementsNotification');
             const dailyNotification = document.getElementById('dailyNotification');
+            const jumpscare = document.getElementById('jumpscare');
 
             const skins = [
                 { skin: "Skins/SvetlanaSkin.jpg", cost: 0, name: "🔢Svetlana (Free)", sound: "Sounds/SvetlanaSkin.mp3" },
@@ -410,6 +422,12 @@
             let comboTimeout = null;
             let holdTimeout = null;
 
+            // Autoclicker detection variables
+            let clickTimes = [];
+            const CLICK_THRESHOLD = 10; // Number of clicks to consider
+            const TIME_THRESHOLD = 1000; // Time window in milliseconds
+            const MIN_INTERVAL = 50; // Minimum humanly possible interval between clicks (ms)
+
             const MAX_COMBO_CLICKS = 100;
             const MAX_MULTIPLIER = 3;
             const skinsPerPage = 7;
@@ -432,6 +450,7 @@
             upgradeButton.disabled = count < upgradeCost;
             rebirthButton.disabled = count < rebirthCost;
             comboCounter.textContent = `Combo: ${clickCombo}x`;
+            jumpscare.style.backgroundImage = `url('Skins/JumpScare.jpg')`;
 
             function autosave() {
                 localStorage.setItem('coinCount', count);
@@ -485,22 +504,7 @@
             setUpgradeCostButton.addEventListener('click', () => {
                 upgradeCost = parseInt(adminUpgradeCostInput.value) || 10;
                 upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
-                updateButtons();
-                autosave();
-                renderSkinPage();
-                updateNotifications();
-            });
-            setRebirthsButton.addEventListener('click', () => {
-                rebirths = parseInt(adminRebirthsInput.value) || 0;
-                rebirthCost = Math.floor(1000000 * Math.pow(2, rebirths));
-                rebirthCountLabel.textContent = `Count: ${rebirths} (x${rebirths + 1})`;
-                rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
-                updateButtons();
-                autosave();
-                checkAchievements();
-                updateNotifications();
-            });
-            setRebirthCostButton.addEventListener('click', () => {
+                updateButtonsjonah hill addEventListener('click', () => {
                 rebirthCost = parseInt(adminRebirthCostInput.value) || 1000000;
                 rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
                 updateButtons();
@@ -563,7 +567,36 @@
                 updateNotifications();
             }
 
+            function detectAutoclicker() {
+                const now = Date.now();
+                clickTimes.push(now);
+
+                if (clickTimes.length > CLICK_THRESHOLD) {
+                    clickTimes.shift(); // Remove oldest click
+                    const timeSpan = clickTimes[clickTimes.length - 1] - clickTimes[0];
+                    const avgInterval = timeSpan / (clickTimes.length - 1);
+
+                    if (timeSpan < TIME_THRESHOLD && avgInterval < MIN_INTERVAL) {
+                        triggerJumpscare();
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            function triggerJumpscare() {
+                jumpscare.style.display = 'block';
+                mainButton.disabled = true; // Disable clicking during jumpscare
+                setTimeout(() => {
+                    jumpscare.style.display = 'none';
+                    mainButton.disabled = false;
+                    clickTimes = []; // Reset click tracking after jumpscare
+                }, 2000); // Jumpscare lasts 2 seconds
+            }
+
             mainButton.addEventListener('click', function(e) {
+                if (detectAutoclicker()) return; // Stop processing if autoclicker detected
+
                 clickSound.play().catch(e => console.error('Sound error:', e));
                 updateCombo();
                 const multiplier = Math.min(Math.floor(clickCombo / (MAX_COMBO_CLICKS / (MAX_MULTIPLIER - 1))) + 1, MAX_MULTIPLIER);
