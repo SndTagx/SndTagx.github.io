@@ -421,8 +421,6 @@
             let clickCombo = parseInt(localStorage.getItem('clickCombo')) || 0;
             let comboTimeout = null;
             let holdTimeout = null;
-
-            // Autoclicker detection variables
             let clickTimes = [];
             const CLICK_THRESHOLD = 10; // Number of clicks to consider
             const TIME_THRESHOLD = 1000; // Time window in milliseconds
@@ -504,7 +502,22 @@
             setUpgradeCostButton.addEventListener('click', () => {
                 upgradeCost = parseInt(adminUpgradeCostInput.value) || 10;
                 upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
-                updateButtonsjonah hill addEventListener('click', () => {
+                updateButtons();
+                autosave();
+                renderSkinPage();
+                updateNotifications();
+            });
+            setRebirthsButton.addEventListener('click', () => {
+                rebirths = parseInt(adminRebirthsInput.value) || 0;
+                rebirthCost = Math.floor(1000000 * Math.pow(2, rebirths));
+                rebirthCountLabel.textContent = `Count: ${rebirths} (x${rebirths + 1})`;
+                rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
+                updateButtons();
+                autosave();
+                checkAchievements();
+                updateNotifications();
+            });
+            setRebirthCostButton.addEventListener('click', () => {
                 rebirthCost = parseInt(adminRebirthCostInput.value) || 1000000;
                 rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
                 updateButtons();
