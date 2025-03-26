@@ -600,11 +600,6 @@
             function triggerJumpscare() {
                 jumpscare.style.display = 'block';
                 mainButton.disabled = true; // Disable clicking during jumpscare
-                setTimeout(() => {
-                    jumpscare.style.display = 'none';
-                    mainButton.disabled = false;
-                    clickTimes = []; // Reset click tracking after jumpscare
-                }, 2000); // Jumpscare lasts 2 seconds
             }
 
             mainButton.addEventListener('click', function(e) {
