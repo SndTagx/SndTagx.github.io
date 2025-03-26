@@ -213,7 +213,7 @@
             gap: 8px;
             margin-bottom: 10px;
         }
-        #adminPanel input {
+        #adminPanel input[type="number"], #adminPanel input[type="text"] {
             flex: 1;
             padding: 6px;
             border-radius: 6px;
@@ -221,6 +221,11 @@
             background: rgba(255, 255, 255, 0.05);
             color: #e0e0e0;
             font-size: clamp(12px, 3vw, 14px);
+        }
+        #adminPanel input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
         }
         #adminPanel button {
             padding: 6px 10px;
@@ -303,6 +308,7 @@
         <div class="admin-field"><input type="number" id="adminDailySet" placeholder="Set Days"><button id="setDailyRewards">Set</button></div>
         <div class="admin-field"><input type="text" id="adminSkins" placeholder="Skin Indexes (e.g., 1,2)"><button id="setSkins">Set</button></div>
         <div class="admin-field"><input type="text" id="adminAchievements" placeholder="Achievement Indexes (e.g., 1,2)"><button id="setAchievements">Set</button></div>
+        <div class="admin-field"><label for="adminAutoclickDetect">Autoclick Detection:</label><input type="checkbox" id="adminAutoclickDetect" checked><button id="toggleAutoclickDetect">Toggle</button></div>
     </div>
     <div id="jumpscare"></div>
     <audio id="clickSound" loop></audio>
@@ -361,6 +367,8 @@
             const achievementsNotification = document.getElementById('achievementsNotification');
             const dailyNotification = document.getElementById('dailyNotification');
             const jumpscare = document.getElementById('jumpscare');
+            const adminAutoclickDetectInput = document.getElementById('adminAutoclickDetect');
+            const toggleAutoclickDetectButton = document.getElementById('toggleAutoclickDetect');
 
             const skins = [
                 { skin: "Skins/SvetlanaSkin.jpg", cost: 0, name: "🔢Svetlana (Free)", sound: "Sounds/SvetlanaSkin.mp3" },
@@ -422,6 +430,7 @@
             let comboTimeout = null;
             let holdTimeout = null;
             let clickTimes = [];
+            let autoclickDetectEnabled = localStorage.getItem('autoclickDetectEnabled') !== 'false'; // Default to true
             const CLICK_THRESHOLD = 10; // Number of clicks to consider for rapid clicking
             const TIME_THRESHOLD = 1000; // Time window in milliseconds for rapid clicking
             const MIN_INTERVAL = 50; // Minimum humanly possible interval between clicks (ms)
@@ -451,6 +460,7 @@
             rebirthButton.disabled = count < rebirthCost;
             comboCounter.textContent = `Combo: ${clickCombo}x`;
             jumpscare.style.backgroundImage = `url('Skins/JumpScare.jpg')`;
+            adminAutoclickDetectInput.checked = autoclickDetectEnabled;
 
             function autosave() {
                 localStorage.setItem('coinCount', count);
@@ -465,6 +475,7 @@
                 localStorage.setItem('dailyRewardDay', dailyRewardDay);
                 localStorage.setItem('lastClaimDate', lastClaimDate);
                 localStorage.setItem('clickCombo', clickCombo);
+                localStorage.setItem('autoclickDetectEnabled', autoclickDetectEnabled);
             }
 
             clickArea.addEventListener('mousedown', function(e) {
@@ -558,6 +569,10 @@
                 renderAchievements();
                 updateNotifications();
             });
+            toggleAutoclickDetectButton.addEventListener('click', () => {
+                autoclickDetectEnabled = adminAutoclickDetectInput.checked;
+                autosave();
+            });
             adminCloseButton.addEventListener('click', () => adminPanel.style.display = 'none');
 
             function updateButtons() {
@@ -583,6 +598,8 @@
             }
 
             function detectAutoclicker() {
+                if (!autoclickDetectEnabled) return false; // Skip detection if disabled
+
                 const now = Date.now();
                 clickTimes.push(now);
 
@@ -630,7 +647,7 @@
             }
 
             mainButton.addEventListener('click', function(e) {
-                if (detectAutoclicker()) return; // Stop processing if autoclicker detected
+                if (detectAutoclicker()) return; // Stop processing if autoclicker detected and enabled
 
                 clickSound.play().catch(e => console.error('Sound error:', e));
                 updateCombo();
