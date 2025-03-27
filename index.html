@@ -9,11 +9,20 @@
             padding: 0;
             height: 100vh;
             overflow: hidden;
-            background: linear-gradient(45deg, #1e1e2f, #3b3b5e);
+            background: linear-gradient(45deg, #1e1e2f, #3b3b5e); /* Default theme */
             font-family: 'Roboto', Arial, sans-serif;
             color: #e0e0e0;
             -webkit-user-select: none;
             user-select: none;
+            transition: background 0.5s ease;
+        }
+        body.light-theme {
+            background: linear-gradient(45deg, #f0f0f0, #d0d0d0);
+            color: #333;
+        }
+        body.night-theme {
+            background: linear-gradient(45deg, #0a0a1a, #1a1a3a);
+            color: #e0e0e0;
         }
         button#mainButton {
             width: 100%;
@@ -42,6 +51,16 @@
             z-index: 150;
             white-space: nowrap;
             overflow: hidden;
+        }
+        #levelDisplay {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            font-size: 18px;
+            background: rgba(20, 20, 40, 0.9);
+            padding: 6px 10px;
+            border-radius: 8px;
+            z-index: 100;
         }
         #coinIcon { width: 32px; height: 32px; margin-right: 10px; }
         #coinCount {
@@ -88,51 +107,52 @@
         #upgradeCountLabel { bottom: 80px; left: 10px; color: #00b4db; }
         #rebirthCostLabel { bottom: 60px; right: 10px; color: #ff4d4d; }
         #rebirthCountLabel { bottom: 80px; right: 10px; color: #ff4d4d; }
-        #skinPanelToggle, #achievementsToggle, #dailyRewardsToggle, #settingsToggle {
+        #skinPanelToggle, #achievementsToggle, #dailyRewardsToggle, #settingsToggle, #shopToggle {
             position: absolute;
-            top: 10px;
-            width: 50px;
-            height: 50px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
             background: linear-gradient(135deg, #1e1e2f 0%, #2e3e5f 100%);
             border: 2px solid #173a5b;
-            border-radius: 50%;
+            border-radius: 8px;
             color: #fff;
-            font-size: 26px;
+            font-size: 20px;
             font-weight: bold;
             text-align: center;
-            line-height: 50px;
+            line-height: 40px;
             cursor: pointer;
             z-index: 101;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
         }
-        #skinPanelToggle:hover, #achievementsToggle:hover, #dailyRewardsToggle:hover, #settingsToggle:hover {
+        #skinPanelToggle { top: 10px; }
+        #achievementsToggle { top: 60px; }
+        #dailyRewardsToggle { top: 110px; }
+        #settingsToggle { top: 160px; }
+        #shopToggle { top: 210px; }
+        #skinPanelToggle:hover, #achievementsToggle:hover, #dailyRewardsToggle:hover, #settingsToggle:hover, #shopToggle:hover {
             transform: scale(1.1);
             box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
             background: linear-gradient(135deg, #2e3e5f 0%, #1e1e2f 100%);
         }
-        #skinPanelToggle { right: 10px; }
-        #achievementsToggle { right: 70px; }
-        #dailyRewardsToggle { right: 130px; }
-        #settingsToggle { right: 190px; }
         .notification {
             position: absolute;
             top: -5px;
             right: -5px;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             background: #ff4d4d;
             border-radius: 50%;
             color: #fff;
-            font-size: 12px;
+            font-size: 10px;
             text-align: center;
-            line-height: 20px;
+            line-height: 18px;
             z-index: 102;
         }
-        #skinPanel, #achievementsPanel, #dailyRewardsPanel, #settingsPanel {
+        #skinPanel, #achievementsPanel, #dailyRewardsPanel, #settingsPanel, #shopPanel {
             position: absolute;
-            top: 60px;
-            right: 10px;
+            top: 10px;
+            right: 60px;
             width: 260px;
             background: rgba(20, 20, 40, 0.95);
             border-radius: 12px;
@@ -141,8 +161,8 @@
             display: none;
             z-index: 100;
         }
-        #achievementsPanel, #settingsPanel { max-height: 70vh; overflow-y: auto; }
-        .skin-option, .achievement-option, .daily-reward-option, .setting-option {
+        #achievementsPanel, #settingsPanel, #shopPanel { max-height: 70vh; overflow-y: auto; }
+        .skin-option, .achievement-option, .daily-reward-option, .setting-option, .shop-option {
             position: relative;
             display: flex;
             align-items: center;
@@ -154,13 +174,13 @@
             cursor: pointer;
         }
         .setting-option { cursor: default; flex-wrap: wrap; }
-        .skin-option img, .achievement-option img {
+        .skin-option img, .achievement-option img, .shop-option img {
             width: 48px;
             height: 48px;
             margin-right: 10px;
             border-radius: 6px;
         }
-        .skin-option.locked, .achievement-option.completed, .daily-reward-option.claimed {
+        .skin-option.locked, .achievement-option.completed, .daily-reward-option.claimed, .shop-option.sold {
             opacity: 0.5;
             cursor: not-allowed;
         }
@@ -182,7 +202,7 @@
         }
         #comboCounter {
             position: absolute;
-            top: 60px;
+            top: 80px;
             left: 10px;
             font-size: 18px;
             background: rgba(20, 20, 40, 0.9);
@@ -273,6 +293,12 @@
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid #00d4ff;
         }
+        #shopTimer {
+            text-align: center;
+            font-size: 14px;
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -281,6 +307,7 @@
         <img id="coinIcon" alt="Coin">
         <span id="coinCount">0</span>
     </div>
+    <div id="levelDisplay">Level: 0</div>
     <div id="comboCounter">Combo: 0x</div>
     <div id="upgradeCountLabel">Count: 0</div>
     <div id="upgradeCostLabel">Cost: 10</div>
@@ -292,6 +319,7 @@
     <button id="achievementsToggle">A<div id="achievementsNotification" class="notification" style="display: none;"></div></button>
     <button id="dailyRewardsToggle">D<div id="dailyNotification" class="notification" style="display: none;"></div></button>
     <button id="settingsToggle">⚙</button>
+    <button id="shopToggle">🏪<div id="shopNotification" class="notification" style="display: none;"></div></button>
     <div id="skinPanel">
         <div id="skinPages"></div>
         <div style="display: flex; justify-content: center; gap: 8px; margin-top: 10px;">
@@ -322,7 +350,7 @@
                 <span id="coinsEarned">Coins Earned: 0</span><br>
                 <span id="coinsCurrent">Current Coins: 0</span><br>
                 <span id="coinsPerClick">Coins Per Click: 1</span><br>
-                <span id="upgradesBought">Upgrades Bought: 0 BURSTED</span><br>
+                <span id="upgradesBought">Upgrades Bought: 0</span><br>
                 <span id="upgradeLevel">Upgrade Level: 0</span><br>
                 <span id="upgradeCost">Upgrade Cost: 10</span><br>
                 <span id="rebirthsCompleted">Rebirths Completed: 0</span><br>
@@ -336,7 +364,17 @@
                 <span id="achievementsCompleted">Achievements Completed: 0</span><br>
                 <span id="dailyRewardDay">Daily Reward Day: 0</span><br>
                 <span id="lastClaimDate">Last Claim Date: None</span><br>
-                <span id="adminPanelState">Admin Panel: Hidden</span>
+                <span id="adminPanelState">Admin Panel: Hidden</span><br>
+                <span id="playerLevel">Player Level: 0</span><br>
+                <span id="shopRefreshTime">Shop Refresh: 600s</span>
+            </div>
+            <div class="setting-option">
+                <label>Theme: </label>
+                <select id="themeSelect">
+                    <option value="default">Default</option>
+                    <option value="light">Light</option>
+                    <option value="night">Night</option>
+                </select>
             </div>
             <div class="setting-option">
                 <button id="exportSave">Export Save</button>
@@ -349,6 +387,15 @@
             <div class="setting-option">
                 <textarea id="importSaveText" placeholder="Paste save code here"></textarea>
             </div>
+        </div>
+    </div>
+    <div id="shopPanel">
+        <div id="shopTimer">Refresh in: 10:00</div>
+        <div id="shopPages"></div>
+        <div style="display: flex; justify-content: center; gap: 8px; margin-top: 10px;">
+            <button id="shopPrevPage" style="padding: 4px 8px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: #e0e0e0; cursor: pointer; font-size: 12px;">Previous</button>
+            <span id="shopPageIndicator" style="font-size: 15px; align-self: center;"></span>
+            <button id="shopNextPage" style="padding: 4px 8px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: #e0e0e0; cursor: pointer; font-size: 12px;">Next</button>
         </div>
     </div>
     <div id="adminPanel">
@@ -366,6 +413,9 @@
         <div class="admin-field"><input type="text" id="adminAchievements" placeholder="Achievement Indexes (e.g., 1,2)"><button id="setAchievements">Set</button></div>
         <div class="admin-field"><label for="adminAutoclickDetect">Autoclick Detection:</label><input type="checkbox" id="adminAutoclickDetect" checked><button id="toggleAutoclickDetect">Toggle</button></div>
         <div class="admin-field"><input type="number" id="adminClicksPerSec" placeholder="Clicks/sec"><button id="setClicksPerSec">Set</button></div>
+        <div class="admin-field"><input type="number" id="adminLevel" placeholder="Player Level"><button id="setLevel">Set</button></div>
+        <div class="admin-field"><input type="number" id="adminShopRefresh" placeholder="Shop Refresh (s)"><button id="setShopRefresh">Set</button></div>
+        <div class="admin-field"><button id="forceShopRefresh">Force Shop Refresh</button></div>
         <div class="admin-field"><button id="unlockAllSkins">Unlock All Skins</button></div>
         <div class="admin-field"><button id="completeAllAchievements">Complete All Achievements</button></div>
         <div class="admin-field"><button id="resetDailyRewards">Reset Daily Rewards</button></div>
@@ -400,8 +450,16 @@
             const dailyRewardsPanel = document.getElementById('dailyRewardsPanel');
             const settingsToggle = document.getElementById('settingsToggle');
             const settingsPanel = document.getElementById('settingsPanel');
+            const shopToggle = document.getElementById('shopToggle');
+            const shopPanel = document.getElementById('shopPanel');
+            const shopPages = document.getElementById('shopPages');
+            const shopPrevPage = document.getElementById('shopPrevPage');
+            const shopNextPage = document.getElementById('shopNextPage');
+            const shopPageIndicator = document.getElementById('shopPageIndicator');
+            const shopTimer = document.getElementById('shopTimer');
             const clickSound = document.getElementById('clickSound');
             const comboCounter = document.getElementById('comboCounter');
+            const levelDisplay = document.getElementById('levelDisplay');
             const adminPanel = document.getElementById('adminPanel');
             const clickArea = document.getElementById('clickArea');
             const setCoinsButton = document.getElementById('setCoins');
@@ -428,6 +486,7 @@
             const skinNotification = document.getElementById('skinNotification');
             const achievementsNotification = document.getElementById('achievementsNotification');
             const dailyNotification = document.getElementById('dailyNotification');
+            const shopNotification = document.getElementById('shopNotification');
             const jumpscare = document.getElementById('jumpscare');
             const adminAutoclickDetectInput = document.getElementById('adminAutoclickDetect');
             const toggleAutoclickDetectButton = document.getElementById('toggleAutoclickDetect');
@@ -453,6 +512,8 @@
             const dailyRewardDayDisplay = document.getElementById('dailyRewardDay');
             const lastClaimDateDisplay = document.getElementById('lastClaimDate');
             const adminPanelState = document.getElementById('adminPanelState');
+            const playerLevelDisplay = document.getElementById('playerLevel');
+            const shopRefreshTimeDisplay = document.getElementById('shopRefreshTime');
             const exportSaveButton = document.getElementById('exportSave');
             const importSaveButton = document.getElementById('importSave');
             const exportSaveText = document.getElementById('exportSaveText');
@@ -460,9 +521,15 @@
             const resetGameButton = document.getElementById('resetGame');
             const adminClicksPerSecInput = document.getElementById('adminClicksPerSec');
             const setClicksPerSecButton = document.getElementById('setClicksPerSec');
+            const adminLevelInput = document.getElementById('adminLevel');
+            const setLevelButton = document.getElementById('setLevel');
+            const adminShopRefreshInput = document.getElementById('adminShopRefresh');
+            const setShopRefreshButton = document.getElementById('setShopRefresh');
+            const forceShopRefreshButton = document.getElementById('forceShopRefresh');
             const unlockAllSkinsButton = document.getElementById('unlockAllSkins');
             const completeAllAchievementsButton = document.getElementById('completeAllAchievements');
             const resetDailyRewardsButton = document.getElementById('resetDailyRewards');
+            const themeSelect = document.getElementById('themeSelect');
 
             const skins = [
                 { skin: "Skins/SvetlanaSkin.jpg", cost: 0, name: "🔢Svetlana (Free)", sound: "Sounds/SvetlanaSkin.mp3" },
@@ -510,6 +577,16 @@
                 { day: 8, reward: 500000 },
             ];
 
+            const shopItemsBase = [
+                { name: "+1 Coin Per Click", effect: () => gameData.coinsPerClick++, cost: () => gameData.coinsPerClick * 10 },
+                { name: "+1 Upgrade", effect: () => { gameData.upgradeLevel++; gameData.totalUpgradesBought++; gameData.upgradeCost = Math.floor(10 * Math.pow(gameData.upgradeLevel, 2)) || 10; }, cost: () => gameData.upgradeCost * 0.9 },
+                { name: "+1 Coin/sec", effect: () => gameData.coinsPerSec++, cost: () => gameData.coinsPerSec * 50 },
+                { name: "+5 Coins Per Click", effect: () => gameData.coinsPerClick += 5, cost: () => gameData.coinsPerClick * 45 },
+                { name: "+10% Combo Boost", effect: () => gameData.clickCombo += Math.floor(MAX_COMBO_CLICKS / 10), cost: () => gameData.clickCombo * 100 },
+                { name: "Half Upgrade Cost", effect: () => gameData.upgradeCost = Math.floor(gameData.upgradeCost / 2), cost: () => gameData.upgradeCost * 2 },
+                { name: "+1 Rebirth", effect: () => { gameData.rebirths++; gameData.totalRebirthsCompleted++; gameData.rebirthCost = Math.floor(1000000 * Math.pow(2, gameData.rebirths)); }, cost: () => gameData.rebirthCost * 0.8 },
+            ];
+
             const defaultGameData = {
                 count: 0,
                 coinsPerClick: 1,
@@ -530,7 +607,12 @@
                 totalRebirthsCompleted: 0,
                 autoclickTriggerCount: 0,
                 debugMode: false,
-                tutorialShown: false
+                tutorialShown: false,
+                level: 0,
+                coinsPerSec: 0,
+                shopItems: [],
+                shopLastRefresh: 0,
+                theme: 'default'
             };
 
             let gameData = loadGameData();
@@ -546,18 +628,21 @@
             const MAX_MULTIPLIER = 3;
             const skinsPerPage = 7;
             const achievementsPerPage = 7;
+            const shopItemsPerPage = 7;
             let currentSkinPage = 0;
             let currentAchPage = 0;
+            let currentShopPage = 0;
             const totalSkinPages = Math.ceil(skins.length / skinsPerPage);
             const totalAchPages = Math.ceil(achievements.length / achievementsPerPage);
+            const totalShopPages = Math.ceil(shopItemsBase.length / shopItemsPerPage);
             let clicksPerSecond = 0;
+            const SHOP_REFRESH_INTERVAL = 600; // 10 minutes in seconds
 
             function loadGameData() {
                 const savedData = localStorage.getItem('gameData');
                 if (savedData) {
                     return JSON.parse(atob(savedData));
                 } else {
-                    // Migrate old data if it exists
                     const oldData = {
                         count: parseInt(localStorage.getItem('coinCount')) || 0,
                         coinsPerClick: parseInt(localStorage.getItem('coinsPerClick')) || 1,
@@ -578,7 +663,12 @@
                         totalRebirthsCompleted: parseInt(localStorage.getItem('totalRebirthsCompleted')) || 0,
                         autoclickTriggerCount: parseInt(localStorage.getItem('autoclickTriggerCount')) || 0,
                         debugMode: localStorage.getItem('debugMode') === 'true',
-                        tutorialShown: localStorage.getItem('tutorialShown') === 'true'
+                        tutorialShown: localStorage.getItem('tutorialShown') === 'true',
+                        level: 0,
+                        coinsPerSec: 0,
+                        shopItems: [],
+                        shopLastRefresh: 0,
+                        theme: 'default'
                     };
                     saveGameData(oldData);
                     return oldData;
@@ -609,21 +699,25 @@
                 upgradeButton.disabled = gameData.count < gameData.upgradeCost;
                 rebirthButton.disabled = gameData.count < gameData.rebirthCost;
                 comboCounter.textContent = `Combo: ${gameData.clickCombo}x`;
+                levelDisplay.textContent = `Level: ${gameData.level}`;
                 jumpscare.style.backgroundImage = `url('Skins/JumpScare.jpg')`;
                 adminAutoclickDetectInput.checked = gameData.autoclickDetectEnabled;
                 debugToggle.checked = gameData.debugMode;
                 debugStats.style.display = gameData.debugMode ? 'block' : 'none';
+                document.body.className = gameData.theme + '-theme';
+                themeSelect.value = gameData.theme;
                 updateDebugStats();
                 renderSkinPage();
                 renderAchievements();
                 renderDailyRewards();
+                renderShop();
                 updateNotifications();
             }
 
             updateUI();
 
             if (!gameData.tutorialShown) {
-                alert("Welcome to SndTagXClicker!\n\n- Click the main button to earn coins.\n- Use coins to buy upgrades or rebirths.\n- Unlock skins and achievements for bonuses.");
+                alert("Welcome to SndTagXClicker!\n\n- Click the main button to earn coins.\n- Use coins to buy upgrades or rebirths.\n- Unlock skins and achievements for bonuses.\n- Check the Shop for discounted items!");
                 gameData.tutorialShown = true;
                 saveGameData(gameData);
             }
@@ -708,6 +802,23 @@
                 clicksPerSecond = parseInt(adminClicksPerSecInput.value) || 0;
                 updateDebugStats();
             });
+            setLevelButton.addEventListener('click', () => {
+                gameData.level = parseInt(adminLevelInput.value) || 0;
+                saveGameData(gameData);
+                updateUI();
+            });
+            setShopRefreshButton.addEventListener('click', () => {
+                gameData.shopLastRefresh = Date.now() - (SHOP_REFRESH_INTERVAL - parseInt(adminShopRefreshInput.value)) * 1000;
+                refreshShopItems();
+                saveGameData(gameData);
+                updateUI();
+            });
+            forceShopRefreshButton.addEventListener('click', () => {
+                refreshShopItems();
+                gameData.shopLastRefresh = Date.now();
+                saveGameData(gameData);
+                updateUI();
+            });
             unlockAllSkinsButton.addEventListener('click', () => {
                 gameData.unlockedSkins = skins.map(s => s.skin);
                 saveGameData(gameData);
@@ -730,11 +841,17 @@
             });
 
             settingsToggle.addEventListener('click', togglePanel.bind(null, settingsPanel, () => {}));
+            shopToggle.addEventListener('click', togglePanel.bind(null, shopPanel, renderShop));
             debugToggle.addEventListener('change', () => {
                 gameData.debugMode = debugToggle.checked;
                 debugStats.style.display = gameData.debugMode ? 'block' : 'none';
                 saveGameData(gameData);
                 updateDebugStats();
+            });
+            themeSelect.addEventListener('change', () => {
+                gameData.theme = themeSelect.value;
+                saveGameData(gameData);
+                updateUI();
             });
             exportSaveButton.addEventListener('click', () => {
                 exportSaveText.value = btoa(JSON.stringify(gameData));
@@ -826,6 +943,7 @@
                 if (detectAutoclicker()) return;
                 clickSound.play().catch(e => console.error('Sound error:', e));
                 updateCombo();
+                gameData.level++;
                 const multiplier = Math.min(Math.floor(gameData.clickCombo / (MAX_COMBO_CLICKS / (MAX_MULTIPLIER - 1))) + 1, MAX_MULTIPLIER);
                 const coinsGained = gameData.coinsPerClick * (gameData.rebirths + 1) * multiplier;
                 gameData.count += coinsGained;
@@ -873,6 +991,7 @@
                     gameData.unlockedSkins = ['Skins/SvetlanaSkin.jpg'];
                     gameData.currentSkin = 'Skins/SvetlanaSkin.jpg';
                     gameData.clickCombo = 0;
+                    gameData.coinsPerSec = 0;
                     saveGameData(gameData);
                     updateUI();
                 }
@@ -910,12 +1029,27 @@
                 }
             });
 
+            shopPrevPage.addEventListener('click', () => {
+                if (currentShopPage > 0) {
+                    currentShopPage--;
+                    renderShop();
+                }
+            });
+
+            shopNextPage.addEventListener('click', () => {
+                if (currentShopPage < totalShopPages - 1) {
+                    currentShopPage++;
+                    renderShop();
+                }
+            });
+
             function togglePanel(panel, renderFn) {
                 const isVisible = panel.style.display === 'block';
                 skinPanel.style.display = 'none';
                 achievementsPanel.style.display = 'none';
                 dailyRewardsPanel.style.display = 'none';
                 settingsPanel.style.display = 'none';
+                shopPanel.style.display = 'none';
                 panel.style.display = isVisible ? 'none' : 'block';
                 if (!isVisible) renderFn();
                 updateDebugStats();
@@ -940,6 +1074,10 @@
                 const canClaimDaily = (!gameData.lastClaimDate || gameData.lastClaimDate !== today) && gameData.dailyRewardDay < dailyRewards.length;
                 dailyNotification.style.display = canClaimDaily ? 'block' : 'none';
                 dailyNotification.textContent = canClaimDaily ? '1' : '';
+
+                const buyableShopItems = gameData.shopItems.filter(item => gameData.count >= item.cost).length;
+                shopNotification.style.display = buyableShopItems > 0 ? 'block' : 'none';
+                shopNotification.textContent = buyableShopItems;
             }
 
             function renderSkinPage() {
@@ -1060,6 +1198,58 @@
                 });
             }
 
+            function refreshShopItems() {
+                gameData.shopItems = [];
+                const availableItems = [...shopItemsBase];
+                for (let i = 0; i < Math.min(7, availableItems.length); i++) {
+                    const randomIndex = Math.floor(Math.random() * availableItems.length);
+                    const item = availableItems.splice(randomIndex, 1)[0];
+                    gameData.shopItems.push({
+                        name: item.name,
+                        effect: item.effect,
+                        cost: Math.floor(item.cost() * 0.9) // 10% discount
+                    });
+                }
+            }
+
+            function renderShop() {
+                const now = Date.now();
+                const timeSinceLastRefresh = (now - gameData.shopLastRefresh) / 1000;
+                if (timeSinceLastRefresh >= SHOP_REFRESH_INTERVAL || gameData.shopItems.length === 0) {
+                    refreshShopItems();
+                    gameData.shopLastRefresh = now;
+                    saveGameData(gameData);
+                }
+                const timeLeft = Math.max(0, SHOP_REFRESH_INTERVAL - Math.floor(timeSinceLastRefresh));
+                shopTimer.textContent = `Refresh in: ${Math.floor(timeLeft / 60)}:${String(timeLeft % 60).padStart(2, '0')}`;
+
+                shopPages.innerHTML = '';
+                const startIndex = currentShopPage * shopItemsPerPage;
+                const endIndex = Math.min(startIndex + shopItemsPerPage, gameData.shopItems.length);
+                gameData.shopItems.slice(startIndex, endIndex).forEach((item, index) => {
+                    const globalIndex = startIndex + index + 1;
+                    const option = document.createElement('div');
+                    option.className = 'shop-option';
+                    option.innerHTML = `<span class="id-label">${globalIndex}</span><img src="${gameData.currentSkin}" alt="Shop"><span>${item.name} (${item.cost} coins)</span>`;
+                    if (gameData.count >= item.cost) {
+                        option.classList.add('buyable');
+                        option.addEventListener('click', function() {
+                            gameData.count -= item.cost;
+                            item.effect();
+                            gameData.shopItems.splice(startIndex + index, 1);
+                            saveGameData(gameData);
+                            updateUI();
+                        });
+                    } else {
+                        option.classList.add('locked');
+                    }
+                    shopPages.appendChild(option);
+                });
+                shopPageIndicator.textContent = `Page ${currentShopPage + 1} of ${totalShopPages}`;
+                shopPrevPage.disabled = currentShopPage === 0;
+                shopNextPage.disabled = currentShopPage === totalShopPages - 1;
+            }
+
             function updateDebugStats() {
                 if (gameData.debugMode) {
                     clicksPerSec.textContent = `Clicks/sec: ${clicksPerSecond}`;
@@ -1082,6 +1272,8 @@
                     dailyRewardDayDisplay.textContent = `Daily Reward Day: ${gameData.dailyRewardDay}`;
                     lastClaimDateDisplay.textContent = `Last Claim Date: ${gameData.lastClaimDate || 'None'}`;
                     adminPanelState.textContent = `Admin Panel: ${adminPanel.style.display === 'block' ? 'Visible' : 'Hidden'}`;
+                    playerLevelDisplay.textContent = `Player Level: ${gameData.level}`;
+                    shopRefreshTimeDisplay.textContent = `Shop Refresh: ${Math.max(0, SHOP_REFRESH_INTERVAL - Math.floor((Date.now() - gameData.shopLastRefresh) / 1000))}s`;
                 }
             }
 
@@ -1090,6 +1282,7 @@
                 if (!achievementsPanel.contains(e.target) && e.target !== achievementsToggle) achievementsPanel.style.display = 'none';
                 if (!dailyRewardsPanel.contains(e.target) && e.target !== dailyRewardsToggle) dailyRewardsPanel.style.display = 'none';
                 if (!settingsPanel.contains(e.target) && e.target !== settingsToggle) settingsPanel.style.display = 'none';
+                if (!shopPanel.contains(e.target) && e.target !== shopToggle) shopPanel.style.display = 'none';
                 updateDebugStats();
             });
 
@@ -1098,6 +1291,10 @@
                     updateDebugStats();
                     clicksPerSecond = 0;
                 }
+                gameData.count += gameData.coinsPerSec;
+                coinCount.textContent = gameData.count;
+                renderShop();
+                updateNotifications();
             }, 1000);
         };
     </script>
