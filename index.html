@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!thansaHTML>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -40,9 +40,14 @@
             padding: 8px 12px;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            z-index: 100;
+            z-index: 150; /* Increased z-index to stay above panels */
+            white-space: nowrap;
+            overflow: hidden;
         }
         #coinIcon { width: 32px; height: 32px; margin-right: 10px; }
+        #coinCount {
+            font-size: clamp(16px, 2.5vw, 26px); /* Auto-scaling font */
+        }
         .flying-coin {
             position: absolute;
             width: 32px;
@@ -67,6 +72,7 @@
             cursor: pointer;
             width: 150px;
             height: 45px;
+            z-index: 100;
         }
         #upgradeButton { left: 10px; }
         #rebirthButton { right: 10px; }
@@ -77,6 +83,7 @@
             padding: 4px 6px;
             border-radius: 8px;
             background: #000;
+            z-index: 100;
         }
         #upgradeCostLabel { bottom: 60px; left: 10px; color: #00b4db; }
         #upgradeCountLabel { bottom: 80px; left: 10px; color: #00b4db; }
@@ -304,36 +311,6 @@
     <div id="settingsPanel">
         <h2>Settings</h2>
         <div id="settingsContent">
-            <!-- Style Editor -->
-            <div class="setting-option">
-                <label>Font Color: </label>
-                <input type="color" id="fontColor" value="#e0e0e0">
-            </div>
-            <div class="setting-option">
-                <label>Notifications: </label>
-                <input type="checkbox" id="notificationsToggle" checked>
-            </div>
-            <div class="setting-option">
-                <label>Button Shape: </label>
-                <select id="buttonShape">
-                    <option value="square">Square</option>
-                    <option value="circle">Circle</option>
-                    <option value="rounded">Rounded</option>
-                </select>
-            </div>
-            <div class="setting-option">
-                <label>Background Gradient: </label>
-                <input type="color" id="bgColor1" value="#1e1e2f">
-                <input type="color" id="bgColor2" value="#3b3b5e">
-            </div>
-            <div class="setting-option">
-                <label>Panel Opacity: </label>
-                <input type="range" id="panelOpacity" min="0.5" max="1" step="0.05" value="0.95">
-            </div>
-            <div class="setting-option">
-                <label>Coin Animation Speed: </label>
-                <input type="range" id="coinAnimSpeed" min="0.5" max="2" step="0.1" value="1">
-            </div>
             <!-- Debug Mode -->
             <div class="setting-option">
                 <label>Debug Mode: </label>
@@ -343,9 +320,23 @@
                 <span id="clicksPerSec">Clicks/sec: 0</span><br>
                 <span id="totalClicks">Total Clicks: 0</span><br>
                 <span id="coinsEarned">Coins Earned: 0</span><br>
+                <span id="coinsCurrent">Current Coins: 0</span><br>
+                <span id="coinsPerClick">Coins Per Click: 1</span><br>
                 <span id="upgradesBought">Upgrades Bought: 0</span><br>
+                <span id="upgradeLevel">Upgrade Level: 0</span><br>
+                <span id="upgradeCost">Upgrade Cost: 10</span><br>
                 <span id="rebirthsCompleted">Rebirths Completed: 0</span><br>
-                <span id="autoclickTriggers">Autoclick Triggers: 0</span>
+                <span id="rebirthCost">Rebirth Cost: 1000000</span><br>
+                <span id="comboMultiplier">Combo Multiplier: 0x</span><br>
+                <span id="clickCombo">Click Combo: 0</span><br>
+                <span id="autoclickTriggers">Autoclick Triggers: 0</span><br>
+                <span id="autoclickDetect">Autoclick Detect: On</span><br>
+                <span id="skinsUnlocked">Skins Unlocked: 1</span><br>
+                <span id="currentSkin">Current Skin: Svetlana</span><br>
+                <span id="achievementsCompleted">Achievements Completed: 0</span><br>
+                <span id="dailyRewardDay">Daily Reward Day: 0</span><br>
+                <span id="lastClaimDate">Last Claim Date: None</span><br>
+                <span id="adminPanelState">Admin Panel: Hidden</span>
             </div>
             <!-- Export/Import -->
             <div class="setting-option">
@@ -437,21 +428,28 @@
             const adminAutoclickDetectInput = document.getElementById('adminAutoclickDetect');
             const toggleAutoclickDetectButton = document.getElementById('toggleAutoclickDetect');
             // Settings elements
-            const fontColor = document.getElementById('fontColor');
-            const notificationsToggle = document.getElementById('notificationsToggle');
-            const buttonShape = document.getElementById('buttonShape');
-            const bgColor1 = document.getElementById('bgColor1');
-            const bgColor2 = document.getElementById('bgColor2');
-            const panelOpacity = document.getElementById('panelOpacity');
-            const coinAnimSpeed = document.getElementById('coinAnimSpeed');
             const debugToggle = document.getElementById('debugToggle');
             const debugStats = document.getElementById('debugStats');
             const clicksPerSec = document.getElementById('clicksPerSec');
             const totalClicks = document.getElementById('totalClicks');
             const coinsEarned = document.getElementById('coinsEarned');
+            const coinsCurrent = document.getElementById('coinsCurrent');
+            const coinsPerClickDisplay = document.getElementById('coinsPerClick');
             const upgradesBought = document.getElementById('upgradesBought');
+            const upgradeLevelDisplay = document.getElementById('upgradeLevel');
+            const upgradeCostDisplay = document.getElementById('upgradeCost');
             const rebirthsCompleted = document.getElementById('rebirthsCompleted');
+            const rebirthCostDisplay = document.getElementById('rebirthCost');
+            const comboMultiplier = document.getElementById('comboMultiplier');
+            const clickComboDisplay = document.getElementById('clickCombo');
             const autoclickTriggers = document.getElementById('autoclickTriggers');
+            const autoclickDetect = document.getElementById('autoclickDetect');
+            const skinsUnlocked = document.getElementById('skinsUnlocked');
+            const currentSkinDisplay = document.getElementById('currentSkin');
+            const achievementsCompleted = document.getElementById('achievementsCompleted');
+            const dailyRewardDayDisplay = document.getElementById('dailyRewardDay');
+            const lastClaimDateDisplay = document.getElementById('lastClaimDate');
+            const adminPanelState = document.getElementById('adminPanelState');
             const exportSaveButton = document.getElementById('exportSave');
             const importSaveButton = document.getElementById('importSave');
             const exportSaveText = document.getElementById('exportSaveText');
@@ -539,8 +537,6 @@
             let totalRebirthsCompleted = parseInt(localStorage.getItem('totalRebirthsCompleted')) || 0;
             let autoclickTriggerCount = parseInt(localStorage.getItem('autoclickTriggerCount')) || 0;
             let clicksPerSecond = 0;
-            // Settings
-            let notificationsEnabled = localStorage.getItem('notificationsEnabled') !== 'false';
             let debugMode = localStorage.getItem('debugMode') === 'true';
 
             mainButton.style.backgroundImage = `url('${currentSkin}')`;
@@ -558,17 +554,9 @@
             comboCounter.textContent = `Combo: ${clickCombo}x`;
             jumpscare.style.backgroundImage = `url('Skins/JumpScare.jpg')`;
             adminAutoclickDetectInput.checked = autoclickDetectEnabled;
-            // Settings initialization
-            fontColor.value = localStorage.getItem('fontColor') || '#e0e0e0';
-            notificationsToggle.checked = notificationsEnabled;
-            buttonShape.value = localStorage.getItem('buttonShape') || 'square';
-            bgColor1.value = localStorage.getItem('bgColor1') || '#1e1e2f';
-            bgColor2.value = localStorage.getItem('bgColor2') || '#3b3b5e';
-            panelOpacity.value = localStorage.getItem('panelOpacity') || 0.95;
-            coinAnimSpeed.value = localStorage.getItem('coinAnimSpeed') || 1;
             debugToggle.checked = debugMode;
             debugStats.style.display = debugMode ? 'block' : 'none';
-            applyStyles();
+            updateDebugStats();
 
             function autosave() {
                 localStorage.setItem('coinCount', count);
@@ -589,24 +577,7 @@
                 localStorage.setItem('totalUpgradesBought', totalUpgradesBought);
                 localStorage.setItem('totalRebirthsCompleted', totalRebirthsCompleted);
                 localStorage.setItem('autoclickTriggerCount', autoclickTriggerCount);
-                localStorage.setItem('fontColor', fontColor.value);
-                localStorage.setItem('notificationsEnabled', notificationsEnabled);
-                localStorage.setItem('buttonShape', buttonShape.value);
-                localStorage.setItem('bgColor1', bgColor1.value);
-                localStorage.setItem('bgColor2', bgColor2.value);
-                localStorage.setItem('panelOpacity', panelOpacity.value);
-                localStorage.setItem('coinAnimSpeed', coinAnimSpeed.value);
                 localStorage.setItem('debugMode', debugMode);
-            }
-
-            function applyStyles() {
-                document.body.style.color = fontColor.value;
-                mainButton.style.borderRadius = buttonShape.value === 'circle' ? '50%' : buttonShape.value === 'rounded' ? '15px' : '0';
-                document.body.style.background = `linear-gradient(45deg, ${bgColor1.value}, ${bgColor2.value})`;
-                [skinPanel, achievementsPanel, dailyRewardsPanel, settingsPanel].forEach(panel => {
-                    panel.style.background = `rgba(20, 20, 40, ${panelOpacity.value})`;
-                });
-                document.styleSheets[0].cssRules[Array.from(document.styleSheets[0].cssRules).findIndex(rule => rule.selectorText === '.flying-coin')].style.animationDuration = `${coinAnimSpeed.value}s`;
             }
 
             // Tutorial
@@ -634,10 +605,12 @@
                 renderSkinPage();
                 updateNotifications();
                 checkAchievements();
+                updateDebugStats();
             });
             setCoinsPerClickButton.addEventListener('click', () => {
                 coinsPerClick = parseInt(adminCoinsPerClickInput.value) || 1;
                 autosave();
+                updateDebugStats();
             });
             setUpgradesButton.addEventListener('click', () => {
                 upgradeLevel = parseInt(adminUpgradesInput.value) || 0;
@@ -649,6 +622,7 @@
                 autosave();
                 checkAchievements();
                 updateNotifications();
+                updateDebugStats();
             });
             setUpgradeCostButton.addEventListener('click', () => {
                 upgradeCost = parseInt(adminUpgradeCostInput.value) || 10;
@@ -657,6 +631,7 @@
                 autosave();
                 renderSkinPage();
                 updateNotifications();
+                updateDebugStats();
             });
             setRebirthsButton.addEventListener('click', () => {
                 rebirths = parseInt(adminRebirthsInput.value) || 0;
@@ -668,12 +643,14 @@
                 autosave();
                 checkAchievements();
                 updateNotifications();
+                updateDebugStats();
             });
             setRebirthCostButton.addEventListener('click', () => {
                 rebirthCost = parseInt(adminRebirthCostInput.value) || 1000000;
                 rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
                 updateButtons();
                 autosave();
+                updateDebugStats();
             });
             setComboButton.addEventListener('click', () => {
                 clickCombo = parseInt(adminComboInput.value) || 0;
@@ -682,6 +659,7 @@
                 autosave();
                 checkAchievements();
                 updateNotifications();
+                updateDebugStats();
             });
             setDailyRewardsButton.addEventListener('click', () => {
                 dailyRewardDay = parseInt(adminDailySetInput.value) || 0;
@@ -689,6 +667,7 @@
                 autosave();
                 renderDailyRewards();
                 updateNotifications();
+                updateDebugStats();
             });
             setSkinsButton.addEventListener('click', () => {
                 const indexes = adminSkinsInput.value.split(',').map(i => parseInt(i.trim())).filter(i => !isNaN(i) && i >= 1 && i <= skins.length);
@@ -700,6 +679,7 @@
                 autosave();
                 renderSkinPage();
                 updateNotifications();
+                updateDebugStats();
             });
             setAchievementsButton.addEventListener('click', () => {
                 const indexes = adminAchievementsInput.value.split(',').map(i => parseInt(i.trim())).filter(i => !isNaN(i) && i >= 1 && i <= achievements.length);
@@ -707,33 +687,25 @@
                 autosave();
                 renderAchievements();
                 updateNotifications();
+                updateDebugStats();
             });
             toggleAutoclickDetectButton.addEventListener('click', () => {
                 autoclickDetectEnabled = adminAutoclickDetectInput.checked;
                 autosave();
+                updateDebugStats();
             });
-            adminCloseButton.addEventListener('click', () => adminPanel.style.display = 'none');
+            adminCloseButton.addEventListener('click', () => {
+                adminPanel.style.display = 'none';
+                updateDebugStats();
+            });
 
             // Settings listeners
             settingsToggle.addEventListener('click', togglePanel.bind(null, settingsPanel, () => {}));
-            fontColor.addEventListener('input', () => { document.body.style.color = fontColor.value; autosave(); });
-            notificationsToggle.addEventListener('change', () => {
-                notificationsEnabled = notificationsToggle.checked;
-                updateNotifications();
-                autosave();
-            });
-            buttonShape.addEventListener('change', () => {
-                mainButton.style.borderRadius = buttonShape.value === 'circle' ? '50%' : buttonShape.value === 'rounded' ? '15px' : '0';
-                autosave();
-            });
-            bgColor1.addEventListener('input', () => { applyStyles(); autosave(); });
-            bgColor2.addEventListener('input', () => { applyStyles(); autosave(); });
-            panelOpacity.addEventListener('input', () => { applyStyles(); autosave(); });
-            coinAnimSpeed.addEventListener('input', () => { applyStyles(); autosave(); });
             debugToggle.addEventListener('change', () => {
                 debugMode = debugToggle.checked;
                 debugStats.style.display = debugMode ? 'block' : 'none';
                 autosave();
+                updateDebugStats();
             });
             exportSaveButton.addEventListener('click', () => {
                 const saveData = {
@@ -755,13 +727,6 @@
                     totalUpgradesBought: totalUpgradesBought,
                     totalRebirthsCompleted: totalRebirthsCompleted,
                     autoclickTriggerCount: autoclickTriggerCount,
-                    fontColor: fontColor.value,
-                    notificationsEnabled: notificationsEnabled,
-                    buttonShape: buttonShape.value,
-                    bgColor1: bgColor1.value,
-                    bgColor2: bgColor2.value,
-                    panelOpacity: panelOpacity.value,
-                    coinAnimSpeed: coinAnimSpeed.value,
                     debugMode: debugMode
                 };
                 const saveString = btoa(JSON.stringify(saveData));
@@ -788,14 +753,6 @@
                     totalUpgradesBought = saveData.totalUpgradesBought || 0;
                     totalRebirthsCompleted = saveData.totalRebirthsCompleted || 0;
                     autoclickTriggerCount = saveData.autoclickTriggerCount || 0;
-                    fontColor.value = saveData.fontColor || '#e0e0e0';
-                    notificationsEnabled = saveData.notificationsEnabled !== false;
-                    notificationsToggle.checked = notificationsEnabled;
-                    buttonShape.value = saveData.buttonShape || 'square';
-                    bgColor1.value = saveData.bgColor1 || '#1e1e2f';
-                    bgColor2.value = saveData.bgColor2 || '#3b3b5e';
-                    panelOpacity.value = saveData.panelOpacity || 0.95;
-                    coinAnimSpeed.value = saveData.coinAnimSpeed || 1;
                     debugMode = saveData.debugMode || false;
                     debugToggle.checked = debugMode;
 
@@ -807,13 +764,13 @@
                     rebirthCountLabel.textContent = `Count: ${rebirths} (x${rebirths + 1})`;
                     comboCounter.textContent = `Combo: ${clickCombo}x`;
                     debugStats.style.display = debugMode ? 'block' : 'none';
-                    applyStyles();
                     updateButtons();
                     autosave();
                     renderSkinPage();
                     renderAchievements();
                     renderDailyRewards();
                     updateNotifications();
+                    updateDebugStats();
                 } catch (e) {
                     alert("Invalid save code!");
                 }
@@ -835,10 +792,12 @@
                     autosave();
                     checkAchievements();
                     updateNotifications();
+                    updateDebugStats();
                 }, 2000);
                 autosave();
                 checkAchievements();
                 updateNotifications();
+                updateDebugStats();
             }
 
             function detectAutoclicker() {
@@ -855,6 +814,7 @@
                         triggerJumpscare();
                         autoclickTriggerCount++;
                         autosave();
+                        updateDebugStats();
                         return true;
                     }
                 }
@@ -872,6 +832,7 @@
                         triggerJumpscare();
                         autoclickTriggerCount++;
                         autosave();
+                        updateDebugStats();
                         return true;
                     }
                 }
@@ -900,13 +861,14 @@
                 coin.style.left = (e.clientX - rect.left - 16) + 'px';
                 coin.style.top = (e.clientY - rect.top - 16) + 'px';
                 document.body.appendChild(coin);
-                setTimeout(() => coin.remove(), coinAnimSpeed.value * 1000);
+                setTimeout(() => coin.remove(), 1000);
                 clicksPerSecond++;
                 updateButtons();
                 autosave();
                 renderSkinPage();
                 checkAchievements();
                 updateNotifications();
+                updateDebugStats();
             });
 
             upgradeButton.addEventListener('click', function() {
@@ -923,6 +885,7 @@
                     autosave();
                     checkAchievements();
                     updateNotifications();
+                    updateDebugStats();
                 }
             });
 
@@ -950,6 +913,7 @@
                     renderSkinPage();
                     checkAchievements();
                     updateNotifications();
+                    updateDebugStats();
                 }
             });
 
@@ -993,6 +957,7 @@
                 settingsPanel.style.display = 'none';
                 panel.style.display = isVisible ? 'none' : 'block';
                 if (!isVisible) renderFn();
+                updateDebugStats();
             }
 
             function updateSkin() {
@@ -1001,15 +966,10 @@
                 rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
                 coinIcon.src = currentSkin;
                 clickSound.src = skins.find(s => s.skin === currentSkin).sound;
+                updateDebugStats();
             }
 
             function updateNotifications() {
-                if (!notificationsEnabled) {
-                    skinNotification.style.display = 'none';
-                    achievementsNotification.style.display = 'none';
-                    dailyNotification.style.display = 'none';
-                    return;
-                }
                 const buyableSkins = skins.filter(s => !unlockedSkins.includes(s.skin) && count >= s.cost).length;
                 skinNotification.style.display = buyableSkins > 0 ? 'block' : 'none';
                 skinNotification.textContent = buyableSkins;
@@ -1053,6 +1013,7 @@
                                 renderSkinPage();
                                 updateNotifications();
                                 checkAchievements();
+                                updateDebugStats();
                             });
                         } else {
                             option.classList.add('locked');
@@ -1063,6 +1024,7 @@
                             updateSkin();
                             autosave();
                             skinPanel.style.display = 'none';
+                            updateDebugStats();
                         });
                     }
                     skinPages.appendChild(option);
@@ -1114,6 +1076,7 @@
                             autosave();
                             renderAchievements();
                             updateNotifications();
+                            updateDebugStats();
                         });
                     }
                     achievementPages.appendChild(option);
@@ -1149,6 +1112,7 @@
                             renderDailyRewards();
                             updateNotifications();
                             dailyRewardsPanel.style.display = 'none';
+                            updateDebugStats();
                         });
                     } else {
                         option.classList.add('locked');
@@ -1157,22 +1121,43 @@
                 });
             }
 
+            function updateDebugStats() {
+                if (debugMode) {
+                    clicksPerSec.textContent = `Clicks/sec: ${clicksPerSecond}`;
+                    totalClicks.textContent = `Total Clicks: ${totalClicksCount}`;
+                    coinsEarned.textContent = `Coins Earned: ${totalCoinsEarned}`;
+                    coinsCurrent.textContent = `Current Coins: ${count}`;
+                    coinsPerClickDisplay.textContent = `Coins Per Click: ${coinsPerClick}`;
+                    upgradesBought.textContent = `Upgrades Bought: ${totalUpgradesBought}`;
+                    upgradeLevelDisplay.textContent = `Upgrade Level: ${upgradeLevel}`;
+                    upgradeCostDisplay.textContent = `Upgrade Cost: ${upgradeCost}`;
+                    rebirthsCompleted.textContent = `Rebirths Completed: ${totalRebirthsCompleted}`;
+                    rebirthCostDisplay.textContent = `Rebirth Cost: ${rebirthCost}`;
+                    comboMultiplier.textContent = `Combo Multiplier: ${Math.min(Math.floor(clickCombo / (MAX_COMBO_CLICKS / (MAX_MULTIPLIER - 1))) + 1, MAX_MULTIPLIER)}x`;
+                    clickComboDisplay.textContent = `Click Combo: ${clickCombo}`;
+                    autoclickTriggers.textContent = `Autoclick Triggers: ${autoclickTriggerCount}`;
+                    autoclickDetect.textContent = `Autoclick Detect: ${autoclickDetectEnabled ? 'On' : 'Off'}`;
+                    skinsUnlocked.textContent = `Skins Unlocked: ${unlockedSkins.length}`;
+                    currentSkinDisplay.textContent = `Current Skin: ${skins.find(s => s.skin === currentSkin).name.split(' ')[0]}`;
+                    achievementsCompleted.textContent = `Achievements Completed: ${completedAchievements.length}`;
+                    dailyRewardDayDisplay.textContent = `Daily Reward Day: ${dailyRewardDay}`;
+                    lastClaimDateDisplay.textContent = `Last Claim Date: ${lastClaimDate || 'None'}`;
+                    adminPanelState.textContent = `Admin Panel: ${adminPanel.style.display === 'block' ? 'Visible' : 'Hidden'}`;
+                }
+            }
+
             document.addEventListener('click', function(e) {
                 if (!skinPanel.contains(e.target) && e.target !== skinPanelToggle) skinPanel.style.display = 'none';
                 if (!achievementsPanel.contains(e.target) && e.target !== achievementsToggle) achievementsPanel.style.display = 'none';
                 if (!dailyRewardsPanel.contains(e.target) && e.target !== dailyRewardsToggle) dailyRewardsPanel.style.display = 'none';
                 if (!settingsPanel.contains(e.target) && e.target !== settingsToggle) settingsPanel.style.display = 'none';
+                updateDebugStats();
             });
 
             // Debug stats update
             setInterval(() => {
                 if (debugMode) {
-                    clicksPerSec.textContent = `Clicks/sec: ${clicksPerSecond}`;
-                    totalClicks.textContent = `Total Clicks: ${totalClicksCount}`;
-                    coinsEarned.textContent = `Coins Earned: ${totalCoinsEarned}`;
-                    upgradesBought.textContent = `Upgrades Bought: ${totalUpgradesBought}`;
-                    rebirthsCompleted.textContent = `Rebirths Completed: ${totalRebirthsCompleted}`;
-                    autoclickTriggers.textContent = `Autoclick Triggers: ${autoclickTriggerCount}`;
+                    updateDebugStats();
                     clicksPerSecond = 0;
                 }
             }, 1000);
