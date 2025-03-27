@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -11,11 +10,12 @@
             height: 100vh;
             overflow: hidden;
             background: linear-gradient(45deg, #1e1e2f, #3b3b5e);
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', Arial, sans-serif;
             color: #e0e0e0;
+            -webkit-user-select: none;
             user-select: none;
         }
-        #mainButton {
+        button#mainButton {
             width: 100%;
             height: 100vh;
             background-size: cover;
@@ -24,9 +24,10 @@
             cursor: pointer;
             outline: none;
             transition: transform 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
         }
-        #mainButton:hover { transform: scale(1.02); }
-        #mainButton:active { transform: scale(0.98); }
+        button#mainButton:hover { transform: scale(1.02); }
+        button#mainButton:active { transform: scale(0.98); }
         #clickArea {
             position: absolute;
             top: 10px;
@@ -39,9 +40,13 @@
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
             z-index: 150;
+            white-space: nowrap;
+            overflow: hidden;
         }
         #coinIcon { width: 32px; height: 32px; margin-right: 10px; }
-        #coinCount { font-size: 26px; }
+        #coinCount {
+            font-size: clamp(16px, 2.5vw, 26px);
+        }
         .flying-coin {
             position: absolute;
             width: 32px;
@@ -51,6 +56,7 @@
         }
         @keyframes flyUp {
             0% { opacity: 1; transform: translateY(0) scale(1); }
+            50% { opacity: 0.9; transform: translateY(-50px) scale(1.05); }
             100% { opacity: 0; transform: translateY(-100px) scale(0.8); }
         }
         #upgradeButton, #rebirthButton {
@@ -82,25 +88,52 @@
         #upgradeCountLabel { bottom: 80px; left: 10px; color: #00b4db; }
         #rebirthCostLabel { bottom: 60px; right: 10px; color: #ff4d4d; }
         #rebirthCountLabel { bottom: 80px; right: 10px; color: #ff4d4d; }
-        #settingsToggle {
+        #skinPanelToggle, #achievementsToggle, #dailyRewardsToggle, #settingsToggle {
             position: absolute;
             top: 10px;
-            right: 10px;
             width: 50px;
             height: 50px;
-            background: #1e1e2f;
+            background: linear-gradient(135deg, #1e1e2f 0%, #2e3e5f 100%);
             border: 2px solid #173a5b;
             border-radius: 50%;
             color: #fff;
             font-size: 26px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 50px;
             cursor: pointer;
             z-index: 101;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
         }
-        #settingsPanel {
+        #skinPanelToggle:hover, #achievementsToggle:hover, #dailyRewardsToggle:hover, #settingsToggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+            background: linear-gradient(135deg, #2e3e5f 0%, #1e1e2f 100%);
+        }
+        #skinPanelToggle { right: 10px; }
+        #achievementsToggle { right: 70px; }
+        #dailyRewardsToggle { right: 130px; }
+        #settingsToggle { right: 190px; }
+        .notification {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: #ff4d4d;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 12px;
+            text-align: center;
+            line-height: 20px;
+            z-index: 102;
+        }
+        #skinPanel, #achievementsPanel, #dailyRewardsPanel, #settingsPanel {
             position: absolute;
             top: 60px;
             right: 10px;
-            width: 300px;
+            width: 260px;
             background: rgba(20, 20, 40, 0.95);
             border-radius: 12px;
             padding: 10px;
@@ -108,7 +141,9 @@
             display: none;
             z-index: 100;
         }
-        .setting-option {
+        #achievementsPanel, #settingsPanel { max-height: 70vh; overflow-y: auto; }
+        .skin-option, .achievement-option, .daily-reward-option, .setting-option {
+            position: relative;
             display: flex;
             align-items: center;
             padding: 8px;
@@ -116,37 +151,128 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
             font-size: 15px;
-            flex-wrap: wrap;
+            cursor: pointer;
+        }
+        .setting-option { cursor: default; flex-wrap: wrap; }
+        .skin-option img, .achievement-option img {
+            width: 48px;
+            height: 48px;
+            margin-right: 10px;
+            border-radius: 6px;
+        }
+        .skin-option.locked, .achievement-option.completed, .daily-reward-option.claimed {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .claimable, .buyable {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            border-image: linear-gradient(135deg, #ff4d4d, #b00000) 1;
+            border-radius: 8px;
+        }
+        .id-label {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 10px;
+            color: #ff4d4d;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 1px 3px;
+            border-radius: 3px;
+        }
+        #comboCounter {
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            font-size: 18px;
+            background: rgba(20, 20, 40, 0.9);
+            padding: 6px 10px;
+            border-radius: 8px;
+            z-index: 100;
+        }
+        #adminPanel {
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: clamp(250px, 80vw, 320px);
+            max-height: 80vh;
+            background: rgba(30, 30, 50, 0.95);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
+            border: 2px solid #00d4ff;
+            display: none;
+            z-index: 200;
+            overflow-y: auto;
+        }
+        #adminPanel h2, #settingsPanel h2 {
+            margin: 0 0 15px;
+            font-size: clamp(18px, 4vw, 22px);
+            text-align: center;
+            color: #00d4ff;
+        }
+        .admin-field, .setting-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        #adminPanel input[type="number"], #adminPanel input[type="text"], #settingsPanel input[type="text"], #settingsPanel textarea {
+            flex: 1;
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+            font-size: clamp(12px, 3vw, 14px);
+        }
+        #adminPanel input[type="checkbox"], #settingsPanel input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        #adminPanel button, #settingsPanel button {
+            padding: 6px 10px;
+            background: linear-gradient(135deg, #ff4d4d, #b00000);
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-size: clamp(12px, 3vw, 14px);
+            cursor: pointer;
+        }
+        #adminCloseButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            background: #ff4d4d;
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        #jumpscare {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-size: cover;
+            background-position: center;
+            z-index: 1000;
+            display: none;
         }
         #exportSaveText, #importSaveText {
             width: 100%;
             height: 60px;
             resize: none;
-            padding: 5px;
             margin-top: 5px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
             background: rgba(255, 255, 255, 0.1);
-            color: #e0e0e0;
-            font-size: 14px;
+            border: 1px solid #00d4ff;
         }
-        #exportSaveText { margin-bottom: 10px; }
-        #settingsPanel input, #settingsPanel button {
-            padding: 5px;
-            margin: 5px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        #settingsPanel button {
-            background: #ff4d4d;
-            border: none;
-            color: #fff;
-            cursor: pointer;
-        }
-        #settingsPanel button:hover {
-            background: #e03c3c;
-        }
-        #authMessage { font-size: 12px; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -155,351 +281,824 @@
         <img id="coinIcon" alt="Coin">
         <span id="coinCount">0</span>
     </div>
+    <div id="comboCounter">Combo: 0x</div>
     <div id="upgradeCountLabel">Count: 0</div>
     <div id="upgradeCostLabel">Cost: 10</div>
     <button id="upgradeButton">Upgrade</button>
     <div id="rebirthCountLabel">Count: 0</div>
     <div id="rebirthCostLabel">Cost: 1000000</div>
     <button id="rebirthButton">Rebirth</button>
+    <button id="skinPanelToggle">S<div id="skinNotification" class="notification" style="display: none;"></div></button>
+    <button id="achievementsToggle">A<div id="achievementsNotification" class="notification" style="display: none;"></div></button>
+    <button id="dailyRewardsToggle">D<div id="dailyNotification" class="notification" style="display: none;"></div></button>
     <button id="settingsToggle">⚙</button>
-    <div id="settingsPanel">
-        <div class="setting-option">
-            <input type="text" id="skinInput" placeholder="Skin URL">
-            <button id="applySkinButton">Apply Skin</button>
-        </div>
-        <div class="setting-option">
-            <button id="exportSaveButton">Export Save</button>
-            <textarea id="exportSaveText" readonly placeholder="Click 'Export Save' to get your save code"></textarea>
-        </div>
-        <div class="setting-option">
-            <button id="importSaveButton">Import Save</button>
-            <textarea id="importSaveText" placeholder="Paste your save code here"></textarea>
-        </div>
-        <div class="setting-option">
-            <button id="resetButton">Reset Game</button>
+    <div id="skinPanel">
+        <div id="skinPages"></div>
+        <div style="display: flex; justify-content: center; gap: 8px; margin-top: 10px;">
+            <button id="prevPage" style="padding: 4px 8px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: #e0e0e0; cursor: pointer; font-size: 12px;">Previous</button>
+            <span id="pageIndicator" style="font-size: 15px; align-self: center;"></span>
+            <button id="nextPage" style="padding: 4px 8px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: #e0e0e0; cursor: pointer; font-size: 12px;">Next</button>
         </div>
     </div>
-    <audio id="clickSound"></audio>
+    <div id="achievementsPanel">
+        <div id="achievementPages"></div>
+        <div style="display: flex; justify-content: center; gap: 8px; margin-top: 10px;">
+            <button id="achPrevPage" style="padding: 4px 8px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: #e0e0e0; cursor: pointer; font-size: 12px;">Previous</button>
+            <span id="achPageIndicator" style="font-size: 15px; align-self: center;"></span>
+            <button id="achNextPage" style="padding: 4px 8px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: #e0e0e0; cursor: pointer; font-size: 12px;">Next</button>
+        </div>
+    </div>
+    <div id="dailyRewardsPanel"></div>
+    <div id="settingsPanel">
+        <h2>Settings</h2>
+        <div id="settingsContent">
+            <div class="setting-option">
+                <label>Debug Mode: </label>
+                <input type="checkbox" id="debugToggle">
+            </div>
+            <div id="debugStats" style="display: none; font-size: 12px; margin-top: 5px;">
+                <span id="clicksPerSec">Clicks/sec: 0</span><br>
+                <span id="totalClicks">Total Clicks: 0</span><br>
+                <span id="coinsEarned">Coins Earned: 0</span><br>
+                <span id="coinsCurrent">Current Coins: 0</span><br>
+                <span id="coinsPerClick">Coins Per Click: 1</span><br>
+                <span id="upgradesBought">Upgrades Bought: 0 BURSTED</span><br>
+                <span id="upgradeLevel">Upgrade Level: 0</span><br>
+                <span id="upgradeCost">Upgrade Cost: 10</span><br>
+                <span id="rebirthsCompleted">Rebirths Completed: 0</span><br>
+                <span id="rebirthCost">Rebirth Cost: 1000000</span><br>
+                <span id="comboMultiplier">Combo Multiplier: 0x</span><br>
+                <span id="clickCombo">Click Combo: 0</span><br>
+                <span id="autoclickTriggers">Autoclick Triggers: 0</span><br>
+                <span id="autoclickDetect">Autoclick Detect: On</span><br>
+                <span id="skinsUnlocked">Skins Unlocked: 1</span><br>
+                <span id="currentSkin">Current Skin: Svetlana</span><br>
+                <span id="achievementsCompleted">Achievements Completed: 0</span><br>
+                <span id="dailyRewardDay">Daily Reward Day: 0</span><br>
+                <span id="lastClaimDate">Last Claim Date: None</span><br>
+                <span id="adminPanelState">Admin Panel: Hidden</span>
+            </div>
+            <div class="setting-option">
+                <button id="exportSave">Export Save</button>
+                <button id="importSave">Import Save</button>
+                <button id="resetGame" style="background: linear-gradient(135deg, #ff4d4d, #800000);">Reset Game</button>
+            </div>
+            <div class="setting-option">
+                <textarea id="exportSaveText" placeholder="Your save code will appear here" readonly></textarea>
+            </div>
+            <div class="setting-option">
+                <textarea id="importSaveText" placeholder="Paste save code here"></textarea>
+            </div>
+        </div>
+    </div>
+    <div id="adminPanel">
+        <h2>Admin Panel</h2>
+        <button id="adminCloseButton">X</button>
+        <div class="admin-field"><input type="number" id="adminCoins" placeholder="Coins"><button id="setCoins">Set</button></div>
+        <div class="admin-field"><input type="number" id="adminCoinsPerClick" placeholder="Coins Per Click"><button id="setCoinsPerClick">Set</button></div>
+        <div class="admin-field"><input type="number" id="adminUpgrades" placeholder="Upgrade Level"><button id="setUpgrades">Set</button></div>
+        <div class="admin-field"><input type="number" id="adminUpgradeCost" placeholder="Upgrade Cost"><button id="setUpgradeCost">Set</button></div>
+        <div class="admin-field"><input type="number" id="adminRebirths" placeholder="Rebirths"><button id="setRebirths">Set</button></div>
+        <div class="admin-field"><input type="number" id="adminRebirthCost" placeholder="Rebirth Cost"><button id="setRebirthCost">Set</button></div>
+        <div class="admin-field"><input type="number" id="adminCombo" placeholder="Combo Multiplier"><button id="setCombo">Set</button></div>
+        <div class="admin-field"><input type="number" id="adminDailySet" placeholder="Set Days"><button id="setDailyRewards">Set</button></div>
+        <div class="admin-field"><input type="text" id="adminSkins" placeholder="Skin Indexes (e.g., 1,2)"><button id="setSkins">Set</button></div>
+        <div class="admin-field"><input type="text" id="adminAchievements" placeholder="Achievement Indexes (e.g., 1,2)"><button id="setAchievements">Set</button></div>
+        <div class="admin-field"><label for="adminAutoclickDetect">Autoclick Detection:</label><input type="checkbox" id="adminAutoclickDetect" checked><button id="toggleAutoclickDetect">Toggle</button></div>
+        <div class="admin-field"><input type="number" id="adminClicksPerSec" placeholder="Clicks/sec"><button id="setClicksPerSec">Set</button></div>
+        <div class="admin-field"><button id="unlockAllSkins">Unlock All Skins</button></div>
+        <div class="admin-field"><button id="completeAllAchievements">Complete All Achievements</button></div>
+        <div class="admin-field"><button id="resetDailyRewards">Reset Daily Rewards</button></div>
+    </div>
+    <div id="jumpscare"></div>
+    <audio id="clickSound" loop></audio>
 
     <script>
         window.onload = function() {
             const mainButton = document.getElementById('mainButton');
-            const coinCount = document.getElementById('coinCount');
-            const coinIcon = document.getElementById('coinIcon');
             const upgradeButton = document.getElementById('upgradeButton');
             const rebirthButton = document.getElementById('rebirthButton');
+            const coinCount = document.getElementById('coinCount');
+            const coinIcon = document.getElementById('coinIcon');
             const upgradeCostLabel = document.getElementById('upgradeCostLabel');
             const upgradeCountLabel = document.getElementById('upgradeCountLabel');
             const rebirthCostLabel = document.getElementById('rebirthCostLabel');
             const rebirthCountLabel = document.getElementById('rebirthCountLabel');
-            const clickSound = document.getElementById('clickSound');
+            const skinPanelToggle = document.getElementById('skinPanelToggle');
+            const skinPanel = document.getElementById('skinPanel');
+            const skinPages = document.getElementById('skinPages');
+            const prevPage = document.getElementById('prevPage');
+            const nextPage = document.getElementById('nextPage');
+            const pageIndicator = document.getElementById('pageIndicator');
+            const achievementsToggle = document.getElementById('achievementsToggle');
+            const achievementsPanel = document.getElementById('achievementsPanel');
+            const achievementPages = document.getElementById('achievementPages');
+            const achPrevPage = document.getElementById('achPrevPage');
+            const achNextPage = document.getElementById('achNextPage');
+            const achPageIndicator = document.getElementById('achPageIndicator');
+            const dailyRewardsToggle = document.getElementById('dailyRewardsToggle');
+            const dailyRewardsPanel = document.getElementById('dailyRewardsPanel');
             const settingsToggle = document.getElementById('settingsToggle');
             const settingsPanel = document.getElementById('settingsPanel');
-            const skinInput = document.getElementById('skinInput');
-            const applySkinButton = document.getElementById('applySkinButton');
-            const exportSaveButton = document.getElementById('exportSaveButton');
+            const clickSound = document.getElementById('clickSound');
+            const comboCounter = document.getElementById('comboCounter');
+            const adminPanel = document.getElementById('adminPanel');
+            const clickArea = document.getElementById('clickArea');
+            const setCoinsButton = document.getElementById('setCoins');
+            const setCoinsPerClickButton = document.getElementById('setCoinsPerClick');
+            const setUpgradesButton = document.getElementById('setUpgrades');
+            const setUpgradeCostButton = document.getElementById('setUpgradeCost');
+            const setRebirthsButton = document.getElementById('setRebirths');
+            const setRebirthCostButton = document.getElementById('setRebirthCost');
+            const setComboButton = document.getElementById('setCombo');
+            const setDailyRewardsButton = document.getElementById('setDailyRewards');
+            const setSkinsButton = document.getElementById('setSkins');
+            const setAchievementsButton = document.getElementById('setAchievements');
+            const adminCoinsInput = document.getElementById('adminCoins');
+            const adminCoinsPerClickInput = document.getElementById('adminCoinsPerClick');
+            const adminUpgradesInput = document.getElementById('adminUpgrades');
+            const adminUpgradeCostInput = document.getElementById('adminUpgradeCost');
+            const adminRebirthsInput = document.getElementById('adminRebirths');
+            const adminRebirthCostInput = document.getElementById('adminRebirthCost');
+            const adminComboInput = document.getElementById('adminCombo');
+            const adminDailySetInput = document.getElementById('adminDailySet');
+            const adminSkinsInput = document.getElementById('adminSkins');
+            const adminAchievementsInput = document.getElementById('adminAchievements');
+            const adminCloseButton = document.getElementById('adminCloseButton');
+            const skinNotification = document.getElementById('skinNotification');
+            const achievementsNotification = document.getElementById('achievementsNotification');
+            const dailyNotification = document.getElementById('dailyNotification');
+            const jumpscare = document.getElementById('jumpscare');
+            const adminAutoclickDetectInput = document.getElementById('adminAutoclickDetect');
+            const toggleAutoclickDetectButton = document.getElementById('toggleAutoclickDetect');
+            const debugToggle = document.getElementById('debugToggle');
+            const debugStats = document.getElementById('debugStats');
+            const clicksPerSec = document.getElementById('clicksPerSec');
+            const totalClicks = document.getElementById('totalClicks');
+            const coinsEarned = document.getElementById('coinsEarned');
+            const coinsCurrent = document.getElementById('coinsCurrent');
+            const coinsPerClickDisplay = document.getElementById('coinsPerClick');
+            const upgradesBought = document.getElementById('upgradesBought');
+            const upgradeLevelDisplay = document.getElementById('upgradeLevel');
+            const upgradeCostDisplay = document.getElementById('upgradeCost');
+            const rebirthsCompleted = document.getElementById('rebirthsCompleted');
+            const rebirthCostDisplay = document.getElementById('rebirthCost');
+            const comboMultiplier = document.getElementById('comboMultiplier');
+            const clickComboDisplay = document.getElementById('clickCombo');
+            const autoclickTriggers = document.getElementById('autoclickTriggers');
+            const autoclickDetect = document.getElementById('autoclickDetect');
+            const skinsUnlocked = document.getElementById('skinsUnlocked');
+            const currentSkinDisplay = document.getElementById('currentSkin');
+            const achievementsCompleted = document.getElementById('achievementsCompleted');
+            const dailyRewardDayDisplay = document.getElementById('dailyRewardDay');
+            const lastClaimDateDisplay = document.getElementById('lastClaimDate');
+            const adminPanelState = document.getElementById('adminPanelState');
+            const exportSaveButton = document.getElementById('exportSave');
+            const importSaveButton = document.getElementById('importSave');
             const exportSaveText = document.getElementById('exportSaveText');
-            const importSaveButton = document.getElementById('importSaveButton');
             const importSaveText = document.getElementById('importSaveText');
-            const resetButton = document.getElementById('resetButton');
+            const resetGameButton = document.getElementById('resetGame');
+            const adminClicksPerSecInput = document.getElementById('adminClicksPerSec');
+            const setClicksPerSecButton = document.getElementById('setClicksPerSec');
+            const unlockAllSkinsButton = document.getElementById('unlockAllSkins');
+            const completeAllAchievementsButton = document.getElementById('completeAllAchievements');
+            const resetDailyRewardsButton = document.getElementById('resetDailyRewards');
 
-            // Default values
-            const defaultSkin = "Skins/SvetlanaSkin.jpg";
-            const defaultSound = "Sounds/SvetlanaSkin.mp3";
-            const defaultData = {
+            const skins = [
+                { skin: "Skins/SvetlanaSkin.jpg", cost: 0, name: "🔢Svetlana (Free)", sound: "Sounds/SvetlanaSkin.mp3" },
+                { skin: "Skins/LeshaSkin.jpg", cost: 1, name: "😍Lesha (1)", sound: "Sounds/LeshaSkin.mp3" },
+                { skin: "Skins/RomanSkin.jpg", cost: 10000, name: "👨‍❤️‍👨Roman (10000)", sound: "Sounds/RomanSkin.mp3" },
+                { skin: "Skins/ElenaSkin.jpg", cost: 30000, name: "🦛Elena (30000)", sound: "Sounds/ElenaSkin.mp3" },
+                { skin: "Skins/KirillSkin.jpg", cost: 50000, name: "🪨Kirill (50000)", sound: "Sounds/KirillSkin.mp3" },
+                { skin: "Skins/MatveiSkin.jpg", cost: 75000, name: "🍖Matvei (75000)", sound: "Sounds/MatveiSkin.mp3" },
+                { skin: "Skins/FilipinkoSkin.jpg", cost: 100000, name: "🎨Fillipinko (100000)", sound: "Sounds/FilipinkoSkin.mp3" },
+                { skin: "Skins/SobakaSkin.jpg", cost: 130000, name: "🐻Sobaka (130000)", sound: "Sounds/SobakaSkin.mp3" },
+                { skin: "Skins/KotSkin.jpg", cost: 175000, name: "🦁Kot (175000)", sound: "Sounds/KotSkin.mp3" },
+                { skin: "Skins/DuraSkin.jpg", cost: 200000, name: "📑Dura (200000)", sound: "Sounds/DuraSkin.mp3" },
+            ];
+
+            const achievements = [
+                { id: 1, name: "Новичок", type: "coins", goal: 10000, reward: 5000, desc: "Собери 10000 монет" },
+                { id: 2, name: "Кликовый мастер", type: "coins", goal: 100000, reward: 20000, desc: "Собери 100000 монет" },
+                { id: 3, name: "Улучшатор", type: "upgrades", goal: 25, reward: 50000, desc: "Купи 25 улучшений" },
+                { id: 4, name: "Возрождённый", type: "rebirths", goal: 1, reward: 100000, desc: "Соверши 1 перерождение" },
+                { id: 5, name: "Комбо-гуру", type: "combo", goal: 3, reward: 150000, desc: "Достигни комбо 3x" },
+                { id: 6, name: "Монетный магнат", type: "coins", goal: 500000, reward: 75000, desc: "Собери 500000 монет" },
+                { id: 7, name: "Улучшение эксперта", type: "upgrades", goal: 50, reward: 100000, desc: "Купи 50 улучшений" },
+                { id: 8, name: "Дважды рождённый", type: "rebirths", goal: 2, reward: 200000, desc: "Соверши 2 перерождения" },
+                { id: 9, name: "Миллионер", type: "coins", goal: 1000000, reward: 150000, desc: "Собери 1M монет" },
+                { id: 10, name: "Мастер кликов", type: "coins", goal: 5000000, reward: 500000, desc: "Собери 5M монет" },
+                { id: 11, name: "Улучшатор-эпик", type: "upgrades", goal: 100, reward: 250000, desc: "Купи 100 улучшений" },
+                { id: 12, name: "Трижды рождённый", type: "rebirths", goal: 3, reward: 400000, desc: "Соверши 3 перерождения" },
+                { id: 13, name: "Богач", type: "coins", goal: 10000000, reward: 1000000, desc: "Собери 10M монет" },
+                { id: 14, name: "Улучшение титана", type: "upgrades", goal: 200, reward: 500000, desc: "Купи 200 улучшений" },
+                { id: 15, name: "Пять перерождений", type: "rebirths", goal: 5, reward: 750000, desc: "Соверши 5 перерождений" },
+                { id: 16, name: "Мультимиллионер", type: "coins", goal: 50000000, reward: 2000000, desc: "Собери 50M монет" },
+                { id: 27, name: "Улучшение бога", type: "upgrades", goal: 500, reward: 1500000, desc: "Купи 500 улучшений" },
+                { id: 28, name: "Вечный возрождённый", type: "rebirths", goal: 10, reward: 3000000, desc: "Соверши 10 перерождений" },
+                { id: 29, name: "Пудж Найден", type: "skin", goal: "Skins/KirillSkin.jpg", reward: 50000, desc: "Найди и купи пуджа" }
+            ];
+
+            const dailyRewards = [
+                { day: 1, reward: 1000 },
+                { day: 2, reward: 10000 },
+                { day: 3, reward: 25000 },
+                { day: 4, reward: 50000 },
+                { day: 5, reward: 75000 },
+                { day: 6, reward: 100000 },
+                { day: 7, reward: 200000 },
+                { day: 8, reward: 500000 },
+            ];
+
+            const defaultGameData = {
                 count: 0,
                 coinsPerClick: 1,
                 upgradeLevel: 0,
                 rebirths: 0,
                 upgradeCost: 10,
                 rebirthCost: 1000000,
-                currentSkin: defaultSkin,
-                currentSound: defaultSound,
-                skins: [
-                    { skin: "Skins/SvetlanaSkin.jpg", cost: 0, name: "🔢Svetlana (Free)", sound: "Sounds/SvetlanaSkin.mp3" },
-                    { skin: "Skins/Skin2.jpg", cost: 100, name: "Skin2", sound: "Sounds/Skin2.mp3" }
-                ],
-                achievements: {
-                    firstClick: false,
-                    tenUpgrades: false,
-                    firstRebirth: false
-                }
+                currentSkin: 'Skins/SvetlanaSkin.jpg',
+                unlockedSkins: ['Skins/SvetlanaSkin.jpg'],
+                completedAchievements: [],
+                dailyRewardDay: 0,
+                lastClaimDate: null,
+                clickCombo: 0,
+                autoclickDetectEnabled: true,
+                totalClicksCount: 0,
+                totalCoinsEarned: 0,
+                totalUpgradesBought: 0,
+                totalRebirthsCompleted: 0,
+                autoclickTriggerCount: 0,
+                debugMode: false,
+                tutorialShown: false
             };
 
-            // Load or convert data
             let gameData = loadGameData();
-            let count = gameData.count;
-            let coinsPerClick = gameData.coinsPerClick;
-            let upgradeLevel = gameData.upgradeLevel;
-            let rebirths = gameData.rebirths;
-            let upgradeCost = gameData.upgradeCost;
-            let rebirthCost = gameData.rebirthCost;
-            let currentSkin = gameData.currentSkin;
-            let currentSound = gameData.currentSound;
-            let skins = gameData.skins;
-            let achievements = gameData.achievements;
+            let clickTimes = [];
+            let comboTimeout = null;
+            let holdTimeout = null;
+            const CLICK_THRESHOLD = 10;
+            const TIME_THRESHOLD = 1000;
+            const MIN_INTERVAL = 50;
+            const CONSISTENT_THRESHOLD = 20;
+            const INTERVAL_TOLERANCE = 5;
+            const MAX_COMBO_CLICKS = 100;
+            const MAX_MULTIPLIER = 3;
+            const skinsPerPage = 7;
+            const achievementsPerPage = 7;
+            let currentSkinPage = 0;
+            let currentAchPage = 0;
+            const totalSkinPages = Math.ceil(skins.length / skinsPerPage);
+            const totalAchPages = Math.ceil(achievements.length / achievementsPerPage);
+            let clicksPerSecond = 0;
 
-            // Initial setup
-            mainButton.style.backgroundImage = `url('${currentSkin}')`;
-            upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
-            rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
-            coinIcon.src = currentSkin;
-            clickSound.src = currentSound;
-            coinCount.textContent = count;
-            upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
-            upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
-            rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
-            rebirthCountLabel.textContent = `Count: ${rebirths}`;
-            updateButtons();
-            checkAchievements();
-
-            // Game logic
-            mainButton.addEventListener('click', e => {
-                clickSound.play().catch(() => console.log("Sound failed"));
-                count += coinsPerClick * (rebirths + 1);
-                coinCount.textContent = count;
-                createFlyingCoin(e);
-                if (!achievements.firstClick) {
-                    achievements.firstClick = true;
-                    alert("Achievement Unlocked: First Click!");
+            function loadGameData() {
+                const savedData = localStorage.getItem('gameData');
+                if (savedData) {
+                    return JSON.parse(atob(savedData));
+                } else {
+                    // Migrate old data if it exists
+                    const oldData = {
+                        count: parseInt(localStorage.getItem('coinCount')) || 0,
+                        coinsPerClick: parseInt(localStorage.getItem('coinsPerClick')) || 1,
+                        upgradeLevel: parseInt(localStorage.getItem('upgradeLevel')) || 0,
+                        rebirths: parseInt(localStorage.getItem('rebirths')) || 0,
+                        upgradeCost: parseInt(localStorage.getItem('upgradeCost')) || 10,
+                        rebirthCost: parseInt(localStorage.getItem('rebirthCost')) || 1000000,
+                        currentSkin: localStorage.getItem('currentSkin') || 'Skins/SvetlanaSkin.jpg',
+                        unlockedSkins: JSON.parse(localStorage.getItem('unlockedSkins')) || ['Skins/SvetlanaSkin.jpg'],
+                        completedAchievements: JSON.parse(localStorage.getItem('completedAchievements')) || [],
+                        dailyRewardDay: parseInt(localStorage.getItem('dailyRewardDay')) || 0,
+                        lastClaimDate: localStorage.getItem('lastClaimDate') || null,
+                        clickCombo: parseInt(localStorage.getItem('clickCombo')) || 0,
+                        autoclickDetectEnabled: localStorage.getItem('autoclickDetectEnabled') !== 'false',
+                        totalClicksCount: parseInt(localStorage.getItem('totalClicksCount')) || 0,
+                        totalCoinsEarned: parseInt(localStorage.getItem('totalCoinsEarned')) || 0,
+                        totalUpgradesBought: parseInt(localStorage.getItem('totalUpgradesBought')) || 0,
+                        totalRebirthsCompleted: parseInt(localStorage.getItem('totalRebirthsCompleted')) || 0,
+                        autoclickTriggerCount: parseInt(localStorage.getItem('autoclickTriggerCount')) || 0,
+                        debugMode: localStorage.getItem('debugMode') === 'true',
+                        tutorialShown: localStorage.getItem('tutorialShown') === 'true'
+                    };
+                    saveGameData(oldData);
+                    return oldData;
                 }
-                updateButtons();
-                saveGameData();
-            });
-
-            upgradeButton.addEventListener('click', () => {
-                if (count >= upgradeCost) {
-                    count -= upgradeCost;
-                    coinsPerClick++;
-                    upgradeLevel++;
-                    upgradeCost = Math.floor(10 * Math.pow(upgradeLevel, 2)) || 10;
-                    coinCount.textContent = count;
-                    upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
-                    upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
-                    if (upgradeLevel >= 10 && !achievements.tenUpgrades) {
-                        achievements.tenUpgrades = true;
-                        alert("Achievement Unlocked: 10 Upgrades!");
-                    }
-                    updateButtons();
-                    saveGameData();
-                }
-            });
-
-            rebirthButton.addEventListener('click', () => {
-                if (count >= rebirthCost) {
-                    count = 0;
-                    coinsPerClick = 1;
-                    upgradeLevel = 0;
-                    rebirths++;
-                    upgradeCost = 10;
-                    rebirthCost = Math.floor(1000000 * Math.pow(2, rebirths));
-                    coinCount.textContent = count;
-                    upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
-                    upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
-                    rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
-                    rebirthCountLabel.textContent = `Count: ${rebirths}`;
-                    if (!achievements.firstRebirth) {
-                        achievements.firstRebirth = true;
-                        alert("Achievement Unlocked: First Rebirth!");
-                    }
-                    updateButtons();
-                    saveGameData();
-                }
-            });
-
-            // Settings panel
-            settingsToggle.addEventListener('click', () => {
-                settingsPanel.style.display = settingsPanel.style.display === 'block' ? 'none' : 'block';
-            });
-
-            document.addEventListener('click', e => {
-                if (!settingsPanel.contains(e.target) && e.target !== settingsToggle) {
-                    settingsPanel.style.display = 'none';
-                }
-            });
-
-            applySkinButton.addEventListener('click', () => {
-                const newSkin = skinInput.value.trim();
-                if (newSkin) {
-                    currentSkin = newSkin;
-                    mainButton.style.backgroundImage = `url('${currentSkin}')`;
-                    upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
-                    rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
-                    coinIcon.src = currentSkin;
-                    saveGameData();
-                    skinInput.value = '';
-                }
-            });
-
-            exportSaveButton.addEventListener('click', () => {
-                const data = {
-                    count: count,
-                    coinsPerClick: coinsPerClick,
-                    upgradeLevel: upgradeLevel,
-                    rebirths: rebirths,
-                    upgradeCost: upgradeCost,
-                    rebirthCost: rebirthCost,
-                    currentSkin: currentSkin,
-                    currentSound: currentSound,
-                    skins: skins,
-                    achievements: achievements
-                };
-                const encodedData = btoa(JSON.stringify(data));
-                exportSaveText.value = encodedData;
-            });
-
-            importSaveButton.addEventListener('click', () => {
-                const inputData = importSaveText.value.trim();
-                if (!inputData) {
-                    alert("Please paste a save code to import.");
-                    return;
-                }
-                try {
-                    const decodedData = JSON.parse(atob(inputData));
-                    count = decodedData.count || 0;
-                    coinsPerClick = decodedData.coinsPerClick || 1;
-                    upgradeLevel = decodedData.upgradeLevel || 0;
-                    rebirths = decodedData.rebirths || 0;
-                    upgradeCost = decodedData.upgradeCost || 10;
-                    rebirthCost = decodedData.rebirthCost || 1000000;
-                    currentSkin = decodedData.currentSkin || defaultSkin;
-                    currentSound = decodedData.currentSound || defaultSound;
-                    skins = decodedData.skins || defaultData.skins;
-                    achievements = decodedData.achievements || defaultData.achievements;
-                    coinCount.textContent = count;
-                    upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
-                    upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
-                    rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
-                    rebirthCountLabel.textContent = `Count: ${rebirths}`;
-                    mainButton.style.backgroundImage = `url('${currentSkin}')`;
-                    upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
-                    rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
-                    coinIcon.src = currentSkin;
-                    clickSound.src = currentSound;
-                    updateButtons();
-                    saveGameData();
-                    importSaveText.value = '';
-                    alert("Save imported successfully!");
-                } catch (e) {
-                    alert("Invalid save code. Please check and try again.");
-                }
-            });
-
-            resetButton.addEventListener('click', () => {
-                if (confirm("Are you sure you want to reset all progress? This cannot be undone.")) {
-                    count = 0;
-                    coinsPerClick = 1;
-                    upgradeLevel = 0;
-                    rebirths = 0;
-                    upgradeCost = 10;
-                    rebirthCost = 1000000;
-                    currentSkin = defaultSkin;
-                    currentSound = defaultSound;
-                    skins = defaultData.skins;
-                    achievements = defaultData.achievements;
-                    coinCount.textContent = count;
-                    upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
-                    upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
-                    rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
-                    rebirthCountLabel.textContent = `Count: ${rebirths}`;
-                    mainButton.style.backgroundImage = `url('${currentSkin}')`;
-                    upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
-                    rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
-                    coinIcon.src = currentSkin;
-                    clickSound.src = currentSound;
-                    updateButtons();
-                    saveGameData();
-                    exportSaveText.value = '';
-                    importSaveText.value = '';
-                }
-            });
-
-            // Helper functions
-            function updateButtons() {
-                upgradeButton.disabled = count < upgradeCost;
-                rebirthButton.disabled = count < rebirthCost;
             }
 
-            function createFlyingCoin(e) {
+            function saveGameData(data) {
+                localStorage.setItem('gameData', btoa(JSON.stringify(data)));
+            }
+
+            function resetGameData() {
+                gameData = { ...defaultGameData };
+                saveGameData(gameData);
+                updateUI();
+            }
+
+            function updateUI() {
+                mainButton.style.backgroundImage = `url('${gameData.currentSkin}')`;
+                upgradeButton.style.backgroundImage = `url('${gameData.currentSkin}')`;
+                rebirthButton.style.backgroundImage = `url('${gameData.currentSkin}')`;
+                coinIcon.src = gameData.currentSkin;
+                clickSound.src = skins.find(s => s.skin === gameData.currentSkin).sound;
+                coinCount.textContent = gameData.count;
+                upgradeCostLabel.textContent = `Cost: ${gameData.upgradeCost}`;
+                upgradeCountLabel.textContent = `Count: ${gameData.upgradeLevel}`;
+                rebirthCostLabel.textContent = `Cost: ${gameData.rebirthCost}`;
+                rebirthCountLabel.textContent = `Count: ${gameData.rebirths} (x${gameData.rebirths + 1})`;
+                upgradeButton.disabled = gameData.count < gameData.upgradeCost;
+                rebirthButton.disabled = gameData.count < gameData.rebirthCost;
+                comboCounter.textContent = `Combo: ${gameData.clickCombo}x`;
+                jumpscare.style.backgroundImage = `url('Skins/JumpScare.jpg')`;
+                adminAutoclickDetectInput.checked = gameData.autoclickDetectEnabled;
+                debugToggle.checked = gameData.debugMode;
+                debugStats.style.display = gameData.debugMode ? 'block' : 'none';
+                updateDebugStats();
+                renderSkinPage();
+                renderAchievements();
+                renderDailyRewards();
+                updateNotifications();
+            }
+
+            updateUI();
+
+            if (!gameData.tutorialShown) {
+                alert("Welcome to SndTagXClicker!\n\n- Click the main button to earn coins.\n- Use coins to buy upgrades or rebirths.\n- Unlock skins and achievements for bonuses.\n- Hold the coin counter for 3 seconds to open the admin panel.");
+                gameData.tutorialShown = true;
+                saveGameData(gameData);
+            }
+
+            clickArea.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                holdTimeout = setTimeout(() => adminPanel.style.display = 'block', 3000);
+            });
+            clickArea.addEventListener('mouseup', () => clearTimeout(holdTimeout));
+            clickArea.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                holdTimeout = setTimeout(() => adminPanel.style.display = 'block', 3000);
+            });
+            clickArea.addEventListener('touchend', () => clearTimeout(holdTimeout));
+
+            setCoinsButton.addEventListener('click', () => {
+                gameData.count = parseInt(adminCoinsInput.value) || 0;
+                saveGameData(gameData);
+                updateUI();
+            });
+            setCoinsPerClickButton.addEventListener('click', () => {
+                gameData.coinsPerClick = parseInt(adminCoinsPerClickInput.value) || 1;
+                saveGameData(gameData);
+                updateUI();
+            });
+            setUpgradesButton.addEventListener('click', () => {
+                gameData.upgradeLevel = parseInt(adminUpgradesInput.value) || 0;
+                gameData.totalUpgradesBought = gameData.upgradeLevel;
+                gameData.upgradeCost = Math.floor(10 * Math.pow(gameData.upgradeLevel, 2)) || 10;
+                saveGameData(gameData);
+                updateUI();
+            });
+            setUpgradeCostButton.addEventListener('click', () => {
+                gameData.upgradeCost = parseInt(adminUpgradeCostInput.value) || 10;
+                saveGameData(gameData);
+                updateUI();
+            });
+            setRebirthsButton.addEventListener('click', () => {
+                gameData.rebirths = parseInt(adminRebirthsInput.value) || 0;
+                gameData.totalRebirthsCompleted = gameData.rebirths;
+                gameData.rebirthCost = Math.floor(1000000 * Math.pow(2, gameData.rebirths));
+                saveGameData(gameData);
+                updateUI();
+            });
+            setRebirthCostButton.addEventListener('click', () => {
+                gameData.rebirthCost = parseInt(adminRebirthCostInput.value) || 1000000;
+                saveGameData(gameData);
+                updateUI();
+            });
+            setComboButton.addEventListener('click', () => {
+                gameData.clickCombo = parseInt(adminComboInput.value) || 0;
+                saveGameData(gameData);
+                updateUI();
+            });
+            setDailyRewardsButton.addEventListener('click', () => {
+                gameData.dailyRewardDay = parseInt(adminDailySetInput.value) || 0;
+                gameData.lastClaimDate = null;
+                saveGameData(gameData);
+                updateUI();
+            });
+            setSkinsButton.addEventListener('click', () => {
+                const indexes = adminSkinsInput.value.split(',').map(i => parseInt(i.trim())).filter(i => !isNaN(i) && i >= 1 && i <= skins.length);
+                gameData.unlockedSkins = indexes.map(i => skins[i - 1].skin);
+                if (!gameData.unlockedSkins.includes(gameData.currentSkin) || gameData.unlockedSkins.length === 0) {
+                    gameData.currentSkin = skins[0].skin;
+                }
+                saveGameData(gameData);
+                updateUI();
+            });
+            setAchievementsButton.addEventListener('click', () => {
+                const indexes = adminAchievementsInput.value.split(',').map(i => parseInt(i.trim())).filter(i => !isNaN(i) && i >= 1 && i <= achievements.length);
+                gameData.completedAchievements = indexes;
+                saveGameData(gameData);
+                updateUI();
+            });
+            toggleAutoclickDetectButton.addEventListener('click', () => {
+                gameData.autoclickDetectEnabled = adminAutoclickDetectInput.checked;
+                saveGameData(gameData);
+                updateUI();
+            });
+            setClicksPerSecButton.addEventListener('click', () => {
+                clicksPerSecond = parseInt(adminClicksPerSecInput.value) || 0;
+                updateDebugStats();
+            });
+            unlockAllSkinsButton.addEventListener('click', () => {
+                gameData.unlockedSkins = skins.map(s => s.skin);
+                saveGameData(gameData);
+                updateUI();
+            });
+            completeAllAchievementsButton.addEventListener('click', () => {
+                gameData.completedAchievements = achievements.map(a => a.id);
+                saveGameData(gameData);
+                updateUI();
+            });
+            resetDailyRewardsButton.addEventListener('click', () => {
+                gameData.dailyRewardDay = 0;
+                gameData.lastClaimDate = null;
+                saveGameData(gameData);
+                updateUI();
+            });
+            adminCloseButton.addEventListener('click', () => {
+                adminPanel.style.display = 'none';
+                updateDebugStats();
+            });
+
+            settingsToggle.addEventListener('click', togglePanel.bind(null, settingsPanel, () => {}));
+            debugToggle.addEventListener('change', () => {
+                gameData.debugMode = debugToggle.checked;
+                debugStats.style.display = gameData.debugMode ? 'block' : 'none';
+                saveGameData(gameData);
+                updateDebugStats();
+            });
+            exportSaveButton.addEventListener('click', () => {
+                exportSaveText.value = btoa(JSON.stringify(gameData));
+            });
+            importSaveButton.addEventListener('click', () => {
+                try {
+                    gameData = JSON.parse(atob(importSaveText.value));
+                    saveGameData(gameData);
+                    updateUI();
+                } catch (e) {
+                    alert("Invalid save code!");
+                }
+            });
+            resetGameButton.addEventListener('click', () => {
+                if (confirm("Are you sure you want to reset all progress? This action cannot be undone.")) {
+                    resetGameData();
+                }
+            });
+
+            function updateButtons() {
+                upgradeButton.disabled = gameData.count < gameData.upgradeCost;
+                rebirthButton.disabled = gameData.count < gameData.rebirthCost;
+            }
+
+            function updateCombo() {
+                gameData.clickCombo = Math.min(gameData.clickCombo + 1, MAX_COMBO_CLICKS);
+                const multiplier = Math.min(Math.floor(gameData.clickCombo / (MAX_COMBO_CLICKS / (MAX_MULTIPLIER - 1))) + 1, MAX_MULTIPLIER);
+                comboCounter.textContent = `Combo: ${multiplier}x`;
+                clearTimeout(comboTimeout);
+                comboTimeout = setTimeout(() => {
+                    gameData.clickCombo = 0;
+                    comboCounter.textContent = `Combo: 0x`;
+                    saveGameData(gameData);
+                    checkAchievements();
+                    updateNotifications();
+                    updateDebugStats();
+                }, 2000);
+                saveGameData(gameData);
+                checkAchievements();
+                updateNotifications();
+                updateDebugStats();
+            }
+
+            function detectAutoclicker() {
+                if (!gameData.autoclickDetectEnabled) return false;
+                const now = Date.now();
+                clickTimes.push(now);
+                if (clickTimes.length > Math.max(CLICK_THRESHOLD, CONSISTENT_THRESHOLD)) {
+                    clickTimes.shift();
+                }
+                if (clickTimes.length >= CLICK_THRESHOLD) {
+                    const timeSpan = clickTimes[clickTimes.length - 1] - clickTimes[clickTimes.length - CLICK_THRESHOLD];
+                    const avgInterval = timeSpan / (CLICK_THRESHOLD - 1);
+                    if (timeSpan < TIME_THRESHOLD && avgInterval < MIN_INTERVAL) {
+                        triggerJumpscare();
+                        gameData.autoclickTriggerCount++;
+                        saveGameData(gameData);
+                        updateDebugStats();
+                        return true;
+                    }
+                }
+                if (clickTimes.length >= CONSISTENT_THRESHOLD) {
+                    let intervals = [];
+                    for (let i = 1; i < clickTimes.length; i++) {
+                        intervals.push(clickTimes[i] - clickTimes[i - 1]);
+                    }
+                    const recentIntervals = intervals.slice(-CONSISTENT_THRESHOLD);
+                    const firstInterval = recentIntervals[0];
+                    const allConsistent = recentIntervals.every(interval => 
+                        Math.abs(interval - firstInterval) <= INTERVAL_TOLERANCE
+                    );
+                    if (allConsistent) {
+                        triggerJumpscare();
+                        gameData.autoclickTriggerCount++;
+                        saveGameData(gameData);
+                        updateDebugStats();
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            function triggerJumpscare() {
+                jumpscare.style.display = 'block';
+                mainButton.disabled = true;
+            }
+
+            mainButton.addEventListener('click', function(e) {
+                if (detectAutoclicker()) return;
+                clickSound.play().catch(e => console.error('Sound error:', e));
+                updateCombo();
+                const multiplier = Math.min(Math.floor(gameData.clickCombo / (MAX_COMBO_CLICKS / (MAX_MULTIPLIER - 1))) + 1, MAX_MULTIPLIER);
+                const coinsGained = gameData.coinsPerClick * (gameData.rebirths + 1) * multiplier;
+                gameData.count += coinsGained;
+                gameData.totalClicksCount++;
+                gameData.totalCoinsEarned += coinsGained;
+                coinCount.textContent = gameData.count;
                 const coin = document.createElement('img');
-                coin.src = currentSkin;
+                coin.src = gameData.currentSkin;
                 coin.className = 'flying-coin';
                 const rect = mainButton.getBoundingClientRect();
                 coin.style.left = (e.clientX - rect.left - 16) + 'px';
                 coin.style.top = (e.clientY - rect.top - 16) + 'px';
                 document.body.appendChild(coin);
                 setTimeout(() => coin.remove(), 1000);
+                clicksPerSecond++;
+                updateButtons();
+                saveGameData(gameData);
+                renderSkinPage();
+                checkAchievements();
+                updateNotifications();
+                updateDebugStats();
+            });
+
+            upgradeButton.addEventListener('click', function() {
+                if (gameData.count >= gameData.upgradeCost) {
+                    gameData.count -= gameData.upgradeCost;
+                    gameData.coinsPerClick++;
+                    gameData.upgradeLevel++;
+                    gameData.totalUpgradesBought++;
+                    gameData.upgradeCost = Math.floor(10 * Math.pow(gameData.upgradeLevel, 2)) || 10;
+                    saveGameData(gameData);
+                    updateUI();
+                }
+            });
+
+            rebirthButton.addEventListener('click', function() {
+                if (gameData.count >= gameData.rebirthCost) {
+                    gameData.count = 0;
+                    gameData.coinsPerClick = 1;
+                    gameData.upgradeLevel = 0;
+                    gameData.rebirths++;
+                    gameData.totalRebirthsCompleted++;
+                    gameData.upgradeCost = 10;
+                    gameData.rebirthCost = Math.floor(1000000 * Math.pow(2, gameData.rebirths));
+                    gameData.unlockedSkins = ['Skins/SvetlanaSkin.jpg'];
+                    gameData.currentSkin = 'Skins/SvetlanaSkin.jpg';
+                    gameData.clickCombo = 0;
+                    saveGameData(gameData);
+                    updateUI();
+                }
+            });
+
+            skinPanelToggle.addEventListener('click', togglePanel.bind(null, skinPanel, renderSkinPage));
+            achievementsToggle.addEventListener('click', togglePanel.bind(null, achievementsPanel, renderAchievements));
+            dailyRewardsToggle.addEventListener('click', togglePanel.bind(null, dailyRewardsPanel, renderDailyRewards));
+
+            prevPage.addEventListener('click', () => {
+                if (currentSkinPage > 0) {
+                    currentSkinPage--;
+                    renderSkinPage();
+                }
+            });
+
+            nextPage.addEventListener('click', () => {
+                if (currentSkinPage < totalSkinPages - 1) {
+                    currentSkinPage++;
+                    renderSkinPage();
+                }
+            });
+
+            achPrevPage.addEventListener('click', () => {
+                if (currentAchPage > 0) {
+                    currentAchPage--;
+                    renderAchievements();
+                }
+            });
+
+            achNextPage.addEventListener('click', () => {
+                if (currentAchPage < totalAchPages - 1) {
+                    currentAchPage++;
+                    renderAchievements();
+                }
+            });
+
+            function togglePanel(panel, renderFn) {
+                const isVisible = panel.style.display === 'block';
+                skinPanel.style.display = 'none';
+                achievementsPanel.style.display = 'none';
+                dailyRewardsPanel.style.display = 'none';
+                settingsPanel.style.display = 'none';
+                panel.style.display = isVisible ? 'none' : 'block';
+                if (!isVisible) renderFn();
+                updateDebugStats();
+            }
+
+            function updateNotifications() {
+                const buyableSkins = skins.filter(s => !gameData.unlockedSkins.includes(s.skin) && gameData.count >= s.cost).length;
+                skinNotification.style.display = buyableSkins > 0 ? 'block' : 'none';
+                skinNotification.textContent = buyableSkins;
+
+                const claimableAchievements = achievements.filter(ach => !gameData.completedAchievements.includes(ach.id) && (
+                    (ach.type === "coins" && gameData.count >= ach.goal) ||
+                    (ach.type === "upgrades" && gameData.upgradeLevel >= ach.goal) ||
+                    (ach.type === "rebirths" && gameData.rebirths >= ach.goal) ||
+                    (ach.type === "combo" && Math.min(Math.floor(gameData.clickCombo / (MAX_COMBO_CLICKS / (MAX_MULTIPLIER - 1))) + 1, MAX_MULTIPLIER) >= ach.goal) ||
+                    (ach.type === "skin" && gameData.unlockedSkins.includes(ach.goal))
+                )).length;
+                achievementsNotification.style.display = claimableAchievements > 0 ? 'block' : 'none';
+                achievementsNotification.textContent = claimableAchievements;
+
+                const today = new Date().toDateString();
+                const canClaimDaily = (!gameData.lastClaimDate || gameData.lastClaimDate !== today) && gameData.dailyRewardDay < dailyRewards.length;
+                dailyNotification.style.display = canClaimDaily ? 'block' : 'none';
+                dailyNotification.textContent = canClaimDaily ? '1' : '';
+            }
+
+            function renderSkinPage() {
+                skinPages.innerHTML = '';
+                const startIndex = currentSkinPage * skinsPerPage;
+                const endIndex = Math.min(startIndex + skinsPerPage, skins.length);
+                skins.slice(startIndex, endIndex).forEach((skinData, index) => {
+                    const globalIndex = startIndex + index + 1;
+                    const option = document.createElement('div');
+                    option.className = 'skin-option';
+                    option.innerHTML = `<span class="id-label">${globalIndex}</span><img src="${skinData.skin}" alt="Skin"><span>${skinData.name}</span>`;
+                    if (!gameData.unlockedSkins.includes(skinData.skin)) {
+                        if (gameData.count >= skinData.cost) {
+                            option.classList.add('buyable');
+                            option.addEventListener('click', function() {
+                                gameData.count -= skinData.cost;
+                                gameData.unlockedSkins.push(skinData.skin);
+                                gameData.currentSkin = skinData.skin;
+                                saveGameData(gameData);
+                                updateUI();
+                            });
+                        } else {
+                            option.classList.add('locked');
+                        }
+                    } else {
+                        option.addEventListener('click', function() {
+                            gameData.currentSkin = skinData.skin;
+                            saveGameData(gameData);
+                            updateUI();
+                            skinPanel.style.display = 'none';
+                        });
+                    }
+                    skinPages.appendChild(option);
+                });
+                pageIndicator.textContent = `Page ${currentSkinPage + 1} of ${totalSkinPages}`;
+                prevPage.disabled = currentSkinPage === 0;
+                nextPage.disabled = currentSkinPage === totalSkinPages - 1;
             }
 
             function checkAchievements() {
-                if (count > 0 && !achievements.firstClick) achievements.firstClick = true;
-                if (upgradeLevel >= 10 && !achievements.tenUpgrades) achievements.tenUpgrades = true;
-                if (rebirths > 0 && !achievements.firstRebirth) achievements.firstRebirth = true;
-            }
-
-            function saveGameData() {
-                const data = {
-                    count: count,
-                    coinsPerClick: coinsPerClick,
-                    upgradeLevel: upgradeLevel,
-                    rebirths: rebirths,
-                    upgradeCost: upgradeCost,
-                    rebirthCost: rebirthCost,
-                    currentSkin: currentSkin,
-                    currentSound: currentSound,
-                    skins: skins,
-                    achievements: achievements
-                };
-                const encodedData = btoa(JSON.stringify(data));
-                localStorage.setItem('sndtagx_save', encodedData);
-            }
-
-            function loadGameData() {
-                const savedData = localStorage.getItem('sndtagx_save');
-                if (savedData) {
-                    try {
-                        return JSON.parse(atob(savedData));
-                    } catch (e) {
-                        console.log("Invalid save data, converting old format");
+                achievements.forEach(ach => {
+                    if (!gameData.completedAchievements.includes(ach.id)) {
+                        let achieved = false;
+                        if (ach.type === "coins" && gameData.count >= ach.goal) achieved = true;
+                        if (ach.type === "upgrades" && gameData.upgradeLevel >= ach.goal) achieved = true;
+                        if (ach.type === "rebirths" && gameData.rebirths >= ach.goal) achieved = true;
+                        if (ach.type === "combo" && Math.min(Math.floor(gameData.clickCombo / (MAX_COMBO_CLICKS / (MAX_MULTIPLIER - 1))) + 1, MAX_MULTIPLIER) >= ach.goal) achieved = true;
+                        if (ach.type === "skin" && gameData.unlockedSkins.includes(ach.goal)) achieved = true;
+                        if (achieved) {
+                            renderAchievements();
+                        }
                     }
+                });
+            }
+
+            function renderAchievements() {
+                achievementPages.innerHTML = '';
+                const startIndex = currentAchPage * achievementsPerPage;
+                const endIndex = Math.min(startIndex + achievementsPerPage, achievements.length);
+                achievements.slice(startIndex, endIndex).forEach(ach => {
+                    const option = document.createElement('div');
+                    option.className = 'achievement-option';
+                    option.innerHTML = `<span class="id-label">${ach.id}</span><img src="${gameData.currentSkin}" alt="Ach"><span>${ach.name} (${ach.reward} монет)<br>${ach.desc}</span>`;
+                    if (gameData.completedAchievements.includes(ach.id)) {
+                        option.classList.add('completed');
+                    } else if (
+                        (ach.type === "coins" && gameData.count >= ach.goal) ||
+                        (ach.type === "upgrades" && gameData.upgradeLevel >= ach.goal) ||
+                        (ach.type === "rebirths" && gameData.rebirths >= ach.goal) ||
+                        (ach.type === "combo" && Math.min(Math.floor(gameData.clickCombo / (MAX_COMBO_CLICKS / (MAX_MULTIPLIER - 1))) + 1, MAX_MULTIPLIER) >= ach.goal) ||
+                        (ach.type === "skin" && gameData.unlockedSkins.includes(ach.goal))
+                    ) {
+                        option.classList.add('claimable');
+                        option.addEventListener('click', function() {
+                            gameData.completedAchievements.push(ach.id);
+                            gameData.count += ach.reward;
+                            gameData.totalCoinsEarned += ach.reward;
+                            saveGameData(gameData);
+                            updateUI();
+                        });
+                    }
+                    achievementPages.appendChild(option);
+                });
+                achPageIndicator.textContent = `Page ${currentAchPage + 1} of ${totalAchPages}`;
+                achPrevPage.disabled = currentAchPage === 0;
+                achNextPage.disabled = currentAchPage === totalAchPages - 1;
+            }
+
+            function renderDailyRewards() {
+                dailyRewardsPanel.innerHTML = '';
+                const today = new Date().toDateString();
+                const canClaim = !gameData.lastClaimDate || gameData.lastClaimDate !== today;
+
+                dailyRewards.forEach((reward, index) => {
+                    const option = document.createElement('div');
+                    option.className = 'daily-reward-option';
+                    const isClaimed = index < gameData.dailyRewardDay;
+                    const isCurrentDay = index === gameData.dailyRewardDay;
+                    option.innerHTML = `<span>День ${reward.day}: ${reward.reward} монет</span>`;
+                    if (isClaimed) {
+                        option.classList.add('claimed');
+                    } else if (isCurrentDay && canClaim) {
+                        option.classList.add('claimable');
+                        option.addEventListener('click', function() {
+                            gameData.count += reward.reward;
+                            gameData.totalCoinsEarned += reward.reward;
+                            gameData.dailyRewardDay++;
+                            gameData.lastClaimDate = today;
+                            if (gameData.dailyRewardDay >= dailyRewards.length) gameData.dailyRewardDay = 0;
+                            saveGameData(gameData);
+                            updateUI();
+                            dailyRewardsPanel.style.display = 'none';
+                        });
+                    } else {
+                        option.classList.add('locked');
+                    }
+                    dailyRewardsPanel.appendChild(option);
+                });
+            }
+
+            function updateDebugStats() {
+                if (gameData.debugMode) {
+                    clicksPerSec.textContent = `Clicks/sec: ${clicksPerSecond}`;
+                    totalClicks.textContent = `Total Clicks: ${gameData.totalClicksCount}`;
+                    coinsEarned.textContent = `Coins Earned: ${gameData.totalCoinsEarned}`;
+                    coinsCurrent.textContent = `Current Coins: ${gameData.count}`;
+                    coinsPerClickDisplay.textContent = `Coins Per Click: ${gameData.coinsPerClick}`;
+                    upgradesBought.textContent = `Upgrades Bought: ${gameData.totalUpgradesBought}`;
+                    upgradeLevelDisplay.textContent = `Upgrade Level: ${gameData.upgradeLevel}`;
+                    upgradeCostDisplay.textContent = `Upgrade Cost: ${gameData.upgradeCost}`;
+                    rebirthsCompleted.textContent = `Rebirths Completed: ${gameData.totalRebirthsCompleted}`;
+                    rebirthCostDisplay.textContent = `Rebirth Cost: ${gameData.rebirthCost}`;
+                    comboMultiplier.textContent = `Combo Multiplier: ${Math.min(Math.floor(gameData.clickCombo / (MAX_COMBO_CLICKS / (MAX_MULTIPLIER - 1))) + 1, MAX_MULTIPLIER)}x`;
+                    clickComboDisplay.textContent = `Click Combo: ${gameData.clickCombo}`;
+                    autoclickTriggers.textContent = `Autoclick Triggers: ${gameData.autoclickTriggerCount}`;
+                    autoclickDetect.textContent = `Autoclick Detect: ${gameData.autoclickDetectEnabled ? 'On' : 'Off'}`;
+                    skinsUnlocked.textContent = `Skins Unlocked: ${gameData.unlockedSkins.length}`;
+                    currentSkinDisplay.textContent = `Current Skin: ${skins.find(s => s.skin === gameData.currentSkin).name.split(' ')[0]}`;
+                    achievementsCompleted.textContent = `Achievements Completed: ${gameData.completedAchievements.length}`;
+                    dailyRewardDayDisplay.textContent = `Daily Reward Day: ${gameData.dailyRewardDay}`;
+                    lastClaimDateDisplay.textContent = `Last Claim Date: ${gameData.lastClaimDate || 'None'}`;
+                    adminPanelState.textContent = `Admin Panel: ${adminPanel.style.display === 'block' ? 'Visible' : 'Hidden'}`;
                 }
-
-                // Convert old LocalStorage format
-                const oldData = {
-                    count: parseInt(localStorage.getItem('coinCount')) || 0,
-                    coinsPerClick: parseInt(localStorage.getItem('coinsPerClick')) || 1,
-                    upgradeLevel: parseInt(localStorage.getItem('upgradeLevel')) || 0,
-                    rebirths: parseInt(localStorage.getItem('rebirths')) || 0,
-                    upgradeCost: parseInt(localStorage.getItem('upgradeCost')) || 10,
-                    rebirthCost: parseInt(localStorage.getItem('rebirthCost')) || 1000000,
-                    currentSkin: localStorage.getItem('currentSkin') || defaultSkin,
-                    currentSound: localStorage.getItem('currentSound') || defaultSound,
-                    skins: JSON.parse(localStorage.getItem('skins')) || defaultData.skins,
-                    achievements: JSON.parse(localStorage.getItem('achievements')) || defaultData.achievements
-                };
-
-                // Save in new format and clean up old keys
-                saveGameDataFromObject(oldData);
-                localStorage.removeItem('coinCount');
-                localStorage.removeItem('coinsPerClick');
-                localStorage.removeItem('upgradeLevel');
-                localStorage.removeItem('rebirths');
-                localStorage.removeItem('upgradeCost');
-                localStorage.removeItem('rebirthCost');
-                localStorage.removeItem('currentSkin');
-                localStorage.removeItem('currentSound');
-                localStorage.removeItem('skins');
-                localStorage.removeItem('achievements');
-
-                return oldData;
             }
 
-            function saveGameDataFromObject(data) {
-                const encodedData = btoa(JSON.stringify(data));
-                localStorage.setItem('sndtagx_save', encodedData);
-            }
+            document.addEventListener('click', function(e) {
+                if (!skinPanel.contains(e.target) && e.target !== skinPanelToggle) skinPanel.style.display = 'none';
+                if (!achievementsPanel.contains(e.target) && e.target !== achievementsToggle) achievementsPanel.style.display = 'none';
+                if (!dailyRewardsPanel.contains(e.target) && e.target !== dailyRewardsToggle) dailyRewardsPanel.style.display = 'none';
+                if (!settingsPanel.contains(e.target) && e.target !== settingsToggle) settingsPanel.style.display = 'none';
+                updateDebugStats();
+            });
 
-            console.log("Game loaded");
+            setInterval(() => {
+                if (gameData.debugMode) {
+                    updateDebugStats();
+                    clicksPerSecond = 0;
+                }
+            }, 1000);
         };
     </script>
 </body>
