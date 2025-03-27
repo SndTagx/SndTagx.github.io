@@ -436,7 +436,6 @@
             const jumpscare = document.getElementById('jumpscare');
             const adminAutoclickDetectInput = document.getElementById('adminAutoclickDetect');
             const toggleAutoclickDetectButton = document.getElementById('toggleAutoclickDetect');
-            const previewSkinsButton = document.getElementById('previewSkins');
             // Settings elements
             const fontColor = document.getElementById('fontColor');
             const notificationsToggle = document.getElementById('notificationsToggle');
@@ -714,18 +713,6 @@
                 autosave();
             });
             adminCloseButton.addEventListener('click', () => adminPanel.style.display = 'none');
-            previewSkinsButton.addEventListener('click', () => {
-                let index = 0;
-                const interval = setInterval(() => {
-                    if (index >= skins.length) {
-                        clearInterval(interval);
-                        mainButton.style.backgroundImage = `url('${currentSkin}')`;
-                        return;
-                    }
-                    mainButton.style.backgroundImage = `url('${skins[index].skin}')`;
-                    index++;
-                }, 1000);
-            });
 
             // Settings listeners
             settingsToggle.addEventListener('click', togglePanel.bind(null, settingsPanel, () => {}));
