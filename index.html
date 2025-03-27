@@ -1,9 +1,13 @@
-<!thansaHTML>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SndTagXClicker</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
     <style>
         body {
             margin: 0;
@@ -40,13 +44,13 @@
             padding: 8px 12px;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            z-index: 150; /* Increased z-index to stay above panels */
+            z-index: 150;
             white-space: nowrap;
             overflow: hidden;
         }
         #coinIcon { width: 32px; height: 32px; margin-right: 10px; }
         #coinCount {
-            font-size: clamp(16px, 2.5vw, 26px); /* Auto-scaling font */
+            font-size: clamp(16px, 2.5vw, 26px);
         }
         .flying-coin {
             position: absolute;
@@ -219,7 +223,7 @@
             gap: 8px;
             margin-bottom: 10px;
         }
-        #adminPanel input[type="number"], #adminPanel input[type="text"], #settingsPanel input[type="text"] {
+        #adminPanel input[type="number"], #adminPanel input[type="text"], #settingsPanel input[type="text"], #settingsPanel input[type="email"], #settingsPanel input[type="password"] {
             flex: 1;
             padding: 6px;
             border-radius: 6px;
@@ -311,6 +315,19 @@
     <div id="settingsPanel">
         <h2>Settings</h2>
         <div id="settingsContent">
+            <!-- Auth Section -->
+            <div id="authSection" class="setting-option">
+                <input type="email" id="emailInput" placeholder="Email">
+                <input type="password" id="passwordInput" placeholder="Password">
+                <button id="loginButton">Login</button>
+                <button id="signupButton">Sign Up</button>
+                <button id="logoutButton" style="display: none;">Logout</button>
+                <div id="authMessage" style="font-size: 12px; margin-top: 5px;"></div>
+            </div>
+            <!-- Save Button -->
+            <div class="setting-option">
+                <button id="saveButton">Save to Cloud</button>
+            </div>
             <!-- Debug Mode -->
             <div class="setting-option">
                 <label>Debug Mode: </label>
@@ -370,6 +387,21 @@
     <audio id="clickSound" loop></audio>
 
     <script>
+        // Firebase configuration (replace with your actual Firebase project config)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY", // Get from Firebase Console
+            authDomain: "sndtagx.firebaseapp.com",
+            projectId: "sndtagx",
+            storageBucket: "sndtagx.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID", // Get from Firebase Console
+            appId: "YOUR_APP_ID" // Get from Firebase Console
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         window.onload = function() {
             const mainButton = document.getElementById('mainButton');
             const upgradeButton = document.getElementById('upgradeButton');
@@ -428,6 +460,13 @@
             const adminAutoclickDetectInput = document.getElementById('adminAutoclickDetect');
             const toggleAutoclickDetectButton = document.getElementById('toggleAutoclickDetect');
             // Settings elements
+            const emailInput = document.getElementById('emailInput');
+            const passwordInput = document.getElementById('passwordInput');
+            const loginButton = document.getElementById('loginButton');
+            const signupButton = document.getElementById('signupButton');
+            const logoutButton = document.getElementById('logoutButton');
+            const authMessage = document.getElementById('authMessage');
+            const saveButton = document.getElementById('saveButton');
             const debugToggle = document.getElementById('debugToggle');
             const debugStats = document.getElementById('debugStats');
             const clicksPerSec = document.getElementById('clicksPerSec');
@@ -501,6 +540,7 @@
                 { day: 8, reward: 500000 },
             ];
 
+            let user = null;
             let count = parseInt(localStorage.getItem('coinCount')) || 0;
             let coinsPerClick = parseInt(localStorage.getItem('coinsPerClick')) || 1;
             let upgradeLevel = parseInt(localStorage.getItem('upgradeLevel')) || 0;
@@ -530,7 +570,6 @@
             let currentAchPage = 0;
             const totalSkinPages = Math.ceil(skins.length / skinsPerPage);
             const totalAchPages = Math.ceil(achievements.length / achievementsPerPage);
-            // Debug stats
             let totalClicksCount = parseInt(localStorage.getItem('totalClicksCount')) || 0;
             let totalCoinsEarned = parseInt(localStorage.getItem('totalCoinsEarned')) || 0;
             let totalUpgradesBought = parseInt(localStorage.getItem('totalUpgradesBought')) || 0;
@@ -558,6 +597,69 @@
             debugStats.style.display = debugMode ? 'block' : 'none';
             updateDebugStats();
 
+            // Firebase Authentication State Listener
+            auth.onAuthStateChanged((firebaseUser) => {
+                user = firebaseUser;
+                if (user) {
+                    emailInput.style.display = 'none';
+                    passwordInput.style.display = 'none';
+                    loginButton.style.display = 'none';
+                    signupButton.style.display = 'none';
+                    logoutButton.style.display = 'block';
+                    authMessage.textContent = `Logged in as ${user.email}`;
+                    loadFromFirestore();
+                } else {
+                    emailInput.style.display = 'inline';
+                    passwordInput.style.display = 'inline';
+                    loginButton.style.display = 'inline';
+                    signupButton.style.display = 'inline';
+                    logoutButton.style.display = 'none';
+                    authMessage.textContent = 'Not logged in';
+                }
+            });
+
+            // Login
+            loginButton.addEventListener('click', () => {
+                const email = emailInput.value;
+                const password = passwordInput.value;
+                auth.signInWithEmailAndPassword(email, password)
+                    .then(() => {
+                        authMessage.textContent = 'Login successful!';
+                    })
+                    .catch((error) => {
+                        authMessage.textContent = `Error: ${error.message}`;
+                    });
+            });
+
+            // Sign Up
+            signupButton.addEventListener('click', () => {
+                const email = emailInput.value;
+                const password = passwordInput.value;
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then(() => {
+                        authMessage.textContent = 'Account created!';
+                        transferLocalToFirestore();
+                    })
+                    .catch((error) => {
+                        authMessage.textContent = `Error: ${error.message}`;
+                    });
+            });
+
+            // Logout
+            logoutButton.addEventListener('click', () => {
+                auth.signOut().then(() => {
+                    authMessage.textContent = 'Logged out';
+                });
+            });
+
+            // Save to Firestore
+            saveButton.addEventListener('click', saveToFirestore);
+
+            // Save on page exit
+            window.addEventListener('beforeunload', () => {
+                if (user) saveToFirestore();
+            });
+
             function autosave() {
                 localStorage.setItem('coinCount', count);
                 localStorage.setItem('coinsPerClick', coinsPerClick);
@@ -580,7 +682,94 @@
                 localStorage.setItem('debugMode', debugMode);
             }
 
-            // Tutorial
+            function saveToFirestore() {
+                if (!user) return;
+                const saveData = {
+                    coinCount: count,
+                    coinsPerClick: coinsPerClick,
+                    upgradeLevel: upgradeLevel,
+                    rebirths: rebirths,
+                    upgradeCost: upgradeCost,
+                    rebirthCost: rebirthCost,
+                    unlockedSkins: unlockedSkins,
+                    currentSkin: currentSkin,
+                    completedAchievements: completedAchievements,
+                    dailyRewardDay: dailyRewardDay,
+                    lastClaimDate: lastClaimDate,
+                    clickCombo: clickCombo,
+                    autoclickDetectEnabled: autoclickDetectEnabled,
+                    totalClicksCount: totalClicksCount,
+                    totalCoinsEarned: totalCoinsEarned,
+                    totalUpgradesBought: totalUpgradesBought,
+                    totalRebirthsCompleted: totalRebirthsCompleted,
+                    autoclickTriggerCount: autoclickTriggerCount,
+                    debugMode: debugMode
+                };
+                db.collection('users').doc(user.uid).set(saveData)
+                    .then(() => {
+                        authMessage.textContent = 'Data saved to cloud!';
+                    })
+                    .catch((error) => {
+                        authMessage.textContent = `Save error: ${error.message}`;
+                    });
+            }
+
+            function loadFromFirestore() {
+                if (!user) return;
+                db.collection('users').doc(user.uid).get()
+                    .then((doc) => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            count = data.coinCount || 0;
+                            coinsPerClick = data.coinsPerClick || 1;
+                            upgradeLevel = data.upgradeLevel || 0;
+                            rebirths = data.rebirths || 0;
+                            upgradeCost = data.upgradeCost || 10;
+                            rebirthCost = data.rebirthCost || 1000000;
+                            unlockedSkins = data.unlockedSkins || ['Skins/SvetlanaSkin.jpg'];
+                            currentSkin = data.currentSkin || 'Skins/SvetlanaSkin.jpg';
+                            completedAchievements = data.completedAchievements || [];
+                            dailyRewardDay = data.dailyRewardDay || 0;
+                            lastClaimDate = data.lastClaimDate || null;
+                            clickCombo = data.clickCombo || 0;
+                            autoclickDetectEnabled = data.autoclickDetectEnabled !== false;
+                            totalClicksCount = data.totalClicksCount || 0;
+                            totalCoinsEarned = data.totalCoinsEarned || 0;
+                            totalUpgradesBought = data.totalUpgradesBought || 0;
+                            totalRebirthsCompleted = data.totalRebirthsCompleted || 0;
+                            autoclickTriggerCount = data.autoclickTriggerCount || 0;
+                            debugMode = data.debugMode || false;
+
+                            updateSkin();
+                            coinCount.textContent = count;
+                            upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
+                            upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
+                            rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
+                            rebirthCountLabel.textContent = `Count: ${rebirths} (x${rebirths + 1})`;
+                            comboCounter.textContent = `Combo: ${clickCombo}x`;
+                            debugToggle.checked = debugMode;
+                            debugStats.style.display = debugMode ? 'block' : 'none';
+                            updateButtons();
+                            autosave();
+                            renderSkinPage();
+                            renderAchievements();
+                            renderDailyRewards();
+                            updateNotifications();
+                            updateDebugStats();
+                        } else {
+                            transferLocalToFirestore();
+                        }
+                    })
+                    .catch((error) => {
+                        authMessage.textContent = `Load error: ${error.message}`;
+                    });
+            }
+
+            function transferLocalToFirestore() {
+                if (!user) return;
+                saveToFirestore();
+            }
+
             if (!localStorage.getItem('tutorialShown')) {
                 alert("Welcome to SndTagXClicker!\n\n- Click the main button to earn coins.\n- Use coins to buy upgrades or rebirths.\n- Unlock skins and achievements for bonuses.\n- Hold the coin counter for 3 seconds to open the admin panel.");
                 localStorage.setItem('tutorialShown', 'true');
@@ -699,7 +888,6 @@
                 updateDebugStats();
             });
 
-            // Settings listeners
             settingsToggle.addEventListener('click', togglePanel.bind(null, settingsPanel, () => {}));
             debugToggle.addEventListener('change', () => {
                 debugMode = debugToggle.checked;
@@ -1154,7 +1342,6 @@
                 updateDebugStats();
             });
 
-            // Debug stats update
             setInterval(() => {
                 if (debugMode) {
                     updateDebugStats();
