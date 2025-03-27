@@ -126,6 +126,7 @@
         #skinPanel, #achievementsPanel, #dailyRewardsPanel, #settingsPanel {
             position: absolute;
             top: 60px;
+            right: 10px;
             width: 260px;
             background: rgba(20, 20, 40, 0.95);
             border-radius: 12px;
@@ -134,10 +135,7 @@
             display: none;
             z-index: 100;
         }
-        #skinPanel { right: 10px; }
-        #achievementsPanel { right: 70px; max-height: 50vh; overflow-y: auto; }
-        #dailyRewardsPanel { right: 130px; }
-        #settingsPanel { right: 190px; max-height: 70vh; overflow-y: auto; }
+        #achievementsPanel, #settingsPanel { max-height: 70vh; overflow-y: auto; }
         .skin-option, .achievement-option, .daily-reward-option, .setting-option {
             position: relative;
             display: flex;
@@ -149,7 +147,7 @@
             font-size: 15px;
             cursor: pointer;
         }
-        .setting-option { cursor: default; }
+        .setting-option { cursor: default; flex-wrap: wrap; }
         .skin-option img, .achievement-option img {
             width: 48px;
             height: 48px;
@@ -261,6 +259,12 @@
             z-index: 1000;
             display: none;
         }
+        #exportSaveText {
+            width: 100%;
+            height: 60px;
+            resize: none;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -349,7 +353,10 @@
                 <button id="importSave">Import Save</button>
             </div>
             <div class="setting-option">
-                <input type="file" id="importFile" accept=".txt">
+                <textarea id="exportSaveText" placeholder="Your save code will appear here" readonly></textarea>
+            </div>
+            <div class="setting-option">
+                <input type="text" id="importSaveText" placeholder="Paste save code here">
             </div>
         </div>
     </div>
@@ -449,7 +456,8 @@
             const autoclickTriggers = document.getElementById('autoclickTriggers');
             const exportSaveButton = document.getElementById('exportSave');
             const importSaveButton = document.getElementById('importSave');
-            const importFile = document.getElementById('importFile');
+            const exportSaveText = document.getElementById('exportSaveText');
+            const importSaveText = document.getElementById('importSaveText');
 
             const skins = [
                 { skin: "Skins/SvetlanaSkin.jpg", cost: 0, name: "🔢Svetlana (Free)", sound: "Sounds/SvetlanaSkin.mp3" },
@@ -771,71 +779,57 @@
                     debugMode: debugMode
                 };
                 const saveString = btoa(JSON.stringify(saveData));
-                const blob = new Blob([saveString], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'SndTagXClicker_save.txt';
-                a.click();
-                URL.revokeObjectURL(url);
+                exportSaveText.value = saveString;
             });
-            importSaveButton.addEventListener('click', () => importFile.click());
-            importFile.addEventListener('change', () => {
-                const file = importFile.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        try {
-                            const saveData = JSON.parse(atob(e.target.result));
-                            count = saveData.coinCount || 0;
-                            coinsPerClick = saveData.coinsPerClick || 1;
-                            upgradeLevel = saveData.upgradeLevel || 0;
-                            rebirths = saveData.rebirths || 0;
-                            upgradeCost = saveData.upgradeCost || 10;
-                            rebirthCost = saveData.rebirthCost || 1000000;
-                            unlockedSkins = saveData.unlockedSkins || ['Skins/SvetlanaSkin.jpg'];
-                            currentSkin = saveData.currentSkin || 'Skins/SvetlanaSkin.jpg';
-                            completedAchievements = saveData.completedAchievements || [];
-                            dailyRewardDay = saveData.dailyRewardDay || 0;
-                            lastClaimDate = saveData.lastClaimDate || null;
-                            clickCombo = saveData.clickCombo || 0;
-                            autoclickDetectEnabled = saveData.autoclickDetectEnabled !== false;
-                            totalClicksCount = saveData.totalClicksCount || 0;
-                            totalCoinsEarned = saveData.totalCoinsEarned || 0;
-                            totalUpgradesBought = saveData.totalUpgradesBought || 0;
-                            totalRebirthsCompleted = saveData.totalRebirthsCompleted || 0;
-                            autoclickTriggerCount = saveData.autoclickTriggerCount || 0;
-                            fontColor.value = saveData.fontColor || '#e0e0e0';
-                            notificationsEnabled = saveData.notificationsEnabled !== false;
-                            notificationsToggle.checked = notificationsEnabled;
-                            buttonShape.value = saveData.buttonShape || 'square';
-                            bgColor1.value = saveData.bgColor1 || '#1e1e2f';
-                            bgColor2.value = saveData.bgColor2 || '#3b3b5e';
-                            panelOpacity.value = saveData.panelOpacity || 0.95;
-                            coinAnimSpeed.value = saveData.coinAnimSpeed || 1;
-                            debugMode = saveData.debugMode || false;
-                            debugToggle.checked = debugMode;
+            importSaveButton.addEventListener('click', () => {
+                try {
+                    const saveData = JSON.parse(atob(importSaveText.value));
+                    count = saveData.coinCount || 0;
+                    coinsPerClick = saveData.coinsPerClick || 1;
+                    upgradeLevel = saveData.upgradeLevel || 0;
+                    rebirths = saveData.rebirths || 0;
+                    upgradeCost = saveData.upgradeCost || 10;
+                    rebirthCost = saveData.rebirthCost || 1000000;
+                    unlockedSkins = saveData.unlockedSkins || ['Skins/SvetlanaSkin.jpg'];
+                    currentSkin = saveData.currentSkin || 'Skins/SvetlanaSkin.jpg';
+                    completedAchievements = saveData.completedAchievements || [];
+                    dailyRewardDay = saveData.dailyRewardDay || 0;
+                    lastClaimDate = saveData.lastClaimDate || null;
+                    clickCombo = saveData.clickCombo || 0;
+                    autoclickDetectEnabled = saveData.autoclickDetectEnabled !== false;
+                    totalClicksCount = saveData.totalClicksCount || 0;
+                    totalCoinsEarned = saveData.totalCoinsEarned || 0;
+                    totalUpgradesBought = saveData.totalUpgradesBought || 0;
+                    totalRebirthsCompleted = saveData.totalRebirthsCompleted || 0;
+                    autoclickTriggerCount = saveData.autoclickTriggerCount || 0;
+                    fontColor.value = saveData.fontColor || '#e0e0e0';
+                    notificationsEnabled = saveData.notificationsEnabled !== false;
+                    notificationsToggle.checked = notificationsEnabled;
+                    buttonShape.value = saveData.buttonShape || 'square';
+                    bgColor1.value = saveData.bgColor1 || '#1e1e2f';
+                    bgColor2.value = saveData.bgColor2 || '#3b3b5e';
+                    panelOpacity.value = saveData.panelOpacity || 0.95;
+                    coinAnimSpeed.value = saveData.coinAnimSpeed || 1;
+                    debugMode = saveData.debugMode || false;
+                    debugToggle.checked = debugMode;
 
-                            updateSkin();
-                            coinCount.textContent = count;
-                            upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
-                            upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
-                            rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
-                            rebirthCountLabel.textContent = `Count: ${rebirths} (x${rebirths + 1})`;
-                            comboCounter.textContent = `Combo: ${clickCombo}x`;
-                            debugStats.style.display = debugMode ? 'block' : 'none';
-                            applyStyles();
-                            updateButtons();
-                            autosave();
-                            renderSkinPage();
-                            renderAchievements();
-                            renderDailyRewards();
-                            updateNotifications();
-                        } catch (e) {
-                            alert("Invalid save file!");
-                        }
-                    };
-                    reader.readAsText(file);
+                    updateSkin();
+                    coinCount.textContent = count;
+                    upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
+                    upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
+                    rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
+                    rebirthCountLabel.textContent = `Count: ${rebirths} (x${rebirths + 1})`;
+                    comboCounter.textContent = `Combo: ${clickCombo}x`;
+                    debugStats.style.display = debugMode ? 'block' : 'none';
+                    applyStyles();
+                    updateButtons();
+                    autosave();
+                    renderSkinPage();
+                    renderAchievements();
+                    renderDailyRewards();
+                    updateNotifications();
+                } catch (e) {
+                    alert("Invalid save code!");
                 }
             });
 
