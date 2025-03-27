@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SndTagXClicker</title>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
     <style>
         body {
             margin: 0;
@@ -104,7 +100,7 @@
             position: absolute;
             top: 60px;
             right: 10px;
-            width: 260px;
+            width: 300px;
             background: rgba(20, 20, 40, 0.95);
             border-radius: 12px;
             padding: 10px;
@@ -120,12 +116,35 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
             font-size: 15px;
+            flex-wrap: wrap;
         }
-        #settingsPanel input, #settingsPanel button {
-            margin: 5px;
+        #exportSaveText, #importSaveText {
+            width: 100%;
+            height: 60px;
+            resize: none;
             padding: 5px;
+            margin-top: 5px;
             border-radius: 5px;
             border: 1px solid #ccc;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+        #exportSaveText { margin-bottom: 10px; }
+        #settingsPanel input, #settingsPanel button {
+            padding: 5px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        #settingsPanel button {
+            background: #ff4d4d;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+        }
+        #settingsPanel button:hover {
+            background: #e03c3c;
         }
         #authMessage { font-size: 12px; margin-top: 5px; }
     </style>
@@ -145,48 +164,25 @@
     <button id="settingsToggle">⚙</button>
     <div id="settingsPanel">
         <div class="setting-option">
-            <input type="text" id="usernameInput" placeholder="Username">
-            <input type="password" id="passwordInput" placeholder="Password">
-            <button id="loginButton">Login</button>
-            <button id="signupButton">Sign Up</button>
-            <button id="logoutButton" style="display: none;">Logout</button>
-            <div id="authMessage"></div>
+            <input type="text" id="skinInput" placeholder="Skin URL">
+            <button id="applySkinButton">Apply Skin</button>
         </div>
         <div class="setting-option">
-            <button id="saveButton">Save to Cloud</button>
+            <button id="exportSaveButton">Export Save</button>
+            <textarea id="exportSaveText" readonly placeholder="Click 'Export Save' to get your save code"></textarea>
+        </div>
+        <div class="setting-option">
+            <button id="importSaveButton">Import Save</button>
+            <textarea id="importSaveText" placeholder="Paste your save code here"></textarea>
+        </div>
+        <div class="setting-option">
+            <button id="resetButton">Reset Game</button>
         </div>
     </div>
     <audio id="clickSound"></audio>
 
     <script>
-        // Firebase configuration (replace apiKey with your new key)
-        const firebaseConfig = {
-            apiKey: "AIzaSyB-fkxockaYaRFtjKserdeY1YJXzRyE_zk", // Get from Firebase Console
-            authDomain: "sndtagx.firebaseapp.com",
-            projectId: "sndtagx",
-            storageBucket: "sndtagx.firebasestorage.app",
-            messagingSenderId: "1057888777099",
-            appId: "1:1057888777099:web:243410f285cd9e9500f58e",
-            measurementId: "G-B7KVZZ3J86"
-        };
-
-        // Wait for Firebase to load
         window.onload = function() {
-            // Initialize Firebase
-            try {
-                firebase.initializeApp(firebaseConfig);
-                console.log("Firebase initialized");
-            } catch (e) {
-                console.error("Firebase init failed:", e);
-                alert("Firebase setup failed. Check console for details.");
-                return;
-            }
-
-            const auth = firebase.auth();
-            const db = firebase.firestore();
-            const FIXED_DOMAIN = "@sndtagx.com";
-
-            // DOM elements
             const mainButton = document.getElementById('mainButton');
             const coinCount = document.getElementById('coinCount');
             const coinIcon = document.getElementById('coinIcon');
@@ -196,94 +192,66 @@
             const upgradeCountLabel = document.getElementById('upgradeCountLabel');
             const rebirthCostLabel = document.getElementById('rebirthCostLabel');
             const rebirthCountLabel = document.getElementById('rebirthCountLabel');
+            const clickSound = document.getElementById('clickSound');
             const settingsToggle = document.getElementById('settingsToggle');
             const settingsPanel = document.getElementById('settingsPanel');
-            const usernameInput = document.getElementById('usernameInput');
-            const passwordInput = document.getElementById('passwordInput');
-            const loginButton = document.getElementById('loginButton');
-            const signupButton = document.getElementById('signupButton');
-            const logoutButton = document.getElementById('logoutButton');
-            const authMessage = document.getElementById('authMessage');
-            const saveButton = document.getElementById('saveButton');
-            const clickSound = document.getElementById('clickSound');
+            const skinInput = document.getElementById('skinInput');
+            const applySkinButton = document.getElementById('applySkinButton');
+            const exportSaveButton = document.getElementById('exportSaveButton');
+            const exportSaveText = document.getElementById('exportSaveText');
+            const importSaveButton = document.getElementById('importSaveButton');
+            const importSaveText = document.getElementById('importSaveText');
+            const resetButton = document.getElementById('resetButton');
 
-            // Game state
-            let user = null;
-            let count = parseInt(localStorage.getItem('coinCount')) || 0;
-            let coinsPerClick = parseInt(localStorage.getItem('coinsPerClick')) || 1;
-            let upgradeLevel = parseInt(localStorage.getItem('upgradeLevel')) || 0;
-            let rebirths = parseInt(localStorage.getItem('rebirths')) || 0;
-            let upgradeCost = parseInt(localStorage.getItem('upgradeCost')) || 10;
-            let rebirthCost = parseInt(localStorage.getItem('rebirthCost')) || 1000000;
+            // Default values
             const defaultSkin = "Skins/SvetlanaSkin.jpg";
             const defaultSound = "Sounds/SvetlanaSkin.mp3";
+            const defaultData = {
+                count: 0,
+                coinsPerClick: 1,
+                upgradeLevel: 0,
+                rebirths: 0,
+                upgradeCost: 10,
+                rebirthCost: 1000000,
+                currentSkin: defaultSkin,
+                currentSound: defaultSound,
+                skins: [
+                    { skin: "Skins/SvetlanaSkin.jpg", cost: 0, name: "🔢Svetlana (Free)", sound: "Sounds/SvetlanaSkin.mp3" },
+                    { skin: "Skins/Skin2.jpg", cost: 100, name: "Skin2", sound: "Sounds/Skin2.mp3" }
+                ],
+                achievements: {
+                    firstClick: false,
+                    tenUpgrades: false,
+                    firstRebirth: false
+                }
+            };
+
+            // Load or convert data
+            let gameData = loadGameData();
+            let count = gameData.count;
+            let coinsPerClick = gameData.coinsPerClick;
+            let upgradeLevel = gameData.upgradeLevel;
+            let rebirths = gameData.rebirths;
+            let upgradeCost = gameData.upgradeCost;
+            let rebirthCost = gameData.rebirthCost;
+            let currentSkin = gameData.currentSkin;
+            let currentSound = gameData.currentSound;
+            let skins = gameData.skins;
+            let achievements = gameData.achievements;
 
             // Initial setup
-            mainButton.style.backgroundImage = `url('${defaultSkin}')`;
-            upgradeButton.style.backgroundImage = `url('${defaultSkin}')`;
-            rebirthButton.style.backgroundImage = `url('${defaultSkin}')`;
-            coinIcon.src = defaultSkin;
-            clickSound.src = defaultSound;
+            mainButton.style.backgroundImage = `url('${currentSkin}')`;
+            upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
+            rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
+            coinIcon.src = currentSkin;
+            clickSound.src = currentSound;
             coinCount.textContent = count;
             upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
             upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
             rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
             rebirthCountLabel.textContent = `Count: ${rebirths}`;
             updateButtons();
-
-            // Authentication
-            auth.onAuthStateChanged(firebaseUser => {
-                user = firebaseUser;
-                if (user) {
-                    usernameInput.style.display = 'none';
-                    passwordInput.style.display = 'none';
-                    loginButton.style.display = 'none';
-                    signupButton.style.display = 'none';
-                    logoutButton.style.display = 'block';
-                    authMessage.textContent = `Logged in as ${user.email.split('@')[0]}`;
-                    loadFromFirestore();
-                } else {
-                    usernameInput.style.display = 'inline';
-                    passwordInput.style.display = 'inline';
-                    loginButton.style.display = 'inline';
-                    signupButton.style.display = 'inline';
-                    logoutButton.style.display = 'none';
-                    authMessage.textContent = 'Not logged in';
-                }
-            });
-
-            loginButton.addEventListener('click', () => {
-                const email = usernameInput.value.trim() + FIXED_DOMAIN;
-                const password = passwordInput.value;
-                if (!email || !password) {
-                    authMessage.textContent = 'Enter username and password';
-                    return;
-                }
-                auth.signInWithEmailAndPassword(email, password)
-                    .then(() => authMessage.textContent = 'Login successful!')
-                    .catch(e => authMessage.textContent = `Error: ${e.message}`);
-            });
-
-            signupButton.addEventListener('click', () => {
-                const email = usernameInput.value.trim() + FIXED_DOMAIN;
-                const password = passwordInput.value;
-                if (!email || !password) {
-                    authMessage.textContent = 'Enter username and password';
-                    return;
-                }
-                auth.createUserWithEmailAndPassword(email, password)
-                    .then(() => {
-                        authMessage.textContent = 'Sign up successful!';
-                        transferLocalToFirestore();
-                    })
-                    .catch(e => authMessage.textContent = `Error: ${e.message}`);
-            });
-
-            logoutButton.addEventListener('click', () => {
-                auth.signOut().then(() => authMessage.textContent = 'Logged out');
-            });
-
-            saveButton.addEventListener('click', saveToFirestore);
+            checkAchievements();
 
             // Game logic
             mainButton.addEventListener('click', e => {
@@ -291,8 +259,12 @@
                 count += coinsPerClick * (rebirths + 1);
                 coinCount.textContent = count;
                 createFlyingCoin(e);
+                if (!achievements.firstClick) {
+                    achievements.firstClick = true;
+                    alert("Achievement Unlocked: First Click!");
+                }
                 updateButtons();
-                autosave();
+                saveGameData();
             });
 
             upgradeButton.addEventListener('click', () => {
@@ -304,8 +276,12 @@
                     coinCount.textContent = count;
                     upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
                     upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
+                    if (upgradeLevel >= 10 && !achievements.tenUpgrades) {
+                        achievements.tenUpgrades = true;
+                        alert("Achievement Unlocked: 10 Upgrades!");
+                    }
                     updateButtons();
-                    autosave();
+                    saveGameData();
                 }
             });
 
@@ -322,11 +298,16 @@
                     upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
                     rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
                     rebirthCountLabel.textContent = `Count: ${rebirths}`;
+                    if (!achievements.firstRebirth) {
+                        achievements.firstRebirth = true;
+                        alert("Achievement Unlocked: First Rebirth!");
+                    }
                     updateButtons();
-                    autosave();
+                    saveGameData();
                 }
             });
 
+            // Settings panel
             settingsToggle.addEventListener('click', () => {
                 settingsPanel.style.display = settingsPanel.style.display === 'block' ? 'none' : 'block';
             });
@@ -334,6 +315,102 @@
             document.addEventListener('click', e => {
                 if (!settingsPanel.contains(e.target) && e.target !== settingsToggle) {
                     settingsPanel.style.display = 'none';
+                }
+            });
+
+            applySkinButton.addEventListener('click', () => {
+                const newSkin = skinInput.value.trim();
+                if (newSkin) {
+                    currentSkin = newSkin;
+                    mainButton.style.backgroundImage = `url('${currentSkin}')`;
+                    upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
+                    rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
+                    coinIcon.src = currentSkin;
+                    saveGameData();
+                    skinInput.value = '';
+                }
+            });
+
+            exportSaveButton.addEventListener('click', () => {
+                const data = {
+                    count: count,
+                    coinsPerClick: coinsPerClick,
+                    upgradeLevel: upgradeLevel,
+                    rebirths: rebirths,
+                    upgradeCost: upgradeCost,
+                    rebirthCost: rebirthCost,
+                    currentSkin: currentSkin,
+                    currentSound: currentSound,
+                    skins: skins,
+                    achievements: achievements
+                };
+                const encodedData = btoa(JSON.stringify(data));
+                exportSaveText.value = encodedData;
+            });
+
+            importSaveButton.addEventListener('click', () => {
+                const inputData = importSaveText.value.trim();
+                if (!inputData) {
+                    alert("Please paste a save code to import.");
+                    return;
+                }
+                try {
+                    const decodedData = JSON.parse(atob(inputData));
+                    count = decodedData.count || 0;
+                    coinsPerClick = decodedData.coinsPerClick || 1;
+                    upgradeLevel = decodedData.upgradeLevel || 0;
+                    rebirths = decodedData.rebirths || 0;
+                    upgradeCost = decodedData.upgradeCost || 10;
+                    rebirthCost = decodedData.rebirthCost || 1000000;
+                    currentSkin = decodedData.currentSkin || defaultSkin;
+                    currentSound = decodedData.currentSound || defaultSound;
+                    skins = decodedData.skins || defaultData.skins;
+                    achievements = decodedData.achievements || defaultData.achievements;
+                    coinCount.textContent = count;
+                    upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
+                    upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
+                    rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
+                    rebirthCountLabel.textContent = `Count: ${rebirths}`;
+                    mainButton.style.backgroundImage = `url('${currentSkin}')`;
+                    upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
+                    rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
+                    coinIcon.src = currentSkin;
+                    clickSound.src = currentSound;
+                    updateButtons();
+                    saveGameData();
+                    importSaveText.value = '';
+                    alert("Save imported successfully!");
+                } catch (e) {
+                    alert("Invalid save code. Please check and try again.");
+                }
+            });
+
+            resetButton.addEventListener('click', () => {
+                if (confirm("Are you sure you want to reset all progress? This cannot be undone.")) {
+                    count = 0;
+                    coinsPerClick = 1;
+                    upgradeLevel = 0;
+                    rebirths = 0;
+                    upgradeCost = 10;
+                    rebirthCost = 1000000;
+                    currentSkin = defaultSkin;
+                    currentSound = defaultSound;
+                    skins = defaultData.skins;
+                    achievements = defaultData.achievements;
+                    coinCount.textContent = count;
+                    upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
+                    upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
+                    rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
+                    rebirthCountLabel.textContent = `Count: ${rebirths}`;
+                    mainButton.style.backgroundImage = `url('${currentSkin}')`;
+                    upgradeButton.style.backgroundImage = `url('${currentSkin}')`;
+                    rebirthButton.style.backgroundImage = `url('${currentSkin}')`;
+                    coinIcon.src = currentSkin;
+                    clickSound.src = currentSound;
+                    updateButtons();
+                    saveGameData();
+                    exportSaveText.value = '';
+                    importSaveText.value = '';
                 }
             });
 
@@ -345,7 +422,7 @@
 
             function createFlyingCoin(e) {
                 const coin = document.createElement('img');
-                coin.src = defaultSkin;
+                coin.src = currentSkin;
                 coin.className = 'flying-coin';
                 const rect = mainButton.getBoundingClientRect();
                 coin.style.left = (e.clientX - rect.left - 16) + 'px';
@@ -354,59 +431,72 @@
                 setTimeout(() => coin.remove(), 1000);
             }
 
-            function autosave() {
-                localStorage.setItem('coinCount', count);
-                localStorage.setItem('coinsPerClick', coinsPerClick);
-                localStorage.setItem('upgradeLevel', upgradeLevel);
-                localStorage.setItem('rebirths', rebirths);
-                localStorage.setItem('upgradeCost', upgradeCost);
-                localStorage.setItem('rebirthCost', rebirthCost);
+            function checkAchievements() {
+                if (count > 0 && !achievements.firstClick) achievements.firstClick = true;
+                if (upgradeLevel >= 10 && !achievements.tenUpgrades) achievements.tenUpgrades = true;
+                if (rebirths > 0 && !achievements.firstRebirth) achievements.firstRebirth = true;
             }
 
-            function saveToFirestore() {
-                if (!user) {
-                    authMessage.textContent = 'Log in to save';
-                    return;
-                }
+            function saveGameData() {
                 const data = {
-                    coinCount: count,
+                    count: count,
                     coinsPerClick: coinsPerClick,
                     upgradeLevel: upgradeLevel,
                     rebirths: rebirths,
                     upgradeCost: upgradeCost,
-                    rebirthCost: rebirthCost
+                    rebirthCost: rebirthCost,
+                    currentSkin: currentSkin,
+                    currentSound: currentSound,
+                    skins: skins,
+                    achievements: achievements
                 };
-                db.collection('users').doc(user.uid).set(data)
-                    .then(() => authMessage.textContent = 'Saved to cloud!')
-                    .catch(e => authMessage.textContent = `Save error: ${e.message}`);
+                const encodedData = btoa(JSON.stringify(data));
+                localStorage.setItem('sndtagx_save', encodedData);
             }
 
-            function loadFromFirestore() {
-                if (!user) return;
-                db.collection('users').doc(user.uid).get()
-                    .then(doc => {
-                        if (doc.exists) {
-                            const data = doc.data();
-                            count = data.coinCount || 0;
-                            coinsPerClick = data.coinsPerClick || 1;
-                            upgradeLevel = data.upgradeLevel || 0;
-                            rebirths = data.rebirths || 0;
-                            upgradeCost = data.upgradeCost || 10;
-                            rebirthCost = data.rebirthCost || 1000000;
-                            coinCount.textContent = count;
-                            upgradeCostLabel.textContent = `Cost: ${upgradeCost}`;
-                            upgradeCountLabel.textContent = `Count: ${upgradeLevel}`;
-                            rebirthCostLabel.textContent = `Cost: ${rebirthCost}`;
-                            rebirthCountLabel.textContent = `Count: ${rebirths}`;
-                            updateButtons();
-                            autosave();
-                        }
-                    })
-                    .catch(e => authMessage.textContent = `Load error: ${e.message}`);
+            function loadGameData() {
+                const savedData = localStorage.getItem('sndtagx_save');
+                if (savedData) {
+                    try {
+                        return JSON.parse(atob(savedData));
+                    } catch (e) {
+                        console.log("Invalid save data, converting old format");
+                    }
+                }
+
+                // Convert old LocalStorage format
+                const oldData = {
+                    count: parseInt(localStorage.getItem('coinCount')) || 0,
+                    coinsPerClick: parseInt(localStorage.getItem('coinsPerClick')) || 1,
+                    upgradeLevel: parseInt(localStorage.getItem('upgradeLevel')) || 0,
+                    rebirths: parseInt(localStorage.getItem('rebirths')) || 0,
+                    upgradeCost: parseInt(localStorage.getItem('upgradeCost')) || 10,
+                    rebirthCost: parseInt(localStorage.getItem('rebirthCost')) || 1000000,
+                    currentSkin: localStorage.getItem('currentSkin') || defaultSkin,
+                    currentSound: localStorage.getItem('currentSound') || defaultSound,
+                    skins: JSON.parse(localStorage.getItem('skins')) || defaultData.skins,
+                    achievements: JSON.parse(localStorage.getItem('achievements')) || defaultData.achievements
+                };
+
+                // Save in new format and clean up old keys
+                saveGameDataFromObject(oldData);
+                localStorage.removeItem('coinCount');
+                localStorage.removeItem('coinsPerClick');
+                localStorage.removeItem('upgradeLevel');
+                localStorage.removeItem('rebirths');
+                localStorage.removeItem('upgradeCost');
+                localStorage.removeItem('rebirthCost');
+                localStorage.removeItem('currentSkin');
+                localStorage.removeItem('currentSound');
+                localStorage.removeItem('skins');
+                localStorage.removeItem('achievements');
+
+                return oldData;
             }
 
-            function transferLocalToFirestore() {
-                if (user) saveToFirestore();
+            function saveGameDataFromObject(data) {
+                const encodedData = btoa(JSON.stringify(data));
+                localStorage.setItem('sndtagx_save', encodedData);
             }
 
             console.log("Game loaded");
