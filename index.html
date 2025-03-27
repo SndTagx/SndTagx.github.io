@@ -110,26 +110,26 @@
         #skinPanelToggle, #achievementsToggle, #dailyRewardsToggle, #settingsToggle, #shopToggle {
             position: absolute;
             right: 10px;
-            width: 40px;
-            height: 40px;
+            width: 30px; /* Smaller size */
+            height: 30px; /* Smaller size */
             background: linear-gradient(135deg, #1e1e2f 0%, #2e3e5f 100%);
             border: 2px solid #173a5b;
-            border-radius: 8px;
+            border-radius: 6px; /* Slightly smaller radius for smaller size */
             color: #fff;
-            font-size: 20px;
+            font-size: 16px; /* Adjusted font size */
             font-weight: bold;
             text-align: center;
-            line-height: 40px;
+            line-height: 30px;
             cursor: pointer;
             z-index: 101;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
         }
         #skinPanelToggle { top: 10px; }
-        #achievementsToggle { top: 60px; }
-        #dailyRewardsToggle { top: 110px; }
-        #settingsToggle { top: 160px; }
-        #shopToggle { top: 210px; }
+        #achievementsToggle { top: 50px; } /* Adjusted spacing */
+        #dailyRewardsToggle { top: 90px; }
+        #settingsToggle { top: 130px; }
+        #shopToggle { top: 170px; }
         #skinPanelToggle:hover, #achievementsToggle:hover, #dailyRewardsToggle:hover, #settingsToggle:hover, #shopToggle:hover {
             transform: scale(1.1);
             box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
@@ -139,20 +139,20 @@
             position: absolute;
             top: -5px;
             right: -5px;
-            width: 18px;
-            height: 18px;
+            width: 16px; /* Slightly smaller */
+            height: 16px;
             background: #ff4d4d;
             border-radius: 50%;
             color: #fff;
             font-size: 10px;
             text-align: center;
-            line-height: 18px;
+            line-height: 16px;
             z-index: 102;
         }
         #skinPanel, #achievementsPanel, #dailyRewardsPanel, #settingsPanel, #shopPanel {
             position: absolute;
             top: 10px;
-            right: 60px;
+            right: 50px; /* Adjusted to align with smaller buttons */
             width: 260px;
             background: rgba(20, 20, 40, 0.95);
             border-radius: 12px;
@@ -319,7 +319,7 @@
     <button id="achievementsToggle">A<div id="achievementsNotification" class="notification" style="display: none;"></div></button>
     <button id="dailyRewardsToggle">D<div id="dailyNotification" class="notification" style="display: none;"></div></button>
     <button id="settingsToggle">⚙</button>
-    <button id="shopToggle">🏪<div id="shopNotification" class="notification" style="display: none;"></div></button>
+    <button id="shopToggle">P<div id="shopNotification" class="notification" style="display: none;"></div></button>
     <div id="skinPanel">
         <div id="skinPages"></div>
         <div style="display: flex; justify-content: center; gap: 8px; margin-top: 10px;">
@@ -641,7 +641,9 @@
             function loadGameData() {
                 const savedData = localStorage.getItem('gameData');
                 if (savedData) {
-                    return JSON.parse(atob(savedData));
+                    const loadedData = JSON.parse(atob(savedData));
+                    // Ensure all properties from defaultGameData are present, including level
+                    return { ...defaultGameData, ...loadedData };
                 } else {
                     const oldData = {
                         count: parseInt(localStorage.getItem('coinCount')) || 0,
@@ -664,11 +666,11 @@
                         autoclickTriggerCount: parseInt(localStorage.getItem('autoclickTriggerCount')) || 0,
                         debugMode: localStorage.getItem('debugMode') === 'true',
                         tutorialShown: localStorage.getItem('tutorialShown') === 'true',
-                        level: 0,
-                        coinsPerSec: 0,
-                        shopItems: [],
-                        shopLastRefresh: 0,
-                        theme: 'default'
+                        level: parseInt(localStorage.getItem('level')) || 0,
+                        coinsPerSec: parseInt(localStorage.getItem('coinsPerSec')) || 0,
+                        shopItems: JSON.parse(localStorage.getItem('shopItems')) || [],
+                        shopLastRefresh: parseInt(localStorage.getItem('shopLastRefresh')) || 0,
+                        theme: localStorage.getItem('theme') || 'default'
                     };
                     saveGameData(oldData);
                     return oldData;
