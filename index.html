@@ -223,7 +223,7 @@
             gap: 8px;
             margin-bottom: 10px;
         }
-        #adminPanel input[type="number"], #adminPanel input[type="text"], #settingsPanel input[type="text"], #settingsPanel input[type="email"], #settingsPanel input[type="password"] {
+        #adminPanel input[type="number"], #adminPanel input[type="text"], #settingsPanel input[type="text"], #settingsPanel input[type="password"] {
             flex: 1;
             padding: 6px;
             border-radius: 6px;
@@ -315,20 +315,17 @@
     <div id="settingsPanel">
         <h2>Settings</h2>
         <div id="settingsContent">
-            <!-- Auth Section -->
             <div id="authSection" class="setting-option">
-                <input type="email" id="emailInput" placeholder="Email">
+                <input type="text" id="usernameInput" placeholder="Username">
                 <input type="password" id="passwordInput" placeholder="Password">
                 <button id="loginButton">Login</button>
                 <button id="signupButton">Sign Up</button>
                 <button id="logoutButton" style="display: none;">Logout</button>
                 <div id="authMessage" style="font-size: 12px; margin-top: 5px;"></div>
             </div>
-            <!-- Save Button -->
             <div class="setting-option">
                 <button id="saveButton">Save to Cloud</button>
             </div>
-            <!-- Debug Mode -->
             <div class="setting-option">
                 <label>Debug Mode: </label>
                 <input type="checkbox" id="debugToggle">
@@ -355,7 +352,6 @@
                 <span id="lastClaimDate">Last Claim Date: None</span><br>
                 <span id="adminPanelState">Admin Panel: Hidden</span>
             </div>
-            <!-- Export/Import -->
             <div class="setting-option">
                 <button id="exportSave">Export Save</button>
                 <button id="importSave">Import Save</button>
@@ -387,20 +383,25 @@
     <audio id="clickSound" loop></audio>
 
     <script>
-        // Firebase configuration (replace with your actual Firebase project config)
+        // Firebase configuration
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY", // Get from Firebase Console
+            apiKey: "AIzaSyB-fkxockaYaRFtjKserdeY1YJXzRyE_zk",
             authDomain: "sndtagx.firebaseapp.com",
+            databaseURL: "https://sndtagx-default-rtdb.firebaseio.com",
             projectId: "sndtagx",
-            storageBucket: "sndtagx.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID", // Get from Firebase Console
-            appId: "YOUR_APP_ID" // Get from Firebase Console
+            storageBucket: "sndtagx.firebasestorage.app",
+            messagingSenderId: "1057888777099",
+            appId: "1:1057888777099:web:243410f285cd9e9500f58e",
+            measurementId: "G-B7KVZZ3J86"
         };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+
+        // Fixed domain for username simulation
+        const FIXED_DOMAIN = "@sndtagx.com";
 
         window.onload = function() {
             const mainButton = document.getElementById('mainButton');
@@ -459,8 +460,7 @@
             const jumpscare = document.getElementById('jumpscare');
             const adminAutoclickDetectInput = document.getElementById('adminAutoclickDetect');
             const toggleAutoclickDetectButton = document.getElementById('toggleAutoclickDetect');
-            // Settings elements
-            const emailInput = document.getElementById('emailInput');
+            const usernameInput = document.getElementById('usernameInput');
             const passwordInput = document.getElementById('passwordInput');
             const loginButton = document.getElementById('loginButton');
             const signupButton = document.getElementById('signupButton');
@@ -597,19 +597,19 @@
             debugStats.style.display = debugMode ? 'block' : 'none';
             updateDebugStats();
 
-            // Firebase Authentication State Listener
             auth.onAuthStateChanged((firebaseUser) => {
                 user = firebaseUser;
                 if (user) {
-                    emailInput.style.display = 'none';
+                    usernameInput.style.display = 'none';
                     passwordInput.style.display = 'none';
                     loginButton.style.display = 'none';
                     signupButton.style.display = 'none';
                     logoutButton.style.display = 'block';
-                    authMessage.textContent = `Logged in as ${user.email}`;
+                    const username = user.email.split('@')[0];
+                    authMessage.textContent = `Logged in as ${username}`;
                     loadFromFirestore();
                 } else {
-                    emailInput.style.display = 'inline';
+                    usernameInput.style.display = 'inline';
                     passwordInput.style.display = 'inline';
                     loginButton.style.display = 'inline';
                     signupButton.style.display = 'inline';
@@ -618,44 +618,41 @@
                 }
             });
 
-            // Login
             loginButton.addEventListener('click', () => {
-                const email = emailInput.value;
+                const username = usernameInput.value.trim();
                 const password = passwordInput.value;
+                if (!username || !password) {
+                    authMessage.textContent = 'Please enter a username and password';
+                    return;
+                }
+                const email = username + FIXED_DOMAIN;
                 auth.signInWithEmailAndPassword(email, password)
-                    .then(() => {
-                        authMessage.textContent = 'Login successful!';
-                    })
-                    .catch((error) => {
-                        authMessage.textContent = `Error: ${error.message}`;
-                    });
+                    .then(() => authMessage.textContent = 'Login successful!')
+                    .catch((error) => authMessage.textContent = `Error: ${error.message}`);
             });
 
-            // Sign Up
             signupButton.addEventListener('click', () => {
-                const email = emailInput.value;
+                const username = usernameInput.value.trim();
                 const password = passwordInput.value;
+                if (!username || !password) {
+                    authMessage.textContent = 'Please enter a username and password';
+                    return;
+                }
+                const email = username + FIXED_DOMAIN;
                 auth.createUserWithEmailAndPassword(email, password)
                     .then(() => {
                         authMessage.textContent = 'Account created!';
                         transferLocalToFirestore();
                     })
-                    .catch((error) => {
-                        authMessage.textContent = `Error: ${error.message}`;
-                    });
+                    .catch((error) => authMessage.textContent = `Error: ${error.message}`);
             });
 
-            // Logout
             logoutButton.addEventListener('click', () => {
-                auth.signOut().then(() => {
-                    authMessage.textContent = 'Logged out';
-                });
+                auth.signOut().then(() => authMessage.textContent = 'Logged out');
             });
 
-            // Save to Firestore
             saveButton.addEventListener('click', saveToFirestore);
 
-            // Save on page exit
             window.addEventListener('beforeunload', () => {
                 if (user) saveToFirestore();
             });
@@ -706,12 +703,8 @@
                     debugMode: debugMode
                 };
                 db.collection('users').doc(user.uid).set(saveData)
-                    .then(() => {
-                        authMessage.textContent = 'Data saved to cloud!';
-                    })
-                    .catch((error) => {
-                        authMessage.textContent = `Save error: ${error.message}`;
-                    });
+                    .then(() => authMessage.textContent = 'Data saved to cloud!')
+                    .catch((error) => authMessage.textContent = `Save error: ${error.message}`);
             }
 
             function loadFromFirestore() {
@@ -760,9 +753,7 @@
                             transferLocalToFirestore();
                         }
                     })
-                    .catch((error) => {
-                        authMessage.textContent = `Load error: ${error.message}`;
-                    });
+                    .catch((error) => authMessage.textContent = `Load error: ${error.message}`);
             }
 
             function transferLocalToFirestore() {
@@ -992,9 +983,7 @@
                 if (!autoclickDetectEnabled) return false;
                 const now = Date.now();
                 clickTimes.push(now);
-                if (clickTimes.length > Math.max(CLICK_THRESHOLD, CONSISTENT_THRESHOLD)) {
-                    clickTimes.shift();
-                }
+                if (clickTimes.length > Math.max(CLICK_THRESHOLD, CONSISTENT_THRESHOLD)) clickTimes.shift();
                 if (clickTimes.length >= CLICK_THRESHOLD) {
                     const timeSpan = clickTimes[clickTimes.length - 1] - clickTimes[clickTimes.length - CLICK_THRESHOLD];
                     const avgInterval = timeSpan / (CLICK_THRESHOLD - 1);
@@ -1008,14 +997,10 @@
                 }
                 if (clickTimes.length >= CONSISTENT_THRESHOLD) {
                     let intervals = [];
-                    for (let i = 1; i < clickTimes.length; i++) {
-                        intervals.push(clickTimes[i] - clickTimes[i - 1]);
-                    }
+                    for (let i = 1; i < clickTimes.length; i++) intervals.push(clickTimes[i] - clickTimes[i - 1]);
                     const recentIntervals = intervals.slice(-CONSISTENT_THRESHOLD);
                     const firstInterval = recentIntervals[0];
-                    const allConsistent = recentIntervals.every(interval => 
-                        Math.abs(interval - firstInterval) <= INTERVAL_TOLERANCE
-                    );
+                    const allConsistent = recentIntervals.every(interval => Math.abs(interval - firstInterval) <= INTERVAL_TOLERANCE);
                     if (allConsistent) {
                         triggerJumpscare();
                         autoclickTriggerCount++;
@@ -1030,6 +1015,10 @@
             function triggerJumpscare() {
                 jumpscare.style.display = 'block';
                 mainButton.disabled = true;
+                setTimeout(() => {
+                    jumpscare.style.display = 'none';
+                    mainButton.disabled = false;
+                }, 2000);
             }
 
             mainButton.addEventListener('click', function(e) {
@@ -1231,9 +1220,7 @@
                         if (ach.type === "rebirths" && rebirths >= ach.goal) achieved = true;
                         if (ach.type === "combo" && Math.min(Math.floor(clickCombo / (MAX_COMBO_CLICKS / (MAX_MULTIPLIER - 1))) + 1, MAX_MULTIPLIER) >= ach.goal) achieved = true;
                         if (ach.type === "skin" && unlockedSkins.includes(ach.goal)) achieved = true;
-                        if (achieved) {
-                            renderAchievements();
-                        }
+                        if (achieved) renderAchievements();
                     }
                 });
             }
@@ -1339,21 +1326,12 @@
                 if (!achievementsPanel.contains(e.target) && e.target !== achievementsToggle) achievementsPanel.style.display = 'none';
                 if (!dailyRewardsPanel.contains(e.target) && e.target !== dailyRewardsToggle) dailyRewardsPanel.style.display = 'none';
                 if (!settingsPanel.contains(e.target) && e.target !== settingsToggle) settingsPanel.style.display = 'none';
-                updateDebugStats();
             });
 
             setInterval(() => {
-                if (debugMode) {
-                    updateDebugStats();
-                    clicksPerSecond = 0;
-                }
+                clicksPerSecond = 0;
+                updateDebugStats();
             }, 1000);
-
-            renderSkinPage();
-            renderAchievements();
-            renderDailyRewards();
-            updateNotifications();
-            checkAchievements();
         };
     </script>
 </body>
