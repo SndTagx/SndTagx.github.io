@@ -167,8 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const MAX_MULTIPLIER = 3;
     const ITEMS_PER_PAGE = 7;
     const SHOP_REFRESH_INTERVAL = 600; // 10 minutes in seconds
-    const BASE_XP = 10; // XP gained per click
-    const LEVEL_GROWTH_FACTOR = 1.15; // 15% increase per level
+    const BASE_XP = 5; // XP gained per click
+    const LEVEL_GROWTH_FACTOR = 1.8; // 15% increase per level
 
     const defaultGameData = {
         count: 0,
@@ -341,16 +341,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     elements.upgradeButton.addEventListener('click', () => {
-        if (gameData.count >= gameData.upgradeCost) {
-            gameData.count -= gameData.upgradeCost;
-            gameData.coinsPerClick++;
-            gameData.upgradeLevel++;
-            gameData.totalUpgradesBought++;
-            gameData.up dão.upgradeCost = Math.floor(10 * Math.pow(gameData.upgradeLevel, 2)) || 10;
-            saveGameData(gameData);
-            updateUI();
-        }
-    });
+    if (gameData.count >= gameData.upgradeCost) {
+        gameData.count -= gameData.upgradeCost;
+        gameData.coinsPerClick++;
+        gameData.upgradeLevel++;
+        gameData.totalUpgradesBought++;
+        gameData.upgradeCost = Math.floor(10 * Math.pow(gameData.upgradeLevel, 2)) || 10;
+        saveGameData(gameData);
+        updateUI();
+    }
+});
 
     elements.rebirthButton.addEventListener('click', () => {
         if (gameData.count >= gameData.rebirthCost) {
@@ -654,10 +654,6 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.mainButton.disabled = true;
         gameData.autoclickTriggerCount++;
         saveGameData(gameData);
-        setTimeout(() => {
-            elements.jumpscare.style.display = 'none';
-            elements.mainButton.disabled = false;
-        }, 2000);
     }
 
     function createFlyingCoin(e) {
