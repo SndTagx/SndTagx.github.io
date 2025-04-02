@@ -9,9 +9,9 @@ body {
     transition: all 0.5s ease;
 }
 
-/* Default Theme (Dark) */
+/* Default Theme (Old Night Theme) */
 body {
-    background: linear-gradient(45deg, #1a1a2e, #2e2e5e);
+    background: linear-gradient(45deg, #0a0a1a, #1a1a3a);
     color: #e0e0e0;
 }
 
@@ -31,7 +31,7 @@ body.light-theme .panel {
     color: #333;
 }
 
-/* Night Theme (Black) */
+/* Night Theme (Pure Black) */
 body.night-theme {
     background: linear-gradient(45deg, #000000, #1a1a1a);
     color: #e0e0e0;
@@ -365,7 +365,7 @@ button#mainButton:active { transform: scale(0.98); }
     background: rgba(255, 255, 255, 0.15);
 }
 #themeSelect option {
-    background: #2e2e5e; /* Default dropdown item background */
+    background: #1a1a3a; /* Matches old night theme (default) */
     color: #e0e0e0;
 }
 body.light-theme #themeSelect option {
@@ -392,4 +392,4 @@ body.night-theme #themeSelect option {
 #shopPrevPage:disabled, #shopNextPage:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    }
+}
