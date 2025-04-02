@@ -179,7 +179,9 @@ document.addEventListener('DOMContentLoaded', () => {
         autoclickTriggerCount: 0,
         debugMode: false,
         tutorialShown: false,
-        level: 0,
+        level: 1, // Start at level 1
+        xp: 0, // Current XP
+        xpToNextLevel: 10, // Initial XP required for level 2
         coinsPerSec: 0,
         comboBoost: 1,
         shopItems: shopItemsBase.map(item => ({ ...item })),
@@ -188,6 +190,9 @@ document.addEventListener('DOMContentLoaded', () => {
         lastUpdateTime: Date.now(),
         tempBoosts: {}
     };
+
+    const BASE_XP = 10; // XP gained per click
+    const LEVEL_GROWTH_FACTOR = 1.15; // 15% increase per level
 
     let gameData = loadGameData();
     let clickTimes = [];
@@ -216,6 +221,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedData) {
             const loadedData = JSON.parse(atob(savedData));
             updateOfflineProgress(loadedData);
+            // Ensure XP and xpToNextLevel are set correctly for existing saves
+            if (!loadedData.xp) loadedData.xp = 0;
+            if (!loadedData.xpToNextLevel) loadedData.xpToNextLevel = calculateXPForLevel(loadedData.level + 1);
             return { ...defaultGameData, ...loadedData };
         }
         saveGameData(defaultGameData);
@@ -247,6 +255,19 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUI();
     }
 
+    // XP and Level Functions
+    function calculateXPForLevel(level) {
+        return Math.floor(BASE_XP * Math.pow(LEVEL_GROWTH_FACTOR, level - 1));
+    }
+
+    function checkLevelUp() {
+        while (gameData.xp >= gameData.xpToNextLevel) {
+            gameData.xp -= gameData.xpToNextLevel;
+            gameData.level++;
+            gameData.xpToNextLevel = calculateXPForLevel(gameData.level + 1);
+        }
+    }
+
     // UI Updates
     function updateUI() {
         elements.mainButton.style.backgroundImage = `url('${gameData.currentSkin}')`;
@@ -262,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.upgradeButton.disabled = gameData.count < gameData.upgradeCost;
         elements.rebirthButton.disabled = gameData.count < gameData.rebirthCost;
         elements.comboCounter.textContent = `Combo: ${getComboMultiplier()}x`;
-        elements.levelDisplay.textContent = `Level: ${gameData.level}`;
+        elements.levelDisplay.textContent = `Level: ${gameData.level} (XP: ${formatNumber(gameData.xp)}/${formatNumber(gameData.xpToNextLevel)})`;
         elements.jumpscare.style.backgroundImage = `url('Skins/JumpScare.jpg')`;
         elements.debugToggle.checked = gameData.debugMode;
         elements.debugStats.style.display = gameData.debugMode ? 'block' : 'none';
@@ -286,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial Setup
     updateUI();
     if (!gameData.tutorialShown) {
-        alert("Welcome to SndTagXClicker!\n\n- Click to earn coins.\n- Buy upgrades or rebirths.\n- Unlock skins and achievements.\n- Check the Shop for boosts!");
+        alert("Welcome to SndTagXClicker!\n\n- Click to earn coins and XP.\n- Buy upgrades or rebirths.\n- Unlock skins and achievements.\n- Check the Shop for boosts!");
         gameData.tutorialShown = true;
         saveGameData(gameData);
     }
@@ -307,11 +328,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (detectAutoclicker()) return;
         elements.clickSound.play().catch(e => console.error('Sound error:', e));
         updateCombo();
-        gameData.level++;
         const coinsGained = gameData.coinsPerClick * (gameData.rebirths + 1) * getComboMultiplier();
         gameData.count += coinsGained;
         gameData.totalClicksCount++;
         gameData.totalCoinsEarned += coinsGained;
+        gameData.xp += BASE_XP; // Gain XP per click
+        checkLevelUp(); // Check if enough XP to level up
         createFlyingCoin(e);
         clicksPerSecond++;
         saveGameData(gameData);
@@ -345,6 +367,9 @@ document.addEventListener('DOMContentLoaded', () => {
             gameData.coinsPerSec = 0;
             gameData.comboBoost = 1;
             gameData.shopItems = shopItemsBase.map(item => ({ ...item }));
+            gameData.level = 1; // Reset to level 1
+            gameData.xp = 0; // Reset XP
+            gameData.xpToNextLevel = calculateXPForLevel(2); // Reset XP requirement
             saveGameData(gameData);
             updateUI();
         }
@@ -480,7 +505,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     elements.setLevel.addEventListener('click', () => {
-        gameData.level = parseInt(elements.adminLevel.value) || 0;
+        gameData.level = parseInt(elements.adminLevel.value) || 1;
+        gameData.xp = 0; // Reset XP when setting level manually
+        gameData.xpToNextLevel = calculateXPForLevel(gameData.level + 1);
         saveGameData(gameData);
         updateUI();
     });
@@ -627,10 +654,6 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.mainButton.disabled = true;
         gameData.autoclickTriggerCount++;
         saveGameData(gameData);
-        setTimeout(() => {
-            elements.jumpscare.style.display = 'none';
-            elements.mainButton.disabled = false;
-        }, 2000);
     }
 
     function createFlyingCoin(e) {
@@ -848,6 +871,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 Last Claim Date: ${gameData.lastClaimDate || 'None'}<br>
                 Admin Panel: ${elements.adminPanel.style.display === 'block' ? 'Visible' : 'Hidden'}<br>
                 Player Level: ${gameData.level}<br>
+                XP: ${formatNumber(gameData.xp)}/${formatNumber(gameData.xpToNextLevel)}<br>
                 Shop Refresh: ${Math.max(0, SHOP_REFRESH_INTERVAL - Math.floor((Date.now() - gameData.shopLastRefresh) / 1000))}s
             `;
         }
