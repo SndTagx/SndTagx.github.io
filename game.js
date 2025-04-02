@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         comboBoost: 1,
         shopItems: shopItemsBase.map(item => ({ ...item })),
         shopLastRefresh: Date.now(),
-        theme: 'default',
+        theme: 'night',
         lastUpdateTime: Date.now(),
         tempBoosts: {}
     };
