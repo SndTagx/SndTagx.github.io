@@ -158,6 +158,18 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: "Double Coins/sec (5min)", effect: () => activateTempBoost('coinsPerSec', 2, 300), cost: () => 100000, maxQty: 1, qty: 0 },
     ];
 
+    const CLICK_THRESHOLD = 10;
+    const TIME_THRESHOLD = 1000;
+    const MIN_INTERVAL = 50;
+    const CONSISTENT_THRESHOLD = 20;
+    const INTERVAL_TOLERANCE = 5;
+    const MAX_COMBO_CLICKS = 100;
+    const MAX_MULTIPLIER = 3;
+    const ITEMS_PER_PAGE = 7;
+    const SHOP_REFRESH_INTERVAL = 600; // 10 minutes in seconds
+    const BASE_XP = 10; // XP gained per click
+    const LEVEL_GROWTH_FACTOR = 1.15; // 15% increase per level
+
     const defaultGameData = {
         count: 0,
         coinsPerClick: 1,
@@ -191,21 +203,10 @@ document.addEventListener('DOMContentLoaded', () => {
         tempBoosts: {}
     };
 
-    const BASE_XP = 10; // XP gained per click
-    const LEVEL_GROWTH_FACTOR = 1.15; // 15% increase per level
-
     let gameData = loadGameData();
     let clickTimes = [];
     let comboTimeout = null;
     let holdTimeout = null;
-    const CLICK_THRESHOLD = 10;
-    const TIME_THRESHOLD = 1000;
-    const MIN_INTERVAL = 50;
-    const CONSISTENT_THRESHOLD = 20;
-    const INTERVAL_TOLERANCE = 5;
-    const MAX_COMBO_CLICKS = 100;
-    const MAX_MULTIPLIER = 3;
-    const ITEMS_PER_PAGE = 7;
     let currentSkinPage = 0;
     let currentAchPage = 0;
     let currentShopPage = 0;
@@ -213,7 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalAchPages = Math.ceil(achievements.length / ITEMS_PER_PAGE);
     const totalShopPages = Math.ceil(shopItemsBase.length / ITEMS_PER_PAGE);
     let clicksPerSecond = 0;
-    const SHOP_REFRESH_INTERVAL = 600; // 10 minutes in seconds
 
     // Load and Save Functions
     function loadGameData() {
@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
             gameData.coinsPerClick++;
             gameData.upgradeLevel++;
             gameData.totalUpgradesBought++;
-            gameData.upgradeCost = Math.floor(10 * Math.pow(gameData.upgradeLevel, 2)) || 10;
+            gameData.up dão.upgradeCost = Math.floor(10 * Math.pow(gameData.upgradeLevel, 2)) || 10;
             saveGameData(gameData);
             updateUI();
         }
@@ -654,6 +654,10 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.mainButton.disabled = true;
         gameData.autoclickTriggerCount++;
         saveGameData(gameData);
+        setTimeout(() => {
+            elements.jumpscare.style.display = 'none';
+            elements.mainButton.disabled = false;
+        }, 2000);
     }
 
     function createFlyingCoin(e) {
