@@ -52,6 +52,53 @@ document.addEventListener('DOMContentLoaded', () => {
         exportSaveText: document.getElementById('exportSaveText'),
         importSaveText: document.getElementById('importSaveText'),
         resetGameButton: document.getElementById('resetGame'),
+        // Admin Panel Elements
+        setCoins: document.getElementById('setCoins'),
+        adminCoins: document.getElementById('adminCoins'),
+        setCoinsPerClick: document.getElementById('setCoinsPerClick'),
+        adminCoinsPerClick: document.getElementById('adminCoinsPerClick'),
+        setUpgrades: document.getElementById('setUpgrades'),
+        adminUpgrades: document.getElementById('adminUpgrades'),
+        setUpgradeCost: document.getElementById('setUpgradeCost'),
+        adminUpgradeCost: document.getElementById('adminUpgradeCost'),
+        setRebirths: document.getElementById('setRebirths'),
+        adminRebirths: document.getElementById('adminRebirths'),
+        setRebirthCost: document.getElementById('setRebirthCost'),
+        adminRebirthCost: document.getElementById('adminRebirthCost'),
+        setCombo: document.getElementById('setCombo'),
+        adminCombo: document.getElementById('adminCombo'),
+        setDailyRewards: document.getElementById('setDailyRewards'),
+        adminDailySet: document.getElementById('adminDailySet'),
+        setSkins: document.getElementById('setSkins'),
+        adminSkins: document.getElementById('adminSkins'),
+        setAchievements: document.getElementById('setAchievements'),
+        adminAchievements: document.getElementById('adminAchievements'),
+        toggleAutoclickDetect: document.getElementById('toggleAutoclickDetect'),
+        adminAutoclickDetect: document.getElementById('adminAutoclickDetect'),
+        setClicksPerSec: document.getElementById('setClicksPerSec'),
+        adminClicksPerSec: document.getElementById('adminClicksPerSec'),
+        setLevel: document.getElementById('setLevel'),
+        adminLevel: document.getElementById('adminLevel'),
+        setShopRefresh: document.getElementById('setShopRefresh'),
+        adminShopRefresh: document.getElementById('adminShopRefresh'),
+        setCoinsPerSec: document.getElementById('setCoinsPerSec'),
+        adminCoinsPerSec: document.getElementById('adminCoinsPerSec'),
+        setComboBoost: document.getElementById('setComboBoost'),
+        adminComboBoost: document.getElementById('adminComboBoost'),
+        setTempBoost: document.getElementById('setTempBoost'),
+        adminTempBoostDuration: document.getElementById('adminTempBoostDuration'),
+        setTotalClicks: document.getElementById('setTotalClicks'),
+        adminTotalClicks: document.getElementById('adminTotalClicks'),
+        setTotalCoinsEarned: document.getElementById('setTotalCoinsEarned'),
+        adminTotalCoinsEarned: document.getElementById('adminTotalCoinsEarned'),
+        clearTempBoosts: document.getElementById('clearTempBoosts'),
+        resetShopQuantities: document.getElementById('resetShopQuantities'),
+        maxShopPurchases: document.getElementById('maxShopPurchases'),
+        triggerJumpscare: document.getElementById('triggerJumpscare'),
+        forceShopRefresh: document.getElementById('forceShopRefresh'),
+        unlockAllSkins: document.getElementById('unlockAllSkins'),
+        completeAllAchievements: document.getElementById('completeAllAchievements'),
+        resetDailyRewards: document.getElementById('resetDailyRewards'),
     };
 
     // Game Data and Constants
@@ -221,6 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.debugStats.style.display = gameData.debugMode ? 'block' : 'none';
         document.body.className = gameData.theme + '-theme';
         elements.themeSelect.value = gameData.theme;
+        elements.adminAutoclickDetect.checked = gameData.autoclickDetectEnabled;
         updateDebugStats();
         renderSkinPage();
         renderAchievements();
@@ -353,12 +401,186 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDebugStats();
     });
 
+    // Admin Panel Event Listeners
+    elements.setCoins.addEventListener('click', () => {
+        gameData.count = parseInt(elements.adminCoins.value) || 0;
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.setCoinsPerClick.addEventListener('click', () => {
+        gameData.coinsPerClick = parseInt(elements.adminCoinsPerClick.value) || 1;
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.setUpgrades.addEventListener('click', () => {
+        gameData.upgradeLevel = parseInt(elements.adminUpgrades.value) || 0;
+        gameData.totalUpgradesBought = gameData.upgradeLevel;
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.setUpgradeCost.addEventListener('click', () => {
+        gameData.upgradeCost = parseInt(elements.adminUpgradeCost.value) || 10;
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.setRebirths.addEventListener('click', () => {
+        gameData.rebirths = parseInt(elements.adminRebirths.value) || 0;
+        gameData.totalRebirthsCompleted = gameData.rebirths;
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.setRebirthCost.addEventListener('click', () => {
+        gameData.rebirthCost = parseInt(elements.adminRebirthCost.value) || 1000000;
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.setCombo.addEventListener('click', () => {
+        gameData.clickCombo = parseInt(elements.adminCombo.value) || 0;
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.setDailyRewards.addEventListener('click', () => {
+        gameData.dailyRewardDay = parseInt(elements.adminDailySet.value) || 0;
+        gameData.lastClaimDate = null;
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.setSkins.addEventListener('click', () => {
+        const indexes = elements.adminSkins.value.split(',').map(i => parseInt(i.trim()) - 1);
+        gameData.unlockedSkins = indexes.map(i => skins[i]?.skin).filter(Boolean);
+        if (!gameData.unlockedSkins.includes(gameData.currentSkin)) gameData.currentSkin = gameData.unlockedSkins[0] || 'Skins/SvetlanaSkin.jpg';
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.setAchievements.addEventListener('click', () => {
+        const ids = elements.adminAchievements.value.split(',').map(i => parseInt(i.trim()));
+        gameData.completedAchievements = ids.filter(id => achievements.some(a => a.id === id));
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.toggleAutoclickDetect.addEventListener('click', () => {
+        gameData.autoclickDetectEnabled = elements.adminAutoclickDetect.checked;
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.setClicksPerSec.addEventListener('click', () => {
+        clicksPerSecond = parseInt(elements.adminClicksPerSec.value) || 0;
+        updateUI();
+    });
+
+    elements.setLevel.addEventListener('click', () => {
+        gameData.level = parseInt(elements.adminLevel.value) || 0;
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.setShopRefresh.addEventListener('click', () => {
+        gameData.shopLastRefresh = Date.now() - (parseInt(elements.adminShopRefresh.value) || 0) * 1000;
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.setCoinsPerSec.addEventListener('click', () => {
+        gameData.coinsPerSec = parseInt(elements.adminCoinsPerSec.value) || 0;
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.setComboBoost.addEventListener('click', () => {
+        gameData.comboBoost = parseFloat(elements.adminComboBoost.value) || 1;
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.setTempBoost.addEventListener('click', () => {
+        const duration = parseInt(elements.adminTempBoostDuration.value) || 0;
+        activateTempBoost('coinsPerSec', 2, duration);
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.setTotalClicks.addEventListener('click', () => {
+        gameData.totalClicksCount = parseInt(elements.adminTotalClicks.value) || 0;
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.setTotalCoinsEarned.addEventListener('click', () => {
+        gameData.totalCoinsEarned = parseInt(elements.adminTotalCoinsEarned.value) || 0;
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.clearTempBoosts.addEventListener('click', () => {
+        gameData.tempBoosts = {};
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.resetShopQuantities.addEventListener('click', () => {
+        gameData.shopItems.forEach(item => item.qty = 0);
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.maxShopPurchases.addEventListener('click', () => {
+        gameData.shopItems.forEach(item => {
+            while (item.qty < item.maxQty) {
+                item.effect();
+                item.qty++;
+            }
+        });
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.triggerJumpscare.addEventListener('click', () => {
+        triggerJumpscare();
+    });
+
+    elements.forceShopRefresh.addEventListener('click', () => {
+        refreshShopItems();
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.unlockAllSkins.addEventListener('click', () => {
+        gameData.unlockedSkins = skins.map(s => s.skin);
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.completeAllAchievements.addEventListener('click', () => {
+        gameData.completedAchievements = achievements.map(a => a.id);
+        saveGameData(gameData);
+        updateUI();
+    });
+
+    elements.resetDailyRewards.addEventListener('click', () => {
+        gameData.dailyRewardDay = 0;
+        gameData.lastClaimDate = null;
+        saveGameData(gameData);
+        updateUI();
+    });
+
     document.addEventListener('click', e => {
         if (!elements.skinPanel.contains(e.target) && e.target !== elements.skinPanelToggle) elements.skinPanel.style.display = 'none';
         if (!elements.achievementsPanel.contains(e.target) && e.target !== elements.achievementsToggle) elements.achievementsPanel.style.display = 'none';
         if (!elements.dailyRewardsPanel.contains(e.target) && e.target !== elements.dailyRewardsToggle) elements.dailyRewardsPanel.style.display = 'none';
         if (!elements.settingsPanel.contains(e.target) && e.target !== elements.settingsToggle) elements.settingsPanel.style.display = 'none';
         if (!elements.shopPanel.contains(e.target) && e.target !== elements.shopToggle) elements.shopPanel.style.display = 'none';
+        if (!elements.adminPanel.contains(e.target) && e.target !== elements.clickArea) elements.adminPanel.style.display = 'none';
         updateDebugStats();
     });
 
@@ -424,7 +646,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function togglePanel(panel, renderFn) {
         const isVisible = panel.style.display === 'block';
-        [elements.skinPanel, elements.achievementsPanel, elements.dailyRewardsPanel, elements.settingsPanel, elements.shopPanel].forEach(p => p.style.display = 'none');
+        [elements.skinPanel, elements.achievementsPanel, elements.dailyRewardsPanel, elements.settingsPanel, elements.shopPanel, elements.adminPanel].forEach(p => p.style.display = 'none');
         panel.style.display = isVisible ? 'none' : 'block';
         if (!isVisible) renderFn();
     }
