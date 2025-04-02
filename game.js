@@ -203,17 +203,20 @@ document.addEventListener('DOMContentLoaded', () => {
         tempBoosts: {}
     };
 
-    let gameData = loadGameData();
-    let clickTimes = [];
-    let comboTimeout = null;
-    let holdTimeout = null;
-    let currentSkinPage = 0;
-    let currentAchPage = 0;
-    let currentShopPage = 0;
-    const totalSkinPages = Math.ceil(skins.length / ITEMS_PER_PAGE);
-    const totalAchPages = Math.ceil(achievements.length / ITEMS_PER_PAGE);
-    const totalShopPages = Math.ceil(shopItemsBase.length / ITEMS_PER_PAGE);
-    let clicksPerSecond = 0;
+    // Initialize gameData first
+let gameData = loadGameData();
+
+// Then declare other variables that depend on it
+let clickTimes = [];
+let comboTimeout = null;
+let holdTimeout = null;
+let currentSkinPage = 0;
+let currentAchPage = 0;
+let currentShopPage = 0;
+const totalSkinPages = Math.ceil(skins.length / ITEMS_PER_PAGE);
+const totalAchPages = Math.ceil(achievements.length / ITEMS_PER_PAGE);
+const totalShopPages = Math.ceil(shopItemsBase.length / ITEMS_PER_PAGE);
+let clicksPerSecond = 0;
 
     // Load and Save Functions
     function loadGameData() {
