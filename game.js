@@ -203,10 +203,45 @@ document.addEventListener('DOMContentLoaded', () => {
         tempBoosts: {}
     };
 
-    // Initialize gameData first
+
+function loadGameData() {
+    try {
+        const savedData = localStorage.getItem('gameData');
+        if (savedData) {
+            const loadedData = JSON.parse(atob(savedData));
+            updateOfflineProgress(loadedData);
+            // Ensure all new properties exist in loaded data
+            const mergedData = { ...defaultGameData, ...loadedData };
+            // Special handling for arrays/objects that shouldn't be overwritten
+            if (loadedData.unlockedSkins) mergedData.unlockedSkins = loadedData.unlockedSkins;
+            if (loadedData.completedAchievements) mergedData.completedAchievements = loadedData.completedAchievements;
+            if (loadedData.shopItems) mergedData.shopItems = loadedData.shopItems;
+            if (loadedData.tempBoosts) mergedData.tempBoosts = loadedData.tempBoosts;
+            
+            // Ensure XP system is properly initialized
+            if (!mergedData.xp) mergedData.xp = 0;
+            if (!mergedData.xpToNextLevel) mergedData.xpToNextLevel = calculateXPForLevel(mergedData.level + 1);
+            
+            return mergedData;
+        }
+    } catch (e) {
+        console.error("Error loading save data:", e);
+    }
+    return { ...defaultGameData };
+}
+
+function saveGameData(data) {
+    try {
+        data.lastUpdateTime = Date.now();
+        localStorage.setItem('gameData', btoa(JSON.stringify(data)));
+    } catch (e) {
+        console.error("Error saving game data:", e);
+    }
+}
+// Initialize game state first
 let gameData = loadGameData();
 
-// Then declare other variables that depend on it
+// Then other game variables
 let clickTimes = [];
 let comboTimeout = null;
 let holdTimeout = null;
@@ -217,27 +252,6 @@ const totalSkinPages = Math.ceil(skins.length / ITEMS_PER_PAGE);
 const totalAchPages = Math.ceil(achievements.length / ITEMS_PER_PAGE);
 const totalShopPages = Math.ceil(shopItemsBase.length / ITEMS_PER_PAGE);
 let clicksPerSecond = 0;
-
-    // Load and Save Functions
-    function loadGameData() {
-        const savedData = localStorage.getItem('gameData');
-        if (savedData) {
-            const loadedData = JSON.parse(atob(savedData));
-            updateOfflineProgress(loadedData);
-            // Ensure XP and xpToNextLevel are set correctly for existing saves
-            if (!loadedData.xp) loadedData.xp = 0;
-            if (!loadedData.xpToNextLevel) loadedData.xpToNextLevel = calculateXPForLevel(loadedData.level + 1);
-            return { ...defaultGameData, ...loadedData };
-        }
-        saveGameData(defaultGameData);
-        return { ...defaultGameData };
-    }
-
-    function saveGameData(data) {
-        data.lastUpdateTime = Date.now();
-        localStorage.setItem('gameData', btoa(JSON.stringify(data)));
-    }
-
     function updateOfflineProgress(data) {
         const now = Date.now();
         const timeElapsed = Math.floor((now - (data.lastUpdateTime || now)) / 1000);
@@ -251,6 +265,7 @@ let clicksPerSecond = 0;
             updateTempBoosts(timeElapsed);
         }
     }
+    
 
     function resetGameData() {
         gameData = { ...defaultGameData, shopItems: shopItemsBase.map(item => ({ ...item })) };
