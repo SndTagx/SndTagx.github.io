@@ -148,16 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { day: 8, reward: 500000 },
     ];
 
-    const shopItemsBase = [
-        { name: "+1 Coin Per Click", effect: () => gameData.coinsPerClick++, cost: () => Math.floor(50 * Math.pow(1.15, gameData.coinsPerClick)), maxQty: 50, qty: 0 },
-        { name: "+1 Coin/sec", effect: () => gameData.coinsPerSec++, cost: () => Math.floor(100 * Math.pow(1.2, gameData.coinsPerSec)), maxQty: 100, qty: 0 },
-        { name: "+5 Coins Per Click", effect: () => gameData.coinsPerClick += 5, cost: () => Math.floor(200 * Math.pow(1.25, gameData.coinsPerClick / 5)), maxQty: 20, qty: 0 },
-        { name: "+10% Combo Boost", effect: () => gameData.comboBoost += 0.1, cost: () => Math.floor(5000 * Math.pow(1.3, gameData.comboBoost * 10)), maxQty: 10, qty: 0 },
-        { name: "Half Upgrade Cost", effect: () => gameData.upgradeCost = Math.max(10, Math.floor(gameData.upgradeCost / 2)), cost: () => gameData.upgradeCost * 5, maxQty: 5, qty: 0 },
-        { name: "Instant 100k Coins", effect: () => gameData.count += 100000, cost: () => 75000, maxQty: 3, qty: 0 },
-        { name: "Double Coins/sec (5min)", effect: () => activateTempBoost('coinsPerSec', 2, 300), cost: () => 100000, maxQty: 1, qty: 0 },
-    ];
-
     const CLICK_THRESHOLD = 10;
     const TIME_THRESHOLD = 1000;
     const MIN_INTERVAL = 50;
@@ -196,62 +186,69 @@ document.addEventListener('DOMContentLoaded', () => {
         xpToNextLevel: 10, // Initial XP required for level 2
         coinsPerSec: 0,
         comboBoost: 1,
-        shopItems: shopItemsBase.map(item => ({ ...item })),
         shopLastRefresh: Date.now(),
         theme: 'night',
         lastUpdateTime: Date.now(),
         tempBoosts: {}
     };
 
+    let gameData = loadGameData();
 
-function loadGameData() {
-    try {
+    // Define shopItemsBase after gameData is initialized
+    const shopItemsBase = [
+        { name: "+1 Coin Per Click", effect: () => gameData.coinsPerClick++, cost: () => Math.floor(50 * Math.pow(1.15, gameData.coinsPerClick)), maxQty: 50, qty: 0 },
+        { name: "+1 Coin/sec", effect: () => gameData.coinsPerSec++, cost: () => Math.floor(100 * Math.pow(1.2, gameData.coinsPerSec)), maxQty: 100, qty: 0 },
+        { name: "+5 Coins Per Click", effect: () => gameData.coinsPerClick += 5, cost: () => Math.floor(200 * Math.pow(1.25, gameData.coinsPerClick / 5)), maxQty: 20, qty: 0 },
+        { name: "+10% Combo Boost", effect: () => gameData.comboBoost += 0.1, cost: () => Math.floor(5000 * Math.pow(1.3, gameData.comboBoost * 10)), maxQty: 10, qty: 0 },
+        { name: "Half Upgrade Cost", effect: () => gameData.upgradeCost = Math.max(10, Math.floor(gameData.upgradeCost / 2)), cost: () => gameData.upgradeCost * 5, maxQty: 5, qty: 0 },
+        { name: "Instant 100k Coins", effect: () => gameData.count += 100000, cost: () => 75000, maxQty: 3, qty: 0 },
+        { name: "Double Coins/sec (5min)", effect: () => activateTempBoost('coinsPerSec', 2, 300), cost: () => 100000, maxQty: 1, qty: 0 },
+    ];
+
+    // Initialize shopItems in gameData if not present
+    if (!gameData.shopItems || gameData.shopItems.length === 0) {
+        gameData.shopItems = shopItemsBase.map(item => ({ ...item }));
+    }
+
+    let clickTimes = [];
+    let comboTimeout = null;
+    let holdTimeout = null;
+    let currentSkinPage = 0;
+    let currentAchPage = 0;
+    let currentShopPage = 0;
+    const totalSkinPages = Math.ceil(skins.length / ITEMS_PER_PAGE);
+    const totalAchPages = Math.ceil(achievements.length / ITEMS_PER_PAGE);
+    const totalShopPages = Math.ceil(shopItemsBase.length / ITEMS_PER_PAGE);
+    let clicksPerSecond = 0;
+
+    // Load and Save Functions
+    function loadGameData() {
         const savedData = localStorage.getItem('gameData');
         if (savedData) {
-            const loadedData = JSON.parse(atob(savedData));
-            updateOfflineProgress(loadedData);
-            // Ensure all new properties exist in loaded data
-            const mergedData = { ...defaultGameData, ...loadedData };
-            // Special handling for arrays/objects that shouldn't be overwritten
-            if (loadedData.unlockedSkins) mergedData.unlockedSkins = loadedData.unlockedSkins;
-            if (loadedData.completedAchievements) mergedData.completedAchievements = loadedData.completedAchievements;
-            if (loadedData.shopItems) mergedData.shopItems = loadedData.shopItems;
-            if (loadedData.tempBoosts) mergedData.tempBoosts = loadedData.tempBoosts;
-            
-            // Ensure XP system is properly initialized
-            if (!mergedData.xp) mergedData.xp = 0;
-            if (!mergedData.xpToNextLevel) mergedData.xpToNextLevel = calculateXPForLevel(mergedData.level + 1);
-            
-            return mergedData;
+            try {
+                const loadedData = JSON.parse(atob(savedData));
+                updateOfflineProgress(loadedData);
+                if (!loadedData.xp) loadedData.xp = 0;
+                if (!loadedData.xpToNextLevel) loadedData.xpToNextLevel = calculateXPForLevel(loadedData.level + 1);
+                return { ...defaultGameData, ...loadedData };
+            } catch (e) {
+                console.error("Error loading save data:", e);
+                return { ...defaultGameData };
+            }
         }
-    } catch (e) {
-        console.error("Error loading save data:", e);
+        saveGameData(defaultGameData);
+        return { ...defaultGameData };
     }
-    return { ...defaultGameData };
-}
 
-function saveGameData(data) {
-    try {
+    function saveGameData(data) {
         data.lastUpdateTime = Date.now();
-        localStorage.setItem('gameData', btoa(JSON.stringify(data)));
-    } catch (e) {
-        console.error("Error saving game data:", e);
+        try {
+            localStorage.setItem('gameData', btoa(JSON.stringify(data)));
+        } catch (e) {
+            console.error("Error saving game data:", e);
+        }
     }
-}
-// Initialize game state first
-let gameData = loadGameData();
 
-// Then other game variables
-let clickTimes = [];
-let comboTimeout = null;
-let holdTimeout = null;
-let currentSkinPage = 0;
-let currentAchPage = 0;
-let currentShopPage = 0;
-const totalSkinPages = Math.ceil(skins.length / ITEMS_PER_PAGE);
-const totalAchPages = Math.ceil(achievements.length / ITEMS_PER_PAGE);
-const totalShopPages = Math.ceil(shopItemsBase.length / ITEMS_PER_PAGE);
-let clicksPerSecond = 0;
     function updateOfflineProgress(data) {
         const now = Date.now();
         const timeElapsed = Math.floor((now - (data.lastUpdateTime || now)) / 1000);
@@ -265,7 +262,6 @@ let clicksPerSecond = 0;
             updateTempBoosts(timeElapsed);
         }
     }
-    
 
     function resetGameData() {
         gameData = { ...defaultGameData, shopItems: shopItemsBase.map(item => ({ ...item })) };
@@ -359,16 +355,16 @@ let clicksPerSecond = 0;
     });
 
     elements.upgradeButton.addEventListener('click', () => {
-    if (gameData.count >= gameData.upgradeCost) {
-        gameData.count -= gameData.upgradeCost;
-        gameData.coinsPerClick++;
-        gameData.upgradeLevel++;
-        gameData.totalUpgradesBought++;
-        gameData.upgradeCost = Math.floor(10 * Math.pow(gameData.upgradeLevel, 2)) || 10;
-        saveGameData(gameData);
-        updateUI();
-    }
-});
+        if (gameData.count >= gameData.upgradeCost) {
+            gameData.count -= gameData.upgradeCost;
+            gameData.coinsPerClick++;
+            gameData.upgradeLevel++;
+            gameData.totalUpgradesBought++;
+            gameData.upgradeCost = Math.floor(10 * Math.pow(gameData.upgradeLevel, 2)) || 10;
+            saveGameData(gameData);
+            updateUI();
+        }
+    });
 
     elements.rebirthButton.addEventListener('click', () => {
         if (gameData.count >= gameData.rebirthCost) {
@@ -426,10 +422,15 @@ let clicksPerSecond = 0;
     elements.importSaveButton.addEventListener('click', () => {
         try {
             gameData = JSON.parse(atob(elements.importSaveText.value));
+            // Ensure shopItems are initialized if missing or corrupted
+            if (!gameData.shopItems || gameData.shopItems.length === 0) {
+                gameData.shopItems = shopItemsBase.map(item => ({ ...item }));
+            }
             saveGameData(gameData);
             updateUI();
         } catch (e) {
-            alert("Invalid save code!");
+            alert("Invalid save code! Resetting to default.");
+            resetGameData();
         }
     });
 
