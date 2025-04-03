@@ -132,9 +132,19 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 14, name: "Улучшение титана", type: "upgrades", goal: 200, reward: 500000, desc: "Купи 200 улучшений" },
         { id: 15, name: "Пять перерождений", type: "rebirths", goal: 5, reward: 750000, desc: "Соверши 5 перерождений" },
         { id: 16, name: "Мультимиллионер", type: "coins", goal: 50000000, reward: 2000000, desc: "Собери 50M монет" },
-        { id: 27, name: "Улучшение бога", type: "upgrades", goal: 500, reward: 1500000, desc: "Купи 500 улучшений" },
-        { id: 28, name: "Вечный возрождённый", type: "rebirths", goal: 10, reward: 3000000, desc: "Соверши 10 перерождений" },
-        { id: 29, name: "Пудж Найден", type: "skin", goal: "Skins/KirillSkin.jpg", reward: 50000, desc: "Найди и купи пуджа" },
+        { id: 17, name: "Улучшение бога", type: "upgrades", goal: 500, reward: 1500000, desc: "Купи 500 улучшений" },
+        { id: 18, name: "Вечный возрождённый", type: "rebirths", goal: 10, reward: 3000000, desc: "Соверши 10 перерождений" },
+        { id: 19, name: "Пудж Найден", type: "skin", goal: "Skins/KirillSkin.jpg", reward: 50000, desc: "Найди и купи пуджа" },
+        // New Achievements
+        { id: 20, name: "Магазинный маньяк", type: "shop", goal: 10, reward: 100000, desc: "Купи 10 предметов в магазине" },
+        { id: 21, name: "Богач второго уровня", type: "coins", goal: 100000000, reward: 5000000, desc: "Собери 100M монет" },
+        { id: 22, name: "Улучшение легенды", type: "upgrades", goal: 1000, reward: 3000000, desc: "Купи 1000 улучшений" },
+        { id: 23, name: "Возрождение мастера", type: "rebirths", goal: 20, reward: 10000000, desc: "Соверши 20 перерождений" },
+        { id: 24, name: "Собиратель скинов", type: "skins", goal: 5, reward: 250000, desc: "Разблокируй 5 скинов" },
+        { id: 25, name: "Трильярдер", type: "coins", goal: 1000000000, reward: 25000000, desc: "Собери 1B монет" },
+        { id: 26, name: "Пассивный доход", type: "coinsPerSec", goal: 1000, reward: 500000, desc: "Достигни 1000 монет/сек" },
+        { id: 27, name: "Ветеран кликов", type: "clicks", goal: 100000, reward: 1000000, desc: "Соверши 100K кликов" },
+        { id: 28, name: "Магазинный король", type: "shop", goal: 50, reward: 2000000, desc: "Купи 50 предметов в магазине" },
     ];
 
     const dailyRewards = [
@@ -146,6 +156,14 @@ document.addEventListener('DOMContentLoaded', () => {
         { day: 6, reward: 100000 },
         { day: 7, reward: 200000 },
         { day: 8, reward: 500000 },
+        // New Daily Rewards
+        { day: 9, reward: 1000000 },
+        { day: 10, reward: 1500000 },
+        { day: 11, reward: 2000000 },
+        { day: 12, reward: 2500000 },
+        { day: 13, reward: 3000000 },
+        { day: 14, reward: 3500000 },
+        { day: 15, reward: 4000000 },
     ];
 
     const CLICK_THRESHOLD = 10;
@@ -157,8 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const MAX_MULTIPLIER = 3;
     const ITEMS_PER_PAGE = 7;
     const SHOP_REFRESH_INTERVAL = 600; // 10 minutes in seconds
-    const BASE_XP = 5; // XP gained per click
-    const LEVEL_GROWTH_FACTOR = 1.8; // 15% increase per level
+    const BASE_XP = 5; // XP gained per click (changed from 10)
+    const LEVEL_GROWTH_FACTOR = 1.8; // 80% increase per level (changed from 1.15)
 
     const defaultGameData = {
         count: 0,
@@ -181,35 +199,41 @@ document.addEventListener('DOMContentLoaded', () => {
         autoclickTriggerCount: 0,
         debugMode: false,
         tutorialShown: false,
-        level: 1, // Start at level 1
-        xp: 0, // Current XP
-        xpToNextLevel: 10, // Initial XP required for level 2
+        level: 1,
+        xp: 0,
+        xpToNextLevel: 5, // Adjusted for BASE_XP = 5
         coinsPerSec: 0,
         comboBoost: 1,
         shopLastRefresh: Date.now(),
-        theme: 'night',
+        theme: 'night', // Changed default theme to 'night'
         lastUpdateTime: Date.now(),
-        tempBoosts: {}
+        tempBoosts: {},
+        shopQuantities: Array(15).fill(0), // Updated for 15 shop items
+        totalShopPurchases: 0, // New: tracks total shop purchases
+        lastClickTime: null, // New: for click frequency
+        sessionTime: 0, // New: tracks session playtime
     };
 
-    let gameData = loadGameData();
-
-    // Define shopItemsBase after gameData is initialized
     const shopItemsBase = [
-        { name: "+1 Coin Per Click", effect: () => gameData.coinsPerClick++, cost: () => Math.floor(50 * Math.pow(1.15, gameData.coinsPerClick)), maxQty: 50, qty: 0 },
-        { name: "+1 Coin/sec", effect: () => gameData.coinsPerSec++, cost: () => Math.floor(100 * Math.pow(1.2, gameData.coinsPerSec)), maxQty: 100, qty: 0 },
-        { name: "+5 Coins Per Click", effect: () => gameData.coinsPerClick += 5, cost: () => Math.floor(200 * Math.pow(1.25, gameData.coinsPerClick / 5)), maxQty: 20, qty: 0 },
-        { name: "+10% Combo Boost", effect: () => gameData.comboBoost += 0.1, cost: () => Math.floor(5000 * Math.pow(1.3, gameData.comboBoost * 10)), maxQty: 10, qty: 0 },
-        { name: "Half Upgrade Cost", effect: () => gameData.upgradeCost = Math.max(10, Math.floor(gameData.upgradeCost / 2)), cost: () => gameData.upgradeCost * 5, maxQty: 5, qty: 0 },
-        { name: "Instant 100k Coins", effect: () => gameData.count += 100000, cost: () => 75000, maxQty: 3, qty: 0 },
-        { name: "Double Coins/sec (5min)", effect: () => activateTempBoost('coinsPerSec', 2, 300), cost: () => 100000, maxQty: 1, qty: 0 },
+        { name: "+1 Coin Per Click", effect: (gd) => gd.coinsPerClick++, cost: (gd) => Math.floor(50 * Math.pow(1.15, gd.coinsPerClick)), maxQty: 50 },
+        { name: "+1 Coin/sec", effect: (gd) => gd.coinsPerSec++, cost: (gd) => Math.floor(100 * Math.pow(1.2, gd.coinsPerSec)), maxQty: 100 },
+        { name: "+5 Coins Per Click", effect: (gd) => gd.coinsPerClick += 5, cost: (gd) => Math.floor(200 * Math.pow(1.25, gd.coinsPerClick / 5)), maxQty: 20 },
+        { name: "+10% Combo Boost", effect: (gd) => gd.comboBoost += 0.1, cost: (gd) => Math.floor(5000 * Math.pow(1.3, gd.comboBoost * 10)), maxQty: 10 },
+        { name: "Half Upgrade Cost", effect: (gd) => gd.upgradeCost = Math.max(10, Math.floor(gd.upgradeCost / 2)), cost: (gd) => gd.upgradeCost * 5, maxQty: 5 },
+        { name: "Instant 100k Coins", effect: (gd) => gd.count += 100000, cost: () => 75000, maxQty: 3 },
+        { name: "Double Coins/sec (5min)", effect: (gd) => activateTempBoost('coinsPerSec', 2, 300), cost: () => 100000, maxQty: 1 },
+        // New Shop Items
+        { name: "+10 Coin/sec", effect: (gd) => gd.coinsPerSec += 10, cost: (gd) => Math.floor(1000 * Math.pow(1.3, gd.coinsPerSec / 10)), maxQty: 50 },
+        { name: "Triple Coins Per Click (10min)", effect: (gd) => activateTempBoost('coinsPerClick', 3, 600), cost: () => 250000, maxQty: 2 },
+        { name: "Instant 1M Coins", effect: (gd) => gd.count += 1000000, cost: () => 500000, maxQty: 5 },
+        { name: "+25% Rebirth Bonus", effect: (gd) => gd.rebirths += Math.floor(gd.rebirths * 0.25), cost: (gd) => gd.rebirthCost / 2, maxQty: 3 },
+        { name: "Reduce Rebirth Cost by 10%", effect: (gd) => gd.rebirthCost = Math.floor(gd.rebirthCost * 0.9), cost: (gd) => gd.rebirthCost, maxQty: 10 },
+        { name: "+50 Coins Per Click", effect: (gd) => gd.coinsPerClick += 50, cost: (gd) => Math.floor(10000 * Math.pow(1.4, gd.coinsPerClick / 50)), maxQty: 15 },
+        { name: "Instant Level Up", effect: (gd) => { gd.level++; gd.xpToNextLevel = calculateXPForLevel(gd.level + 1); }, cost: (gd) => gd.xpToNextLevel * 100, maxQty: 10 },
+        { name: "Permanent +5 Coins/sec", effect: (gd) => gd.coinsPerSec += 5, cost: (gd) => 200000 * Math.pow(1.25, gd.coinsPerSec / 5), maxQty: 25 },
     ];
 
-    // Initialize shopItems in gameData if not present
-    if (!gameData.shopItems || gameData.shopItems.length === 0) {
-        gameData.shopItems = shopItemsBase.map(item => ({ ...item }));
-    }
-
+    let gameData = loadGameData();
     let clickTimes = [];
     let comboTimeout = null;
     let holdTimeout = null;
@@ -230,6 +254,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateOfflineProgress(loadedData);
                 if (!loadedData.xp) loadedData.xp = 0;
                 if (!loadedData.xpToNextLevel) loadedData.xpToNextLevel = calculateXPForLevel(loadedData.level + 1);
+                if (!loadedData.shopQuantities || loadedData.shopQuantities.length !== shopItemsBase.length) {
+                    loadedData.shopQuantities = Array(shopItemsBase.length).fill(0);
+                }
+                if (!loadedData.totalShopPurchases) loadedData.totalShopPurchases = 0;
+                if (!loadedData.lastClickTime) loadedData.lastClickTime = null;
+                if (!loadedData.sessionTime) loadedData.sessionTime = 0;
                 return { ...defaultGameData, ...loadedData };
             } catch (e) {
                 console.error("Error loading save data:", e);
@@ -256,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
             data.count += data.coinsPerSec * timeElapsed;
             data.totalCoinsEarned += data.coinsPerSec * timeElapsed;
             if (timeElapsed >= SHOP_REFRESH_INTERVAL) {
-                refreshShopItems();
+                data.shopQuantities = Array(shopItemsBase.length).fill(0);
                 data.shopLastRefresh = now - (timeElapsed % SHOP_REFRESH_INTERVAL) * 1000;
             }
             updateTempBoosts(timeElapsed);
@@ -264,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetGameData() {
-        gameData = { ...defaultGameData, shopItems: shopItemsBase.map(item => ({ ...item })) };
+        gameData = { ...defaultGameData, shopQuantities: Array(shopItemsBase.length).fill(0) };
         saveGameData(gameData);
         updateUI();
     }
@@ -313,6 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function formatNumber(num) {
+        if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
         if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
         if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
         return num.toString();
@@ -321,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial Setup
     updateUI();
     if (!gameData.tutorialShown) {
-        alert("Welcome to SndTagXClicker!\n\n- Click to earn coins and XP.\n- Buy upgrades or rebirths.\n- Unlock skins and achievements.\n- Check the Shop for boosts!");
+        alert("Welcome to SndTagXClicker!\n\n- Click to earn coins and XP.\n- Buy upgrades or rebirths.\n- Unlock skins, achievements, and shop items.\n- Enjoy the new night theme and expanded content!");
         gameData.tutorialShown = true;
         saveGameData(gameData);
     }
@@ -346,8 +377,9 @@ document.addEventListener('DOMContentLoaded', () => {
         gameData.count += coinsGained;
         gameData.totalClicksCount++;
         gameData.totalCoinsEarned += coinsGained;
-        gameData.xp += BASE_XP; // Gain XP per click
-        checkLevelUp(); // Check if enough XP to level up
+        gameData.xp += BASE_XP;
+        gameData.lastClickTime = Date.now();
+        checkLevelUp();
         createFlyingCoin(e);
         clicksPerSecond++;
         saveGameData(gameData);
@@ -380,10 +412,11 @@ document.addEventListener('DOMContentLoaded', () => {
             gameData.clickCombo = 0;
             gameData.coinsPerSec = 0;
             gameData.comboBoost = 1;
-            gameData.shopItems = shopItemsBase.map(item => ({ ...item }));
-            gameData.level = 1; // Reset to level 1
-            gameData.xp = 0; // Reset XP
-            gameData.xpToNextLevel = calculateXPForLevel(2); // Reset XP requirement
+            gameData.shopQuantities = Array(shopItemsBase.length).fill(0);
+            gameData.totalShopPurchases = 0;
+            gameData.level = 1;
+            gameData.xp = 0;
+            gameData.xpToNextLevel = calculateXPForLevel(2);
             saveGameData(gameData);
             updateUI();
         }
@@ -416,15 +449,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     elements.exportSaveButton.addEventListener('click', () => {
-        elements.exportSaveText.value = btoa(JSON.stringify(gameData));
+        const saveData = { ...gameData };
+        elements.exportSaveText.value = btoa(JSON.stringify(saveData));
     });
 
     elements.importSaveButton.addEventListener('click', () => {
         try {
-            gameData = JSON.parse(atob(elements.importSaveText.value));
-            // Ensure shopItems are initialized if missing or corrupted
-            if (!gameData.shopItems || gameData.shopItems.length === 0) {
-                gameData.shopItems = shopItemsBase.map(item => ({ ...item }));
+            const importedData = JSON.parse(atob(elements.importSaveText.value));
+            gameData = { ...defaultGameData, ...importedData };
+            if (!gameData.shopQuantities || gameData.shopQuantities.length !== shopItemsBase.length) {
+                gameData.shopQuantities = Array(shopItemsBase.length).fill(0);
             }
             saveGameData(gameData);
             updateUI();
@@ -525,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     elements.setLevel.addEventListener('click', () => {
         gameData.level = parseInt(elements.adminLevel.value) || 1;
-        gameData.xp = 0; // Reset XP when setting level manually
+        gameData.xp = 0;
         gameData.xpToNextLevel = calculateXPForLevel(gameData.level + 1);
         saveGameData(gameData);
         updateUI();
@@ -575,16 +609,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     elements.resetShopQuantities.addEventListener('click', () => {
-        gameData.shopItems.forEach(item => item.qty = 0);
+        gameData.shopQuantities = Array(shopItemsBase.length).fill(0);
+        gameData.totalShopPurchases = 0;
         saveGameData(gameData);
         updateUI();
     });
 
     elements.maxShopPurchases.addEventListener('click', () => {
-        gameData.shopItems.forEach(item => {
-            while (item.qty < item.maxQty) {
-                item.effect();
-                item.qty++;
+        gameData.shopQuantities.forEach((qty, i) => {
+            while (qty < shopItemsBase[i].maxQty) {
+                shopItemsBase[i].effect(gameData);
+                gameData.shopQuantities[i]++;
+                gameData.totalShopPurchases++;
             }
         });
         saveGameData(gameData);
@@ -673,6 +709,7 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.mainButton.disabled = true;
         gameData.autoclickTriggerCount++;
         saveGameData(gameData);
+        // No timeout to remove jumpscare; persists until reload
     }
 
     function createFlyingCoin(e) {
@@ -698,7 +735,7 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.achievementsNotification.style.display = achievements.some(a => !gameData.completedAchievements.includes(a.id) && isAchievable(a)) ? 'block' : 'none';
         const canClaimDaily = !gameData.lastClaimDate || gameData.lastClaimDate !== new Date().toDateString();
         elements.dailyNotification.style.display = canClaimDaily && gameData.dailyRewardDay < dailyRewards.length ? 'block' : 'none';
-        elements.shopNotification.style.display = gameData.shopItems.some(i => i.qty < i.maxQty && gameData.count >= i.cost()) ? 'block' : 'none';
+        elements.shopNotification.style.display = shopItemsBase.some((item, i) => gameData.shopQuantities[i] < item.maxQty && gameData.count >= item.cost(gameData)) ? 'block' : 'none';
     }
 
     function isAchievable(ach) {
@@ -706,7 +743,11 @@ document.addEventListener('DOMContentLoaded', () => {
                (ach.type === "upgrades" && gameData.upgradeLevel >= ach.goal) ||
                (ach.type === "rebirths" && gameData.rebirths >= ach.goal) ||
                (ach.type === "combo" && getComboMultiplier() >= ach.goal) ||
-               (ach.type === "skin" && gameData.unlockedSkins.includes(ach.goal));
+               (ach.type === "skin" && gameData.unlockedSkins.includes(ach.goal)) ||
+               (ach.type === "shop" && gameData.totalShopPurchases >= ach.goal) ||
+               (ach.type === "skins" && gameData.unlockedSkins.length >= ach.goal) ||
+               (ach.type === "coinsPerSec" && gameData.coinsPerSec >= ach.goal) ||
+               (ach.type === "clicks" && gameData.totalClicksCount >= ach.goal);
     }
 
     // Rendering Functions
@@ -802,7 +843,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function refreshShopItems() {
-        gameData.shopItems = shopItemsBase.map(item => ({ ...item, qty: 0 }));
+        gameData.shopQuantities = Array(shopItemsBase.length).fill(0);
         gameData.shopLastRefresh = Date.now();
     }
 
@@ -817,18 +858,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         elements.shopPages.innerHTML = '';
         const start = currentShopPage * ITEMS_PER_PAGE;
-        const end = Math.min(start + ITEMS_PER_PAGE, gameData.shopItems.length);
-        gameData.shopItems.slice(start, end).forEach((item, i) => {
+        const end = Math.min(start + ITEMS_PER_PAGE, shopItemsBase.length);
+        shopItemsBase.slice(start, end).forEach((item, i) => {
+            const shopIndex = start + i;
+            const remainingQty = item.maxQty - gameData.shopQuantities[shopIndex];
             const option = document.createElement('div');
             option.className = 'shop-option';
-            const remainingQty = item.maxQty - item.qty;
-            option.innerHTML = `<span class="id-label">${start + i + 1}</span><img src="${gameData.currentSkin}" alt="Shop"><span>${item.name} (${formatNumber(item.cost())})</span><span class="quantity">Qty: ${remainingQty}/${item.maxQty}</span>`;
-            if (remainingQty > 0 && gameData.count >= item.cost()) {
+            option.innerHTML = `<span class="id-label">${shopIndex + 1}</span><img src="${gameData.currentSkin}" alt="Shop"><span>${item.name} (${formatNumber(item.cost(gameData))})</span><span class="quantity">Qty: ${remainingQty}/${item.maxQty}</span>`;
+            if (remainingQty > 0 && gameData.count >= item.cost(gameData)) {
                 option.classList.add('buyable');
                 option.addEventListener('click', () => {
-                    gameData.count -= item.cost();
-                    item.effect();
-                    item.qty++;
+                    gameData.count -= item.cost(gameData);
+                    item.effect(gameData);
+                    gameData.shopQuantities[shopIndex]++;
+                    gameData.totalShopPurchases++;
                     saveGameData(gameData);
                     updateUI();
                 });
@@ -864,34 +907,56 @@ document.addEventListener('DOMContentLoaded', () => {
         return gameData.coinsPerSec * multiplier;
     }
 
+    function getEffectiveCoinsPerClick() {
+        let multiplier = 1;
+        if (gameData.tempBoosts.coinsPerClick) {
+            multiplier = gameData.tempBoosts.coinsPerClick.multiplier;
+        }
+        return gameData.coinsPerClick * multiplier;
+    }
+
     function updateDebugStats() {
         if (gameData.debugMode) {
+            const now = Date.now();
+            const clickFreq = gameData.lastClickTime ? ((now - gameData.lastClickTime) / 1000).toFixed(2) : 'N/A';
+            const tempBoostsInfo = Object.entries(gameData.tempBoosts).map(([type, boost]) => 
+                `${type}: x${boost.multiplier} (${Math.max(0, Math.floor((boost.endTime - now) / 1000))}s)`
+            ).join(', ') || 'None';
             elements.debugStats.innerHTML = `
                 Clicks/sec: ${clicksPerSecond}<br>
                 Total Clicks: ${gameData.totalClicksCount}<br>
+                Last Click Interval: ${clickFreq}s<br>
                 Coins Earned: ${formatNumber(gameData.totalCoinsEarned)}<br>
                 Current Coins: ${formatNumber(gameData.count)}<br>
-                Coins Per Click: ${gameData.coinsPerClick}<br>
+                Coins Per Click: ${getEffectiveCoinsPerClick()}<br>
+                Base Coins Per Click: ${gameData.coinsPerClick}<br>
                 Upgrades Bought: ${gameData.totalUpgradesBought}<br>
                 Upgrade Level: ${gameData.upgradeLevel}<br>
                 Upgrade Cost: ${formatNumber(gameData.upgradeCost)}<br>
                 Rebirths Completed: ${gameData.totalRebirthsCompleted}<br>
                 Rebirth Cost: ${formatNumber(gameData.rebirthCost)}<br>
+                Rebirth Multiplier: x${gameData.rebirths + 1}<br>
                 Combo Multiplier: ${getComboMultiplier().toFixed(2)}x<br>
                 Click Combo: ${gameData.clickCombo}<br>
                 Coins/sec: ${getEffectiveCoinsPerSec()}<br>
+                Base Coins/sec: ${gameData.coinsPerSec}<br>
                 Combo Boost: ${gameData.comboBoost.toFixed(2)}x<br>
                 Autoclick Triggers: ${gameData.autoclickTriggerCount}<br>
                 Autoclick Detect: ${gameData.autoclickDetectEnabled ? 'On' : 'Off'}<br>
-                Skins Unlocked: ${gameData.unlockedSkins.length}<br>
+                Skins Unlocked: ${gameData.unlockedSkins.length}/${skins.length}<br>
                 Current Skin: ${skins.find(s => s.skin === gameData.currentSkin).name.split(' ')[0]}<br>
-                Achievements Completed: ${gameData.completedAchievements.length}<br>
-                Daily Reward Day: ${gameData.dailyRewardDay}<br>
+                Achievements Completed: ${gameData.completedAchievements.length}/${achievements.length}<br>
+                Daily Reward Day: ${gameData.dailyRewardDay}/${dailyRewards.length}<br>
                 Last Claim Date: ${gameData.lastClaimDate || 'None'}<br>
                 Admin Panel: ${elements.adminPanel.style.display === 'block' ? 'Visible' : 'Hidden'}<br>
                 Player Level: ${gameData.level}<br>
                 XP: ${formatNumber(gameData.xp)}/${formatNumber(gameData.xpToNextLevel)}<br>
-                Shop Refresh: ${Math.max(0, SHOP_REFRESH_INTERVAL - Math.floor((Date.now() - gameData.shopLastRefresh) / 1000))}s
+                Shop Refresh: ${Math.max(0, SHOP_REFRESH_INTERVAL - Math.floor((now - gameData.shopLastRefresh) / 1000))}s<br>
+                Shop Quantities: ${gameData.shopQuantities.join(', ')}<br>
+                Total Shop Purchases: ${gameData.totalShopPurchases}<br>
+                Temp Boosts: ${tempBoostsInfo}<br>
+                Session Time: ${Math.floor(gameData.sessionTime / 60)}m ${gameData.sessionTime % 60}s<br>
+                Memory Usage: ${window.performance.memory ? (window.performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2) + 'MB' : 'N/A'}
             `;
         }
     }
@@ -901,6 +966,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const coinsPerSec = getEffectiveCoinsPerSec();
         gameData.count += coinsPerSec;
         gameData.totalCoinsEarned += coinsPerSec;
+        gameData.sessionTime++;
         updateTempBoosts(1);
         saveGameData(gameData);
         updateUI();
