@@ -241,14 +241,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalShopPages = Math.ceil(shopItemsBase.length / ITEMS_PER_PAGE);
     let clicksPerSecond = 0;
 
-    // Fixed Save/Load Functions
+    // Updated Save/Load Functions
     function saveGameData() {
         try {
-            const dataToSave = {
+            const now = Date.now();
+            // Save each property separately
+            Object.entries({
                 ...gameData,
-                lastUpdateTime: Date.now()
-            };
-            localStorage.setItem('gameData', JSON.stringify(dataToSave));
+                lastUpdateTime: now
+            }).forEach(([key, value]) => {
+                localStorage.setItem(`game_${key}`, JSON.stringify(value));
+            });
             return true;
         } catch (e) {
             console.error("Error saving game data:", e);
@@ -258,15 +261,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadGameData() {
         try {
-            const savedData = localStorage.getItem('gameData');
-            let loadedData = savedData ? JSON.parse(savedData) : null;
+            let loadedData = {};
             
-            // If no saved data or invalid data, use default
-            if (!loadedData || typeof loadedData !== 'object') {
+            // Load each property if it exists
+            Object.keys(defaultGameData).forEach(key => {
+                const storedValue = localStorage.getItem(`game_${key}`);
+                if (storedValue !== null) {
+                    loadedData[key] = JSON.parse(storedValue);
+                }
+            });
+
+            // If no data loaded at all, use default
+            if (Object.keys(loadedData).length === 0) {
                 loadedData = { ...defaultGameData };
             }
 
-            // Ensure all properties exist with proper defaults
+            // Merge with defaults and validate
             const completeData = {
                 ...defaultGameData,
                 ...loadedData
@@ -375,6 +385,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetGameData() {
+        Object.keys(gameData).forEach(key => {
+            localStorage.removeItem(`game_${key}`);
+        });
         gameData = { ...defaultGameData, shopQuantities: Array(shopItemsBase.length).fill(0) };
         saveGameData();
         updateUI();
@@ -438,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveGameData();
     }
 
-    // Event Listeners (unchanged except where noted)
+    // Event Listeners (unchanged)
     elements.clickArea.addEventListener('mousedown', e => {
         e.preventDefault();
         holdTimeout = setTimeout(() => elements.adminPanel.style.display = 'block', 3000);
