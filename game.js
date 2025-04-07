@@ -52,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
         exportSaveText: document.getElementById('exportSaveText'),
         importSaveText: document.getElementById('importSaveText'),
         resetGameButton: document.getElementById('resetGame'),
-        // Admin Panel Elements (unchanged)
         setCoins: document.getElementById('setCoins'),
         adminCoins: document.getElementById('adminCoins'),
         setCoinsPerClick: document.getElementById('setCoinsPerClick'),
@@ -221,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: "Instant 100k Coins", effect: (gd) => gd.count += 100000, cost: () => 75000, maxQty: 3 },
         { name: "Double Coins/sec (5min)", effect: (gd) => activateTempBoost('coinsPerSec', 2, 300), cost: () => 100000, maxQty: 1 },
         { name: "+10 Coin/sec", effect: (gd) => gd.coinsPerSec += 10, cost: (gd) => Math.floor(1000 * Math.pow(1.3, gd.coinsPerSec / 10)), maxQty: 50 },
-        { name: "Triple impresionante Per Click (10min)", effect: (gd) => activateTempBoost('coinsPerClick', 3, 600), cost: () => 250000, maxQty: 2 },
+        { name: "Triple Coins Per Click (10min)", effect: (gd) => activateTempBoost('coinsPerClick', 3, 600), cost: () => 250000, maxQty: 2 },
         { name: "Instant 1M Coins", effect: (gd) => gd.count += 1000000, cost: () => 500000, maxQty: 5 },
         { name: "+25% Rebirth Bonus", effect: (gd) => gd.rebirths += Math.floor(gd.rebirths * 0.25), cost: (gd) => gd.rebirthCost / 2, maxQty: 3 },
         { name: "Reduce Rebirth Cost by 10%", effect: (gd) => gd.rebirthCost = Math.floor(gd.rebirthCost * 0.9), cost: (gd) => gd.rebirthCost, maxQty: 10 },
@@ -260,38 +259,56 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadGameData() {
         try {
             const savedData = localStorage.getItem('gameData');
-            if (savedData) {
-                const loadedData = JSON.parse(savedData);
-                // Ensure all default properties exist
-                const completeData = {
-                    ...defaultGameData,
-                    ...loadedData
-                };
-                
-                // Validate and fix critical data
-                completeData.count = Number(completeData.count) || 0;
-                completeData.coinsPerClick = Number(completeData.coinsPerClick) || 1;
-                completeData.upgradeLevel = Number(completeData.upgradeLevel) || 0;
-                completeData.rebirths = Number(completeData.rebirths) || 0;
-                completeData.upgradeCost = Number(completeData.upgradeCost) || 10;
-                completeData.rebirthCost = Number(completeData.rebirthCost) || 1000000;
-                
-                // Handle arrays and objects
-                completeData.unlockedSkins = Array.isArray(completeData.unlockedSkins) ? completeData.unlockedSkins : ['Skins/SvetlanaSkin.jpg'];
-                completeData.completedAchievements = Array.isArray(completeData.completedAchievements) ? completeData.completedAchiements : [];
-                completeData.shopQuantities = Array.isArray(completeData.shopQuantities) && completeData.shopQuantities.length === shopItemsBase.length 
-                    ? completeData.shopQuantities 
-                    : Array(shopItemsBase.length).fill(0);
-                completeData.tempBoosts = completeData.tempBoosts && typeof completeData.tempBoosts === 'object' ? completeData.tempBoosts : {};
-
-                updateOfflineProgress(completeData);
-                return completeData;
+            let loadedData = savedData ? JSON.parse(savedData) : null;
+            
+            // If no saved data or invalid data, use default
+            if (!loadedData || typeof loadedData !== 'object') {
+                loadedData = { ...defaultGameData };
             }
-            saveGameData(); // Save default data if no save exists
-            return { ...defaultGameData };
+
+            // Ensure all properties exist with proper defaults
+            const completeData = {
+                ...defaultGameData,
+                ...loadedData
+            };
+
+            // Validate and fix critical data
+            completeData.count = Number(completeData.count) || 0;
+            completeData.coinsPerClick = Number(completeData.coinsPerClick) || 1;
+            completeData.upgradeLevel = Number(completeData.upgradeLevel) || 0;
+            completeData.rebirths = Number(completeData.rebirths) || 0;
+            completeData.upgradeCost = Number(completeData.upgradeCost) || 10;
+            completeData.rebirthCost = Number(completeData.rebirthCost) || 1000000;
+            completeData.currentSkin = completeData.currentSkin || 'Skins/SvetlanaSkin.jpg';
+            
+            // Ensure arrays are properly initialized
+            completeData.unlockedSkins = Array.isArray(completeData.unlockedSkins) 
+                ? completeData.unlockedSkins 
+                : ['Skins/SvetlanaSkin.jpg'];
+            completeData.completedAchievements = Array.isArray(completeData.completedAchievements) 
+                ? completeData.completedAchievements 
+                : [];
+            completeData.shopQuantities = Array.isArray(completeData.shopQuantities) && completeData.shopQuantities.length === shopItemsBase.length 
+                ? completeData.shopQuantities 
+                : Array(shopItemsBase.length).fill(0);
+            completeData.tempBoosts = completeData.tempBoosts && typeof completeData.tempBoosts === 'object' 
+                ? completeData.tempBoosts 
+                : {};
+
+            // Validate currentSkin is in unlockedSkins
+            if (!completeData.unlockedSkins.includes(completeData.currentSkin)) {
+                completeData.currentSkin = 'Skins/SvetlanaSkin.jpg';
+                completeData.unlockedSkins = ['Skins/SvetlanaSkin.jpg'];
+            }
+
+            updateOfflineProgress(completeData);
+            saveGameData(); // Save the corrected data
+            return completeData;
         } catch (e) {
-            console.error("Error loading game data:", e);
-            return { ...defaultGameData };
+            console.error("Error loading game data, resetting to defaults:", e);
+            const defaultData = { ...defaultGameData };
+            saveGameData();
+            return defaultData;
         }
     }
 
@@ -311,12 +328,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const importedData = JSON.parse(decodedData);
             gameData = {
                 ...defaultGameData,
-                ...importedData,
-                shopQuantities: Array.isArray(importedData.shopQuantities) && importedData.shopQuantities.length === shopItemsBase.length 
-                    ? importedData.shopQuantities 
-                    : Array(shopItemsBase.length).fill(0),
-                tempBoosts: importedData.tempBoosts && typeof importedData.tempBoosts === 'object' ? importedData.tempBoosts : {}
+                ...importedData
             };
+            
+            // Ensure arrays are properly initialized after import
+            gameData.unlockedSkins = Array.isArray(gameData.unlockedSkins) 
+                ? gameData.unlockedSkins 
+                : ['Skins/SvetlanaSkin.jpg'];
+            gameData.completedAchievements = Array.isArray(gameData.completedAchievements) 
+                ? gameData.completedAchievements 
+                : [];
+            gameData.shopQuantities = Array.isArray(gameData.shopQuantities) && gameData.shopQuantities.length === shopItemsBase.length 
+                ? gameData.shopQuantities 
+                : Array(shopItemsBase.length).fill(0);
+            gameData.tempBoosts = gameData.tempBoosts && typeof gameData.tempBoosts === 'object' 
+                ? gameData.tempBoosts 
+                : {};
+
+            // Validate currentSkin
+            if (!gameData.unlockedSkins.includes(gameData.currentSkin)) {
+                gameData.currentSkin = 'Skins/SvetlanaSkin.jpg';
+                gameData.unlockedSkins = ['Skins/SvetlanaSkin.jpg'];
+            }
+
             saveGameData();
             updateUI();
             return true;
@@ -404,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveGameData();
     }
 
-    // Event Listeners (updated export/import)
+    // Event Listeners (unchanged except where noted)
     elements.clickArea.addEventListener('mousedown', e => {
         e.preventDefault();
         holdTimeout = setTimeout(() => elements.adminPanel.style.display = 'block', 3000);
@@ -527,7 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDebugStats();
     });
 
-    // Admin Panel Event Listeners (unchanged except save calls)
+    // Admin Panel Event Listeners (unchanged)
     elements.setCoins.addEventListener('click', () => {
         gameData.count = parseInt(elements.adminCoins.value) || 0;
         saveGameData();
@@ -714,7 +748,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDebugStats();
     });
 
-    // Game Logic (unchanged except save calls)
+    // Game Logic (unchanged)
     function updateCombo() {
         gameData.clickCombo = Math.min(gameData.clickCombo + 1, MAX_COMBO_CLICKS);
         clearTimeout(comboTimeout);
@@ -797,7 +831,7 @@ document.addEventListener('DOMContentLoaded', () => {
                (ach.type === "clicks" && gameData.totalClicksCount >= ach.goal);
     }
 
-    // Rendering Functions (unchanged except save calls)
+    // Rendering Functions (unchanged)
     function renderSkinPage() {
         elements.skinPages.innerHTML = '';
         const start = currentSkinPage * ITEMS_PER_PAGE;
@@ -991,7 +1025,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 Autoclick Triggers: ${gameData.autoclickTriggerCount}<br>
                 Autoclick Detect: ${gameData.autoclickDetectEnabled ? 'On' : 'Off'}<br>
                 Skins Unlocked: ${gameData.unlockedSkins.length}/${skins.length}<br>
-                Current Skin: ${skins.find(s => s.skin === gameData.currentSkin).name.split(' ')[0]}<br>
+                Current Skin: ${skins.find(s => s.skin === gameData.currentSkin)?.name.split(' ')[0] || 'Default'}<br>
                 Achievements Completed: ${gameData.completedAchievements.length}/${achievements.length}<br>
                 Daily Reward Day: ${gameData.dailyRewardDay}/${dailyRewards.length}<br>
                 Last Claim Date: ${gameData.lastClaimDate || 'None'}<br>
