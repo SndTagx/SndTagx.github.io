@@ -30,12 +30,12 @@
         const button = document.getElementById('audioButton');
         let audioInstances = [];
 
-        // Function to generate random RGB color
+        // Function to generate random HSL color with full saturation and brightness
         function getRandomColor() {
-            const r = Math.floor(Math.random() * 256);
-            const g = Math.floor(Math.random() * 256);
-            const b = Math.floor(Math.random() * 256);
-            return `rgb(${r}, ${g}, ${b})`;
+            const h = Math.floor(Math.random() * 360); // Hue: 0-359
+            const s = 100; // Saturation: 100%
+            const l = 50;  // Lightness: 50% (keeps colors bright, not dark)
+            return `hsl(${h}, ${s}%, ${l}%)`;
         }
 
         // Change color rapidly
@@ -44,7 +44,7 @@
         }
 
         // Start color changing interval
-        setInterval(changeColor, 50); // Changes color every 100ms
+        setInterval(changeColor, 50); // Changes color every 50ms
 
         // Function to create and play new audio instance
         function createNewAudio() {
