@@ -117,28 +117,33 @@
         let audioInstances = [];
         let colorInterval = null;
         let playbackRate = 1.0;
+        let colorInterval = null;
+let colorChangeSpeed = 50; // Default speed (50ms)
+let colorsEnabled = true; // Color changing is on by default
 
         // Function to generate random HSL color
         function getRandomColor() {
-            const h = Math.floor(Math.random() * 360);
-            const s = 100;
-            const l = 50;
-            return `hsl(${h}, ${s}%, ${l}%)`;
-        }
-
+    const h = Math.floor(Math.random() * 360); // Random hue (0-359)
+    return `hsl(${h}, 100%, 50%)`; // Fixed 100% saturation, 50% lightness
+}
         // Change color rapidly
         function changeColor() {
-            if (!button.classList.contains('active')) { // Only change if not clicked
-                button.style.backgroundColor = getRandomColor();
-            }
-        }
-
+    if (colorsEnabled) {
+        document.getElementById('audioButton').style.backgroundColor = getRandomColor();
+    }
+}
         // Start color changing
         function startColorChange(speed = 50) {
-            if (colorInterval) clearInterval(colorInterval);
-            colorInterval = setInterval(changeColor, speed);
-        }
-
+    if (colorInterval) clearInterval(colorInterval);
+    colorChangeSpeed = speed;
+    colorInterval = setInterval(changeColor, speed);
+}
+        function toggleColors(enable) {
+    colorsEnabled = enable;
+    if (!enable) {
+        document.getElementById('audioButton').style.backgroundColor = 'transparent';
+    }
+}
         startColorChange(); // Initial start
 
         // Create new audio instance
@@ -181,14 +186,14 @@
                     audioInstances = [];
                     logMessage('Stopped all audio instances');
                     break;
-                case 'speed':
-                    if (value > 0) {
-                        startColorChange(value);
-                        logMessage(`Color change speed set to ${value}ms`);
-                    } else {
-                        logMessage('Error: Speed must be greater than 0');
-                    }
-                    break;
+                case 'speed': // Change color transition speed
+            if (value > 0) {
+                startColorChange(value);
+                logMessage(`Color change speed set to ${value}ms`);
+            } else {
+                logMessage('Error: Speed must be greater than 0');
+            }
+            break;
                 case 'count':
                     logMessage(`Current audio instances: ${audioInstances.length}`);
                     break;
@@ -241,18 +246,17 @@
                         logMessage('Error: Playback must be between 0.1 and 4');
                     }
                     break;
-                case 'color':
-                    if (args[1] === 'on') {
-                        startColorChange(50);
-                        logMessage('Color change enabled');
-                    } else if (args[1] === 'off') {
-                        clearInterval(colorInterval);
-                        button.style.backgroundColor = 'transparent';
-                        logMessage('Color change disabled');
-                    } else {
-                        logMessage('Error: Use "on" or "off"');
-                    }
-                    break;
+                case 'color': // Toggle color changing
+            if (args[1] === 'on') {
+                toggleColors(true);
+                logMessage('Color changing enabled');
+            } else if (args[1] === 'off') {
+                toggleColors(false);
+                logMessage('Color changing disabled');
+            } else {
+                logMessage('Error: Use "on" or "off"');
+            }
+            break;
                 case 'consolecolor':
                     if (/^#[0-9A-F]{6}$/i.test(args[1])) {
                         consoleContainer.style.borderColor = args[1];
@@ -346,7 +350,7 @@
         // Button click handler
         button.addEventListener('mousedown', () => {
             createNewAudio();
-            logMessage('Started 1 audio instance');
+    
             button.classList.add('active');
         });
 
