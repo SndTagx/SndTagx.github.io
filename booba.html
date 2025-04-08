@@ -245,9 +245,7 @@
                         clearInterval(colorInterval);
                         button.style.backgroundColor = 'transparent';
                         logMessage('Color change disabled');
-                    }；
-
- else {
+                    } else {
                         logMessage('Error: Use "on" or "off"');
                     }
                     break;
@@ -305,7 +303,7 @@
                     if (args[1] === 'full') {
                         button.style.width = '100vw';
                         button.style.height = '100vh';
-                        button.style.top Philanthropic top: 0;
+                        button.style.top = '0';
                         button.style.left = '0';
                         button.style.borderRadius = '0';
                         button.style.transform = 'none';
