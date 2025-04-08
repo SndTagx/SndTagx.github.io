@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SndTagX Booba</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        #audioButton {
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <button id="audioButton"></button>
+
+    <script>
+        const button = document.getElementById('audioButton');
+        let audioInstances = [];
+
+        // Function to generate random RGB color
+        function getRandomColor() {
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // Change color rapidly
+        function changeColor() {
+            button.style.backgroundColor = getRandomColor();
+        }
+
+        // Start color changing interval
+        setInterval(changeColor, 100); // Changes color every 100ms
+
+        // Function to create and play new audio instance
+        function createNewAudio() {
+            const newAudio = new Audio('Sounds/BoobaSkin.mp3');
+            newAudio.loop = true; // Make each instance loop
+            newAudio.play();
+            audioInstances.push(newAudio);
+        }
+
+        // Button click handler
+        button.addEventListener('click', () => {
+            createNewAudio();
+        });
+    </script>
+</body>
+</html>
