@@ -10,27 +10,55 @@
             padding: 0;
             height: 100vh;
             overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             background-color: #1a1a1a;
             font-family: 'Courier New', monospace;
         }
         
         #audioButton {
-            width: 100vw;
-            height: 100vh;
+            width: 200px;
+            height: 200px;
             border: none;
             margin: 0;
             padding: 0;
             cursor: pointer;
             outline: none;
             position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             z-index: 1;
+            background-color: transparent;
+            transition: background-color 0.3s ease;
+        }
+
+        #audioButton.active {
+            background-color: #00aaff;
+        }
+
+        #consoleToggle {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: 30px;
+            height: 30px;
+            background: rgba(0, 0, 30, 0.9);
+            border: 1px solid #00aaff;
+            border-radius: 5px;
+            color: #00ff00;
+            font-size: 16px;
+            text-align: center;
+            line-height: 28px;
+            cursor: pointer;
+            z-index: 3;
+            box-shadow: 0 0 5px rgba(0, 170, 255, 0.5);
         }
 
         .console-container {
-            position: relative;
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             z-index: 2;
             width: 400px;
             height: 300px;
@@ -38,7 +66,6 @@
             border: 2px solid #00aaff;
             border-radius: 8px;
             box-shadow: 0 0 15px rgba(0, 170, 255, 0.5);
-            display: flex;
             flex-direction: column;
             padding: 10px;
         }
@@ -74,6 +101,7 @@
 </head>
 <body>
     <button id="audioButton"></button>
+    <button id="consoleToggle">~</button>
     <div class="console-container">
         <div id="consoleLog"></div>
         <input type="text" id="consoleInput" placeholder="Type command...">
@@ -81,11 +109,15 @@
 
     <script>
         const button = document.getElementById('audioButton');
+        const consoleToggle = document.getElementById('consoleToggle');
+        const consoleContainer = document.getElementById('console-container');
         const consoleInput = document.getElementById('consoleInput');
         const consoleLog = document.getElementById('consoleLog');
         let audioInstances = [];
+        let colorInterval = null;
+        let playbackRate = 1.0;
 
-        // Function to generate random HSL color with full saturation and brightness
+        // Function to generate random HSL color
         function getRandomColor() {
             const h = Math.floor(Math.random() * 360);
             const s = 100;
@@ -98,13 +130,19 @@
             button.style.backgroundColor = getRandomColor();
         }
 
-        // Start color changing interval
-        let colorInterval = setInterval(changeColor, 50);
+        // Start color changing
+        function startColorChange(speed = 50) {
+            if (colorInterval) clearInterval(colorInterval);
+            colorInterval = setInterval(changeColor, speed);
+        }
 
-        // Function to create and play new audio instance
+        startColorChange(); // Initial start
+
+        // Create new audio instance
         function createNewAudio() {
             const newAudio = new Audio('Sounds/BoobaSkin.mp3');
             newAudio.loop = true;
+            newAudio.playbackRate = playbackRate;
             newAudio.play();
             audioInstances.push(newAudio);
             return newAudio;
@@ -122,7 +160,7 @@
         function handleCommand(command) {
             const args = command.trim().toLowerCase().split(' ');
             const cmd = args[0];
-            const value = args[1] ? parseFloat(args[1]) : 1; // Use float for volume
+            const value = args[1] ? parseFloat(args[1]) : 1;
 
             switch (cmd) {
                 case 'play':
@@ -142,8 +180,7 @@
                     break;
                 case 'speed':
                     if (value > 0) {
-                        clearInterval(colorInterval);
-                        colorInterval = setInterval(changeColor, value);
+                        startColorChange(value);
                         logMessage(`Color change speed set to ${value}ms`);
                     } else {
                         logMessage('Error: Speed must be greater than 0');
@@ -165,6 +202,13 @@
                     logMessage('clear - Clear console');
                     logMessage('volume [n] - Set volume (0-1)');
                     logMessage('soundloop [on/off] - Toggle sound looping');
+                    logMessage('playback [n] - Set playback speed (0.1-4)');
+                    logMessage('color [on/off] - Enable/disable color change');
+                    logMessage('consolecolor [hex] - Set console border color');
+                    logMessage('logcolor [hex] - Set log text color');
+                    logMessage('buttonsize [n] - Set button size (px)');
+                    logMessage('buttonpos [x] [y] - Set button position (px)');
+                    logMessage('consolesize [w] [h] - Set console size (px)');
                     logMessage('cmds - Show this list');
                     break;
                 case 'volume':
@@ -184,16 +228,93 @@
                         logMessage('Error: Use "on" or "off"');
                     }
                     break;
+                case 'playback':
+ अगर (value >= 0.1 && value <= 4) {
+                        playbackRate = value;
+                        audioInstances.forEach(audio => audio.playbackRate = value);
+                        logMessage(`Playback speed set to ${value}x`);
+                    } else {
+                        logMessage('Error: Playback must be between 0.1 and 4');
+                    }
+                    break;
+                case 'color':
+                    if (args[1] === 'on') {
+                        startColorChange(50);
+                        logMessage('Color change enabled');
+                    } else if (args[1] === 'off') {
+                        clearInterval(colorInterval);
+                        button.style.backgroundColor = 'transparent';
+                        logMessage('Color change disabled');
+                    } else {
+                        logMessage('Error: Use "on" or "off"');
+                    }
+                    break;
+                case 'consolecolor':
+                    if (/^#[0-9A-F]{6}$/i.test(args[1])) {
+                        consoleContainer.style.borderColor = args[1];
+                        consoleToggle.style.borderColor = args[1];
+                        logMessage(`Console border color set to ${args[1]}`);
+                    } else {
+                        logMessage('Error: Use hex color (e.g., #FF0000)');
+                    }
+                    break;
+                case 'logcolor':
+                    if (/^#[0-9A-F]{6}$/i.test(args[1])) {
+                        consoleLog.style.color = args[1];
+                        logMessage(`Log text color set to ${args[1]}`);
+                    } else {
+                        logMessage('Error: Use hex color (e.g., #FF0000)');
+                    }
+                    break;
+                case 'buttonsize':
+                    if (value > 0) {
+                        button.style.width = `${value}px`;
+                        button.style.height = `${value}px`;
+                        logMessage(`Button size set to ${value}px`);
+                    } else {
+                        logMessage('Error: Size must be greater than 0');
+                    }
+                    break;
+                case 'buttonpos':
+                    const x = parseInt(args[1]);
+                    const y = parseInt(args[2]);
+                    if (!isNaN(x) && !isNaN(y)) {
+                        button.style.left = `${x}px`;
+                        button.style.top = `${y}px`;
+                        button.style.transform = 'none';
+                        logMessage(`Button position set to (${x}, ${y})`);
+                    } else {
+                        logMessage('Error: Use two numbers (e.g., 100 200)');
+                    }
+                    break;
+                case 'consolesize':
+                    const w = parseInt(args[1]);
+                    const h = parseInt(args[2]);
+                    if (w > 0 && h > 0) {
+                        consoleContainer.style.width = `${w}px`;
+                        consoleContainer.style.height = `${h}px`;
+                        logMessage(`Console size set to ${w}x${h}px`);
+                    } else {
+                        logMessage('Error: Width and height must be greater than 0');
+                    }
+                    break;
                 default:
                     logMessage(`Unknown command: ${cmd}`);
                     logMessage('Type "cmds" for available commands');
             }
         }
 
-        // Button click handler (default play 1)
+        // Toggle console visibility
+        consoleToggle.addEventListener('click', () => {
+            consoleContainer.style.display = consoleContainer.style.display === 'none' ? 'flex' : 'none';
+        });
+
+        // Button click handler
         button.addEventListener('click', () => {
             createNewAudio();
             logMessage('Started 1 audio instance');
+            button.classList.add('active');
+            setTimeout(() => button.classList.remove('active'), 300);
         });
 
         // Console input handler
