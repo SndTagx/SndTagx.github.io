@@ -28,10 +28,11 @@
             z-index: 1;
             background-color: transparent;
             transition: background-color 0.3s ease;
+            -webkit-tap-highlight-color: transparent; /* Remove mobile tap highlight */
         }
 
-        #audioButton.active {
-            background-color: #00aaff;
+        #audioButton:active {
+            background-color: #00aaff; /* Blue only on click */
         }
 
         #consoleToggle {
@@ -59,21 +60,22 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 2;
-            width: 400px;
-            height: 300px;
+            width: 300px; /* Reduced width */
+            height: 200px; /* Reduced height */
             background: rgba(0, 0, 30, 0.9);
             border: 2px solid #00aaff;
             border-radius: 8px;
             box-shadow: 0 0 15px rgba(0, 170, 255, 0.5);
             flex-direction: column;
             padding: 10px;
+            margin: 20px; /* Prevent touching screen edges */
         }
 
         #consoleLog {
             flex: 1;
             color: #00ff00;
             overflow-y: auto;
-            font-size: 14px;
+            font-size: 12px; /* Smaller font for smaller console */
             margin-bottom: 10px;
             padding: 5px;
             background: rgba(0, 0, 0, 0.3);
@@ -82,8 +84,8 @@
 
         #consoleInput {
             width: 100%;
-            padding: 8px;
-            font-size: 14px;
+            padding: 6px; /* Adjusted padding */
+            font-size: 12px; /* Smaller font */
             background: linear-gradient(90deg, rgba(0, 100, 255, 0.2), rgba(0, 170, 255, 0.1));
             border: 1px solid #00aaff;
             border-radius: 4px;
@@ -126,7 +128,9 @@
 
         // Change color rapidly
         function changeColor() {
-            button.style.backgroundColor = getRandomColor();
+            if (!button.classList.contains('active')) { // Only change if not clicked
+                button.style.backgroundColor = getRandomColor();
+            }
         }
 
         // Start color changing
@@ -340,10 +344,13 @@
         });
 
         // Button click handler
-        button.addEventListener('click', () => {
+        button.addEventListener('mousedown', () => {
             createNewAudio();
             logMessage('Started 1 audio instance');
             button.classList.add('active');
+        });
+
+        button.addEventListener('mouseup', () => {
             setTimeout(() => button.classList.remove('active'), 300);
         });
 
