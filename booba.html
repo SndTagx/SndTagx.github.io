@@ -15,17 +15,16 @@
         }
         
         #audioButton {
-            width: 200px;
-            height: 200px;
+            width: 100vw;
+            height: 100vh;
             border: none;
             margin: 0;
             padding: 0;
             cursor: pointer;
             outline: none;
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            top: 0;
+            left: 0;
             z-index: 1;
             background-color: transparent;
             transition: background-color 0.3s ease;
@@ -102,7 +101,7 @@
 <body>
     <button id="audioButton"></button>
     <button id="consoleToggle">~</button>
-    <div class="console-container">
+    <div class="console-container" id="consoleContainer">
         <div id="consoleLog"></div>
         <input type="text" id="consoleInput" placeholder="Type command...">
     </div>
@@ -110,7 +109,7 @@
     <script>
         const button = document.getElementById('audioButton');
         const consoleToggle = document.getElementById('consoleToggle');
-        const consoleContainer = document.getElementById('console-container');
+        const consoleContainer = document.getElementById('consoleContainer');
         const consoleInput = document.getElementById('consoleInput');
         const consoleLog = document.getElementById('consoleLog');
         let audioInstances = [];
@@ -209,6 +208,7 @@
                     logMessage('buttonsize [n] - Set button size (px)');
                     logMessage('buttonpos [x] [y] - Set button position (px)');
                     logMessage('consolesize [w] [h] - Set console size (px)');
+                    logMessage('buttondesign [full/circle/square] - Change button design');
                     logMessage('cmds - Show this list');
                     break;
                 case 'volume':
@@ -229,7 +229,7 @@
                     }
                     break;
                 case 'playback':
- अगर (value >= 0.1 && value <= 4) {
+                    if (value >= 0.1 && value <= 4) {
                         playbackRate = value;
                         audioInstances.forEach(audio => audio.playbackRate = value);
                         logMessage(`Playback speed set to ${value}x`);
@@ -245,7 +245,9 @@
                         clearInterval(colorInterval);
                         button.style.backgroundColor = 'transparent';
                         logMessage('Color change disabled');
-                    } else {
+                    }；
+
+ else {
                         logMessage('Error: Use "on" or "off"');
                     }
                     break;
@@ -270,6 +272,7 @@
                     if (value > 0) {
                         button.style.width = `${value}px`;
                         button.style.height = `${value}px`;
+                        button.style.borderRadius = '0'; // Reset for full/square
                         logMessage(`Button size set to ${value}px`);
                     } else {
                         logMessage('Error: Size must be greater than 0');
@@ -296,6 +299,35 @@
                         logMessage(`Console size set to ${w}x${h}px`);
                     } else {
                         logMessage('Error: Width and height must be greater than 0');
+                    }
+                    break;
+                case 'buttondesign':
+                    if (args[1] === 'full') {
+                        button.style.width = '100vw';
+                        button.style.height = '100vh';
+                        button.style.top Philanthropic top: 0;
+                        button.style.left = '0';
+                        button.style.borderRadius = '0';
+                        button.style.transform = 'none';
+                        logMessage('Button design set to full screen');
+                    } else if (args[1] === 'circle') {
+                        button.style.width = '200px';
+                        button.style.height = '200px';
+                        button.style.borderRadius = '50%';
+                        button.style.left = '50%';
+                        button.style.top = '50%';
+                        button.style.transform = 'translate(-50%, -50%)';
+                        logMessage('Button design set to circle');
+                    } else if (args[1] === 'square') {
+                        button.style.width = '200px';
+                        button.style.height = '200px';
+                        button.style.borderRadius = '0';
+                        button.style.left = '50%';
+                        button.style.top = '50%';
+                        button.style.transform = 'translate(-50%, -50%)';
+                        logMessage('Button design set to square');
+                    } else {
+                        logMessage('Error: Use "full", "circle", or "square"');
                     }
                     break;
                 default:
