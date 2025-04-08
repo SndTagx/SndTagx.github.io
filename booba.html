@@ -13,7 +13,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #111;
+            background-color: #1a1a1a;
+            font-family: 'Courier New', monospace;
         }
         
         #audioButton {
@@ -28,45 +29,60 @@
             z-index: 1;
         }
 
-        .input-container {
+        .console-container {
             position: relative;
             z-index: 2;
+            width: 400px;
+            height: 300px;
+            background: rgba(0, 0, 30, 0.9);
+            border: 2px solid #00aaff;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 170, 255, 0.5);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
         }
 
-        #soundCount {
-            padding: 15px 20px;
-            font-size: 24px;
-            width: 100px;
-            text-align: center;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(45deg, #ff00ff, #00ffff);
-            color: white;
-            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        #consoleLog {
+            flex: 1;
+            color: #00ff00;
+            overflow-y: auto;
+            font-size: 14px;
+            margin-bottom: 10px;
+            padding: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        #consoleInput {
+            width: 100%;
+            padding: 8px;
+            font-size: 14px;
+            background: linear-gradient(90deg, rgba(0, 100, 255, 0.2), rgba(0, 170, 255, 0.1));
+            border: 1px solid #00aaff;
+            border-radius: 4px;
+            color: #ffffff;
+            outline: none;
             transition: all 0.3s ease;
         }
 
-        #soundCount:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
-        }
-
-        #soundCount:focus {
-            outline: none;
-            box-shadow: 0 0 40px rgba(255, 255, 255, 0.7);
+        #consoleInput:focus {
+            box-shadow: 0 0 10px rgba(0, 170, 255, 0.7);
+            background: linear-gradient(90deg, rgba(0, 100, 255, 0.3), rgba(0, 170, 255, 0.2));
         }
     </style>
 </head>
 <body>
     <button id="audioButton"></button>
-    <div class="input-container">
-        <input type="number" id="soundCount" value="1" min="1" max="50">
+    <div class="console-container">
+        <div id="consoleLog"></div>
+        <input type="text" id="consoleInput" placeholder="Type command...">
     </div>
 
     <script>
         const button = document.getElementById('audioButton');
-        const soundCountInput = document.getElementById('soundCount');
+        const consoleInput = document.getElementById('consoleInput');
+        const consoleLog = document.getElementById('consoleLog');
         let audioInstances = [];
 
         // Function to generate random HSL color with full saturation and brightness
@@ -83,7 +99,7 @@
         }
 
         // Start color changing interval
-        setInterval(changeColor, 50);
+        let colorInterval = setInterval(changeColor, 50);
 
         // Function to create and play new audio instance
         function createNewAudio() {
@@ -91,13 +107,100 @@
             newAudio.loop = true;
             newAudio.play();
             audioInstances.push(newAudio);
+            return newAudio;
         }
 
-        // Button click handler
+        // Log message to console
+        function logMessage(message) {
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `> ${message}`;
+            consoleLog.appendChild(logEntry);
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+        }
+
+        // Command handler
+        function handleCommand(command) {
+            const args = command.trim().toLowerCase().split(' ');
+            const cmd = args[0];
+            const value = args[1] ? parseFloat(args[1]) : 1; // Use float for volume
+
+            switch (cmd) {
+                case 'play':
+                    if (value > 0) {
+                        for (let i = 0; i < value; i++) {
+                            createNewAudio();
+                        }
+                        logMessage(`Started ${value} audio instances`);
+                    } else {
+                        logMessage('Error: Value must be greater than 0');
+                    }
+                    break;
+                case 'stop':
+                    audioInstances.forEach(audio => audio.pause());
+                    audioInstances = [];
+                    logMessage('Stopped all audio instances');
+                    break;
+                case 'speed':
+                    if (value > 0) {
+                        clearInterval(colorInterval);
+                        colorInterval = setInterval(changeColor, value);
+                        logMessage(`Color change speed set to ${value}ms`);
+                    } else {
+                        logMessage('Error: Speed must be greater than 0');
+                    }
+                    break;
+                case 'count':
+                    logMessage(`Current audio instances: ${audioInstances.length}`);
+                    break;
+                case 'clear':
+                    consoleLog.innerHTML = '';
+                    logMessage('Console cleared');
+                    break;
+                case 'cmds':
+                    logMessage('Available commands:');
+                    logMessage('play [n] - Start n audio instances');
+                    logMessage('stop - Stop all audio');
+                    logMessage('speed [n] - Set color change speed (ms)');
+                    logMessage('count - Show current audio instances');
+                    logMessage('clear - Clear console');
+                    logMessage('volume [n] - Set volume (0-1)');
+                    logMessage('soundloop [on/off] - Toggle sound looping');
+                    logMessage('cmds - Show this list');
+                    break;
+                case 'volume':
+                    if (value >= 0 && value <= 1) {
+                        audioInstances.forEach(audio => audio.volume = value);
+                        logMessage(`Volume set to ${value}`);
+                    } else {
+                        logMessage('Error: Volume must be between 0 and 1');
+                    }
+                    break;
+                case 'soundloop':
+                    if (args[1] === 'on' || args[1] === 'off') {
+                        const loopState = args[1] === 'on';
+                        audioInstances.forEach(audio => audio.loop = loopState);
+                        logMessage(`Sound looping set to ${args[1]}`);
+                    } else {
+                        logMessage('Error: Use "on" or "off"');
+                    }
+                    break;
+                default:
+                    logMessage(`Unknown command: ${cmd}`);
+                    logMessage('Type "cmds" for available commands');
+            }
+        }
+
+        // Button click handler (default play 1)
         button.addEventListener('click', () => {
-            const count = parseInt(soundCountInput.value) || 1; // Default to 1 if invalid
-            for (let i = 0; i < count; i++) {
-                createNewAudio();
+            createNewAudio();
+            logMessage('Started 1 audio instance');
+        });
+
+        // Console input handler
+        consoleInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && consoleInput.value.trim()) {
+                handleCommand(consoleInput.value);
+                consoleInput.value = '';
             }
         });
     </script>
