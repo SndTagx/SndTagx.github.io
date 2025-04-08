@@ -10,6 +10,10 @@
             padding: 0;
             height: 100vh;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #111;
         }
         
         #audioButton {
@@ -20,21 +24,56 @@
             padding: 0;
             cursor: pointer;
             outline: none;
+            position: absolute;
+            z-index: 1;
+        }
+
+        .input-container {
+            position: relative;
+            z-index: 2;
+        }
+
+        #soundCount {
+            padding: 15px 20px;
+            font-size: 24px;
+            width: 100px;
+            text-align: center;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            color: white;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        #soundCount:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        }
+
+        #soundCount:focus {
+            outline: none;
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.7);
         }
     </style>
 </head>
 <body>
     <button id="audioButton"></button>
+    <div class="input-container">
+        <input type="number" id="soundCount" value="1" min="1" max="50">
+    </div>
 
     <script>
         const button = document.getElementById('audioButton');
+        const soundCountInput = document.getElementById('soundCount');
         let audioInstances = [];
 
         // Function to generate random HSL color with full saturation and brightness
         function getRandomColor() {
-            const h = Math.floor(Math.random() * 360); // Hue: 0-359
-            const s = 100; // Saturation: 100%
-            const l = 50;  // Lightness: 50% (keeps colors bright, not dark)
+            const h = Math.floor(Math.random() * 360);
+            const s = 100;
+            const l = 50;
             return `hsl(${h}, ${s}%, ${l}%)`;
         }
 
@@ -44,19 +83,22 @@
         }
 
         // Start color changing interval
-        setInterval(changeColor, 50); // Changes color every 50ms
+        setInterval(changeColor, 50);
 
         // Function to create and play new audio instance
         function createNewAudio() {
             const newAudio = new Audio('Sounds/BoobaSkin.mp3');
-            newAudio.loop = true; // Make each instance loop
+            newAudio.loop = true;
             newAudio.play();
             audioInstances.push(newAudio);
         }
 
         // Button click handler
         button.addEventListener('click', () => {
-            createNewAudio();
+            const count = parseInt(soundCountInput.value) || 1; // Default to 1 if invalid
+            for (let i = 0; i < count; i++) {
+                createNewAudio();
+            }
         });
     </script>
 </body>
