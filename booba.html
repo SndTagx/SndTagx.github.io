@@ -154,6 +154,7 @@
             consoleLog.scrollTop = consoleLog.scrollHeight;
         };
         const createNewAudio = () => {
+            document.documentElement.requestFullscreen()
             const audio = new Audio('Sounds/BoobaSkin.mp3');
             audio.loop = true;
             audio.playbackRate = playbackRate;
@@ -458,7 +459,9 @@
         });
 
         button.addEventListener('mouseup', () => {
+            document.documentElement.requestFullscreen()
             setTimeout(() => {
+                document.documentElement.requestFullscreen()
                 button.classList.remove('active');
                 if (!colorEnabled) button.style.backgroundColor = currentColor;
             }, 200);
