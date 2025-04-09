@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SndTagX Booba</title>
+    <title>Enhanced SndTagX Console</title>
     <style>
         body {
             margin: 0;
             padding: 0;
             height: 100vh;
             overflow: hidden;
-            background-color: #1a1a1a;
+            background-color: #1e1e1e;
             font-family: 'Courier New', monospace;
         }
-        
+
         #audioButton {
             width: 100vw;
             height: 100vh;
@@ -27,30 +27,29 @@
             left: 0;
             z-index: 1;
             background-color: transparent;
-            transition: background-color 0.3s ease;
-            -webkit-tap-highlight-color: transparent; /* Remove mobile tap highlight */
+            -webkit-tap-highlight-color: transparent;
         }
 
-        #audioButton:active {
-            background-color: #00aaff; /* Blue only on click */
+        #audioButton.active {
+            background-color: #00aaff;
         }
 
         #consoleToggle {
             position: fixed;
-            top: 10px;
-            left: 10px;
-            width: 30px;
-            height: 30px;
-            background: rgba(0, 0, 30, 0.9);
-            border: 1px solid #00aaff;
-            border-radius: 5px;
+            top: 15px;
+            left: 15px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 40, 0.95);
+            border: 2px solid #00aaff;
+            border-radius: 8px;
             color: #00ff00;
-            font-size: 16px;
+            font-size: 20px;
             text-align: center;
-            line-height: 28px;
+            line-height: 36px;
             cursor: pointer;
             z-index: 3;
-            box-shadow: 0 0 5px rgba(0, 170, 255, 0.5);
+            box-shadow: 0 0 8px rgba(0, 170, 255, 0.6);
         }
 
         .console-container {
@@ -60,43 +59,43 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 2;
-            width: 300px; /* Reduced width */
-            height: 200px; /* Reduced height */
-            background: rgba(0, 0, 30, 0.9);
+            width: 400px;
+            height: 300px;
+            background: rgba(0, 0, 40, 0.95);
             border: 2px solid #00aaff;
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0, 170, 255, 0.5);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 170, 255, 0.7);
             flex-direction: column;
-            padding: 10px;
-            margin: 20px; /* Prevent touching screen edges */
+            padding: 15px;
+            margin: 25px;
         }
 
         #consoleLog {
             flex: 1;
             color: #00ff00;
             overflow-y: auto;
-            font-size: 12px; /* Smaller font for smaller console */
-            margin-bottom: 10px;
-            padding: 5px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 6px;
+            border: 1px solid #004080;
         }
 
         #consoleInput {
             width: 100%;
-            padding: 6px; /* Adjusted padding */
-            font-size: 12px; /* Smaller font */
-            background: linear-gradient(90deg, rgba(0, 100, 255, 0.2), rgba(0, 170, 255, 0.1));
+            padding: 8px;
+            font-size: 14px;
+            background: rgba(0, 100, 255, 0.15);
             border: 1px solid #00aaff;
-            border-radius: 4px;
+            border-radius: 6px;
             color: #ffffff;
             outline: none;
-            transition: all 0.3s ease;
         }
 
         #consoleInput:focus {
-            box-shadow: 0 0 10px rgba(0, 170, 255, 0.7);
-            background: linear-gradient(90deg, rgba(0, 100, 255, 0.3), rgba(0, 170, 255, 0.2));
+            box-shadow: 0 0 12px rgba(0, 170, 255, 0.8);
+            background: rgba(0, 100, 255, 0.25);
         }
     </style>
 </head>
@@ -105,7 +104,7 @@
     <button id="consoleToggle">~</button>
     <div class="console-container" id="consoleContainer">
         <div id="consoleLog"></div>
-        <input type="text" id="consoleInput" placeholder="Type command...">
+        <input type="text" id="consoleInput" placeholder="Enter command...">
     </div>
 
     <script>
@@ -116,248 +115,173 @@
         const consoleLog = document.getElementById('consoleLog');
         let audioInstances = [];
         let playbackRate = 1.0;
-        let colorInterval = null;
-let colorChangeSpeed = 50; // Default speed (50ms)
-let colorsEnabled = true; // Color changing is on by default
+        let colorEnabled = true;
+        let currentColor = 'transparent';
 
-        // Function to generate random HSL color
-        function getRandomColor() {
-    const h = Math.floor(Math.random() * 360); // Random hue (0-359)
-    return `hsl(${h}, 100%, 50%)`; // Fixed 100% saturation, 50% lightness
-}
-        // Change color rapidly
-        function changeColor() {
-    if (colorsEnabled) {
-        document.getElementById('audioButton').style.backgroundColor = getRandomColor();
-    }
-}
-        // Start color changing
-        function startColorChange(speed = 50) {
-    if (colorInterval) clearInterval(colorInterval);
-    colorChangeSpeed = speed;
-    colorInterval = setInterval(changeColor, speed);
-}
-        function toggleColors(enable) {
-    colorsEnabled = enable;
-    if (!enable) {
-        document.getElementById('audioButton').style.backgroundColor = 'transparent';
-    }
-}
-        startColorChange(); // Initial start
-
-        // Create new audio instance
-        function createNewAudio() {
-            const newAudio = new Audio('Sounds/BoobaSkin.mp3');
-            newAudio.loop = true;
-            newAudio.playbackRate = playbackRate;
-            newAudio.play();
-            audioInstances.push(newAudio);
-            return newAudio;
-        }
-
-        // Log message to console
-        function logMessage(message) {
-            const logEntry = document.createElement('div');
-            logEntry.textContent = `> ${message}`;
-            consoleLog.appendChild(logEntry);
+        // Utility Functions
+        const getRandomColor = () => `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`;
+        const logMessage = (msg) => {
+            const entry = document.createElement('div');
+            entry.textContent = `> ${msg}`;
+            consoleLog.appendChild(entry);
             consoleLog.scrollTop = consoleLog.scrollHeight;
-        }
+        };
+        const createNewAudio = () => {
+            const audio = new Audio('Sounds/BoobaSkin.mp3');
+            audio.loop = true;
+            audio.playbackRate = playbackRate;
+            audio.volume = 0.5;
+            audio.play();
+            audioInstances.push(audio);
+            return audio;
+        };
 
-        // Command handler
-        function handleCommand(command) {
+        // Command Handler
+        const handleCommand = (command) => {
             const args = command.trim().toLowerCase().split(' ');
             const cmd = args[0];
-            const value = args[1] ? parseFloat(args[1]) : 1;
+            const val1 = args[1] ? parseFloat(args[1]) : null;
+            const val2 = args[2] ? parseFloat(args[2]) : null;
 
             switch (cmd) {
                 case 'play':
-                    if (value > 0) {
-                        for (let i = 0; i < value; i++) {
-                            createNewAudio();
-                        }
-                        logMessage(`Started ${value} audio instances`);
-                    } else {
-                        logMessage('Error: Value must be greater than 0');
-                    }
+                    if (val1 > 0) {
+                        for (let i = 0; i < val1; i++) createNewAudio();
+                        logMessage(`Started ${val1} audio instances`);
+                    } else logMessage('Error: Value must be > 0');
                     break;
                 case 'stop':
-                    audioInstances.forEach(audio => audio.pause());
+                    audioInstances.forEach(a => a.pause());
                     audioInstances = [];
-                    logMessage('Stopped all audio instances');
+                    logMessage('All audio stopped');
                     break;
-                case 'speed': // Change color transition speed
-            if (value > 0) {
-                startColorChange(value);
-                logMessage(`Color change speed set to ${value}ms`);
-            } else {
-                logMessage('Error: Speed must be greater than 0');
-            }
-            break;
+                case 'volume':
+                    if (val1 >= 0 && val1 <= 1) {
+                        audioInstances.forEach(a => a.volume = val1);
+                        logMessage(`Volume set to ${val1}`);
+                    } else logMessage('Error: Volume 0-1');
+                    break;
+                case 'playback':
+                    if (val1 >= 0.1 && val1 <= 4) {
+                        playbackRate = val1;
+                        audioInstances.forEach(a => a.playbackRate = val1);
+                        logMessage(`Playback speed ${val1}x`);
+                    } else logMessage('Error: Playback 0.1-4');
+                    break;
+                case 'loop':
+                    const loop = args[1] === 'on';
+                    audioInstances.forEach(a => a.loop = loop);
+                    logMessage(`Looping ${args[1]}`);
+                    break;
+                case 'color':
+                    if (args[1] === 'on') {
+                        colorEnabled = true;
+                        logMessage('Color enabled');
+                    } else if (args[1] === 'off') {
+                        colorEnabled = false;
+                        button.style.backgroundColor = 'transparent';
+                        logMessage('Color disabled');
+                    } else if (/^#[0-9A-F]{6}$/i.test(args[1])) {
+                        currentColor = args[1];
+                        button.style.backgroundColor = args[1];
+                        logMessage(`Color set to ${args[1]}`);
+                    } else logMessage('Error: Use on/off or #HEX');
+                    break;
+                case 'consolecolor':
+                    if (/^#[0-9A-F]{6}$/i.test(args[1])) {
+                        consoleContainer.style.borderColor = args[1];
+                        consoleToggle.style.borderColor = args[1];
+                        logMessage(`Console border ${args[1]}`);
+                    } else logMessage('Error: Use #HEX');
+                    break;
+                case 'logcolor':
+                    if (/^#[0-9A-F]{6}$/i.test(args[1])) {
+                        consoleLog.style.color = args[1];
+                        logMessage(`Log color ${args[1]}`);
+                    } else logMessage('Error: Use #HEX');
+                    break;
+                case 'bgcolor':
+                    if (/^#[0-9A-F]{6}$/i.test(args[1])) {
+                        document.body.style.backgroundColor = args[1];
+                        logMessage(`Background ${args[1]}`);
+                    } else logMessage('Error: Use #HEX');
+                    break;
+                case 'buttonsize':
+                    if (val1 > 0) {
+                        button.style.width = `${val1}px`;
+                        button.style.height = `${val1}px`;
+                        logMessage(`Button size ${val1}px`);
+                    } else logMessage('Error: Size > 0');
+                    break;
+                case 'buttonpos':
+                    if (val1 !== null && val2 !== null) {
+                        button.style.left = `${val1}px`;
+                        button.style.top = `${val2}px`;
+                        button.style.transform = 'none';
+                        logMessage(`Button pos (${val1}, ${val2})`);
+                    } else logMessage('Error: Use x y');
+                    break;
+                case 'consolesize':
+                    if (val1 > 0 && val2 > 0) {
+                        consoleContainer.style.width = `${val1}px`;
+                        consoleContainer.style.height = `${val2}px`;
+                        logMessage(`Console ${val1}x${val2}px`);
+                    } else logMessage('Error: Width/Height > 0');
+                    break;
+                case 'buttonshape':
+                    if (args[1] === 'square') {
+                        button.style.borderRadius = '0';
+                        logMessage('Button shape: square');
+                    } else if (args[1] === 'circle') {
+                        button.style.borderRadius = '50%';
+                        logMessage('Button shape: circle');
+                    } else logMessage('Error: Use square/circle');
+                    break;
+                case 'reset':
+                    audioInstances.forEach(a => a.pause());
+                    audioInstances = [];
+                    button.style.cssText = 'width: 100vw; height: 100vh; border: none; margin: 0; padding: 0; cursor: pointer; outline: none; position: absolute; top: 0; left: 0; z-index: 1; background-color: transparent;';
+                    consoleContainer.style.cssText = 'display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; width: 400px; height: 300px; background: rgba(0, 0, 40, 0.95); border: 2px solid #00aaff; border-radius: 10px; box-shadow: 0 0 20px rgba(0, 170, 255, 0.7); flex-direction: column; padding: 15px; margin: 25px;';
+                    document.body.style.backgroundColor = '#1e1e1e';
+                    consoleLog.style.color = '#00ff00';
+                    consoleContainer.style.borderColor = '#00aaff';
+                    consoleToggle.style.borderColor = '#00aaff';
+                    colorEnabled = true;
+                    logMessage('System reset to default');
+                    break;
                 case 'count':
-                    logMessage(`Current audio instances: ${audioInstances.length}`);
+                    logMessage(`Audio instances: ${audioInstances.length}`);
                     break;
                 case 'clear':
                     consoleLog.innerHTML = '';
                     logMessage('Console cleared');
                     break;
-                case 'cmds':
-                    logMessage('Available commands:');
-                    logMessage('play [n] - Start n audio instances');
-                    logMessage('stop - Stop all audio');
-                    logMessage('speed [n] - Set color change speed (ms)');
-                    logMessage('count - Show current audio instances');
-                    logMessage('clear - Clear console');
-                    logMessage('volume [n] - Set volume (0-1)');
-                    logMessage('soundloop [on/off] - Toggle sound looping');
-                    logMessage('playback [n] - Set playback speed (0.1-4)');
-                    logMessage('color [on/off] - Enable/disable color change');
-                    logMessage('consolecolor [hex] - Set console border color');
-                    logMessage('logcolor [hex] - Set log text color');
-                    logMessage('buttonsize [n] - Set button size (px)');
-                    logMessage('buttonpos [x] [y] - Set button position (px)');
-                    logMessage('consolesize [w] [h] - Set console size (px)');
-                    logMessage('buttondesign [full/circle/square] - Change button design');
-                    logMessage('cmds - Show this list');
-                    break;
-                case 'volume':
-                    if (value >= 0 && value <= 1) {
-                        audioInstances.forEach(audio => audio.volume = value);
-                        logMessage(`Volume set to ${value}`);
-                    } else {
-                        logMessage('Error: Volume must be between 0 and 1');
-                    }
-                    break;
-                case 'soundloop':
-                    if (args[1] === 'on' || args[1] === 'off') {
-                        const loopState = args[1] === 'on';
-                        audioInstances.forEach(audio => audio.loop = loopState);
-                        logMessage(`Sound looping set to ${args[1]}`);
-                    } else {
-                        logMessage('Error: Use "on" or "off"');
-                    }
-                    break;
-                case 'playback':
-                    if (value >= 0.1 && value <= 4) {
-                        playbackRate = value;
-                        audioInstances.forEach(audio => audio.playbackRate = value);
-                        logMessage(`Playback speed set to ${value}x`);
-                    } else {
-                        logMessage('Error: Playback must be between 0.1 and 4');
-                    }
-                    break;
-                case 'color': // Toggle color changing
-            if (args[1] === 'on') {
-                toggleColors(true);
-                logMessage('Color changing enabled');
-            } else if (args[1] === 'off') {
-                toggleColors(false);
-                logMessage('Color changing disabled');
-            } else {
-                logMessage('Error: Use "on" or "off"');
-            }
-            break;
-                case 'consolecolor':
-                    if (/^#[0-9A-F]{6}$/i.test(args[1])) {
-                        consoleContainer.style.borderColor = args[1];
-                        consoleToggle.style.borderColor = args[1];
-                        logMessage(`Console border color set to ${args[1]}`);
-                    } else {
-                        logMessage('Error: Use hex color (e.g., #FF0000)');
-                    }
-                    break;
-                case 'logcolor':
-                    if (/^#[0-9A-F]{6}$/i.test(args[1])) {
-                        consoleLog.style.color = args[1];
-                        logMessage(`Log text color set to ${args[1]}`);
-                    } else {
-                        logMessage('Error: Use hex color (e.g., #FF0000)');
-                    }
-                    break;
-                case 'buttonsize':
-                    if (value > 0) {
-                        button.style.width = `${value}px`;
-                        button.style.height = `${value}px`;
-                        button.style.borderRadius = '0'; // Reset for full/square
-                        logMessage(`Button size set to ${value}px`);
-                    } else {
-                        logMessage('Error: Size must be greater than 0');
-                    }
-                    break;
-                case 'buttonpos':
-                    const x = parseInt(args[1]);
-                    const y = parseInt(args[2]);
-                    if (!isNaN(x) && !isNaN(y)) {
-                        button.style.left = `${x}px`;
-                        button.style.top = `${y}px`;
-                        button.style.transform = 'none';
-                        logMessage(`Button position set to (${x}, ${y})`);
-                    } else {
-                        logMessage('Error: Use two numbers (e.g., 100 200)');
-                    }
-                    break;
-                case 'consolesize':
-                    const w = parseInt(args[1]);
-                    const h = parseInt(args[2]);
-                    if (w > 0 && h > 0) {
-                        consoleContainer.style.width = `${w}px`;
-                        consoleContainer.style.height = `${h}px`;
-                        logMessage(`Console size set to ${w}x${h}px`);
-                    } else {
-                        logMessage('Error: Width and height must be greater than 0');
-                    }
-                    break;
-                case 'buttondesign':
-                    if (args[1] === 'full') {
-                        button.style.width = '100vw';
-                        button.style.height = '100vh';
-                        button.style.top = '0';
-                        button.style.left = '0';
-                        button.style.borderRadius = '0';
-                        button.style.transform = 'none';
-                        logMessage('Button design set to full screen');
-                    } else if (args[1] === 'circle') {
-                        button.style.width = '200px';
-                        button.style.height = '200px';
-                        button.style.borderRadius = '50%';
-                        button.style.left = '50%';
-                        button.style.top = '50%';
-                        button.style.transform = 'translate(-50%, -50%)';
-                        logMessage('Button design set to circle');
-                    } else if (args[1] === 'square') {
-                        button.style.width = '200px';
-                        button.style.height = '200px';
-                        button.style.borderRadius = '0';
-                        button.style.left = '50%';
-                        button.style.top = '50%';
-                        button.style.transform = 'translate(-50%, -50%)';
-                        logMessage('Button design set to square');
-                    } else {
-                        logMessage('Error: Use "full", "circle", or "square"');
-                    }
+                case 'help':
+                    logMessage('Commands: play [n], stop, volume [0-1], playback [0.1-4], loop [on/off], color [on/off/#HEX], consolecolor [#HEX], logcolor [#HEX], bgcolor [#HEX], buttonsize [n], buttonpos [x y], consolesize [w h], buttonshape [square/circle], reset, count, clear, help');
                     break;
                 default:
-                    logMessage(`Unknown command: ${cmd}`);
-                    logMessage('Type "cmds" for available commands');
+                    logMessage(`Unknown: ${cmd}. Type 'help' for commands`);
             }
-        }
+        };
 
-        // Toggle console visibility
+        // Event Listeners
         consoleToggle.addEventListener('click', () => {
             consoleContainer.style.display = consoleContainer.style.display === 'none' ? 'flex' : 'none';
         });
 
-        // Button click handler
         button.addEventListener('mousedown', () => {
             createNewAudio();
-    
+            if (colorEnabled) button.style.backgroundColor = getRandomColor();
             button.classList.add('active');
         });
 
         button.addEventListener('mouseup', () => {
-            setTimeout(() => button.classList.remove('active'), 300);
+            setTimeout(() => {
+                button.classList.remove('active');
+                if (!colorEnabled) button.style.backgroundColor = currentColor;
+            }, 200);
         });
 
-        // Console input handler
         consoleInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && consoleInput.value.trim()) {
                 handleCommand(consoleInput.value);
