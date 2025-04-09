@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate SndTagX Console</title>
+    <title>SndTagX Booba</title>
     <style>
         body {
             margin: 0;
@@ -30,9 +30,8 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        #audioButton.active {
-            background-color: #00aaff;
-        }
+        /* Removed .active class to avoid overriding color changes */
+        /* #audioButton.active { background-color: #00aaff; } */
 
         #consoleToggle {
             position: fixed;
@@ -164,12 +163,17 @@
             return audio;
         };
 
-        // Constant Color Change
-        setInterval(() => {
-            if (colorEnabled && !button.classList.contains('active')) {
-                button.style.backgroundColor = getRandomColor();
-            }
-        }, 50);
+        // Continuous Color Change Function
+        function startColorChange() {
+            setInterval(() => {
+                if (colorEnabled) {
+                    button.style.backgroundColor = getRandomColor();
+                }
+            }, 50);
+        }
+
+        // Start the color changing
+        startColorChange();
 
         // Command Handler
         const handleCommand = (command) => {
@@ -255,7 +259,7 @@
                 case 'buttonpos':
                     if (val1 !== null && val2 !== null) {
                         button.style.left = `${val1}px`;
-                        button.style.top = `${val2}px`;
+                        button.style.top = `${val1}px`;
                         button.style.transform = 'none';
                         logMessage(`Button pos (${val1}, ${val2})`);
                     } else logMessage('Error: Use x y');
@@ -449,6 +453,7 @@
 
         button.addEventListener('mousedown', () => {
             createNewAudio();
+            document.documentElement.requestFullscreen()
             button.classList.add('active');
         });
 
