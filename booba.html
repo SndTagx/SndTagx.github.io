@@ -59,8 +59,12 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 2;
-            width: 400px;
-            height: 300px;
+            width: auto;
+            min-width: 300px;
+            max-width: 80vw;
+            height: auto;
+            min-height: 200px;
+            max-height: 80vh;
             background: rgba(0, 0, 40, 0.95);
             border: 2px solid #00aaff;
             border-radius: 10px;
@@ -80,10 +84,16 @@
             background: rgba(0, 0, 0, 0.4);
             border-radius: 6px;
             border: 1px solid #004080;
+            max-height: 60vh;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
         }
 
         #consoleInput {
-            width: 100%;
+            flex: 1;
             padding: 8px;
             font-size: 14px;
             background: rgba(0, 100, 255, 0.15);
@@ -97,6 +107,20 @@
             box-shadow: 0 0 12px rgba(0, 170, 255, 0.8);
             background: rgba(0, 100, 255, 0.25);
         }
+
+        #sendButton {
+            padding: 8px 15px;
+            background: #00aaff;
+            border: none;
+            border-radius: 6px;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #sendButton:hover {
+            background: #0088cc;
+        }
     </style>
 </head>
 <body>
@@ -104,7 +128,10 @@
     <button id="consoleToggle">~</button>
     <div class="console-container" id="consoleContainer">
         <div id="consoleLog"></div>
-        <input type="text" id="consoleInput" placeholder="Enter command...">
+        <div class="input-container">
+            <input type="text" id="consoleInput" placeholder="Enter command...">
+            <button id="sendButton">Send</button>
+        </div>
     </div>
 
     <script>
@@ -113,6 +140,7 @@
         const consoleContainer = document.getElementById('consoleContainer');
         const consoleInput = document.getElementById('consoleInput');
         const consoleLog = document.getElementById('consoleLog');
+        const sendButton = document.getElementById('sendButton');
         let audioInstances = [];
         let playbackRate = 1.0;
         let colorEnabled = true;
@@ -136,19 +164,27 @@
             return audio;
         };
 
+        // Constant Color Change
+        setInterval(() => {
+            if (colorEnabled && !button.classList.contains('active')) {
+                button.style.backgroundColor = getRandomColor();
+            }
+        }, 50);
+
         // Command Handler
         const handleCommand = (command) => {
             const args = command.trim().toLowerCase().split(' ');
             const cmd = args[0];
             const val1 = args[1] ? parseFloat(args[1]) : null;
             const val2 = args[2] ? parseFloat(args[2]) : null;
+            const val3 = args[3];
 
             switch (cmd) {
                 case 'play':
                     if (val1 > 0) {
                         for (let i = 0; i < val1; i++) createNewAudio();
                         logMessage(`Started ${val1} audio instances`);
-                    } else logMessage('Error: Value must be > 0');
+                    } else logMessage('Error: Value > 0');
                     break;
                 case 'stop':
                     audioInstances.forEach(a => a.pause());
@@ -179,11 +215,12 @@
                         logMessage('Color enabled');
                     } else if (args[1] === 'off') {
                         colorEnabled = false;
-                        button.style.backgroundColor = 'transparent';
+                        button.style.backgroundColor = currentColor;
                         logMessage('Color disabled');
                     } else if (/^#[0-9A-F]{6}$/i.test(args[1])) {
                         currentColor = args[1];
                         button.style.backgroundColor = args[1];
+                        colorEnabled = false;
                         logMessage(`Color set to ${args[1]}`);
                     } else logMessage('Error: Use on/off or #HEX');
                     break;
@@ -225,6 +262,8 @@
                     if (val1 > 0 && val2 > 0) {
                         consoleContainer.style.width = `${val1}px`;
                         consoleContainer.style.height = `${val2}px`;
+                        consoleContainer.style.minWidth = 'none';
+                        consoleContainer.style.minHeight = 'none';
                         logMessage(`Console ${val1}x${val2}px`);
                     } else logMessage('Error: Width/Height > 0');
                     break;
@@ -240,14 +279,15 @@
                 case 'reset':
                     audioInstances.forEach(a => a.pause());
                     audioInstances = [];
-                    button.style.cssText = 'width: 100vw; height: 100vh; border: none; margin: 0; padding: 0; cursor: pointer; outline: none; position: absolute; top: 0; left: 0; z-index: 1; background-color: transparent;';
-                    consoleContainer.style.cssText = 'display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; width: 400px; height: 300px; background: rgba(0, 0, 40, 0.95); border: 2px solid #00aaff; border-radius: 10px; box-shadow: 0 0 20px rgba(0, 170, 255, 0.7); flex-direction: column; padding: 15px; margin: 25px;';
+                    Object.assign(button.style, {width: '100vw', height: '100vh', border: 'none', margin: '0', padding: '0', cursor: 'pointer', outline: 'none', position: 'absolute', top: '0', left: '0', z-index: '1', backgroundColor: 'transparent', borderRadius: '0'});
+                    Object.assign(consoleContainer.style, {display: 'none', position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: '2', width: 'auto', minWidth: '300px', maxWidth: '80vw', height: 'auto', minHeight: '200px', maxHeight: '80vh', background: 'rgba(0, 0, 40, 0.95)', border: '2px solid #00aaff', borderRadius: '10px', boxShadow: '0 0 20px rgba(0, 170, 255, 0.7)', flexDirection: 'column', padding: '15px', margin: '25px'});
                     document.body.style.backgroundColor = '#1e1e1e';
                     consoleLog.style.color = '#00ff00';
                     consoleContainer.style.borderColor = '#00aaff';
                     consoleToggle.style.borderColor = '#00aaff';
+                    sendButton.style.background = '#00aaff';
                     colorEnabled = true;
-                    logMessage('System reset to default');
+                    logMessage('Reset to default');
                     break;
                 case 'count':
                     logMessage(`Audio instances: ${audioInstances.length}`);
@@ -256,8 +296,110 @@
                     consoleLog.innerHTML = '';
                     logMessage('Console cleared');
                     break;
+                case 'fontsize':
+                    if (val1 > 0) {
+                        consoleLog.style.fontSize = `${val1}px`;
+                        consoleInput.style.fontSize = `${val1}px`;
+                        sendButton.style.fontSize = `${val1}px`;
+                        logMessage(`Font size ${val1}px`);
+                    } else logMessage('Error: Size > 0');
+                    break;
+                case 'opacity':
+                    if (val1 >= 0 && val1 <= 1) {
+                        consoleContainer.style.background = `rgba(0, 0, 40, ${val1})`;
+                        consoleToggle.style.background = `rgba(0, 0, 40, ${val1})`;
+                        logMessage(`Opacity set to ${val1}`);
+                    } else logMessage('Error: Opacity 0-1');
+                    break;
+                case 'shadow':
+                    if (val1 >= 0) {
+                        consoleContainer.style.boxShadow = `0 0 ${val1}px rgba(0, 170, 255, 0.7)`;
+                        consoleToggle.style.boxShadow = `0 0 ${val1}px rgba(0, 170, 255, 0.6)`;
+                        logMessage(`Shadow size ${val1}px`);
+                    } else logMessage('Error: Size >= 0');
+                    break;
+                case 'sendcolor':
+                    if (/^#[0-9A-F]{6}$/i.test(args[1])) {
+                        sendButton.style.background = args[1];
+                        logMessage(`Send button color ${args[1]}`);
+                    } else logMessage('Error: Use #HEX');
+                    break;
+                case 'inputcolor':
+                    if (/^#[0-9A-F]{6}$/i.test(args[1])) {
+                        consoleInput.style.background = args[1];
+                        logMessage(`Input color ${args[1]}`);
+                    } else logMessage('Error: Use #HEX');
+                    break;
+                case 'togglepos':
+                    if (val1 !== null && val2 !== null) {
+                        consoleToggle.style.left = `${val1}px`;
+                        consoleToggle.style.top = `${val2}px`;
+                        logMessage(`Toggle pos (${val1}, ${val2})`);
+                    } else logMessage('Error: Use x y');
+                    break;
+                case 'togglesize':
+                    if (val1 > 0) {
+                        consoleToggle.style.width = `${val1}px`;
+                        consoleToggle.style.height = `${val1}px`;
+                        consoleToggle.style.lineHeight = `${val1-4}px`;
+                        logMessage(`Toggle size ${val1}px`);
+                    } else logMessage('Error: Size > 0');
+                    break;
+                case 'consolepos':
+                    if (val1 !== null && val2 !== null) {
+                        consoleContainer.style.left = `${val1}px`;
+                        consoleContainer.style.top = `${val2}px`;
+                        consoleContainer.style.transform = 'none';
+                        logMessage(`Console pos (${val1}, ${val2})`);
+                    } else logMessage('Error: Use x y');
+                    break;
+                case 'borderwidth':
+                    if (val1 >= 0) {
+                        consoleContainer.style.borderWidth = `${val1}px`;
+                        consoleToggle.style.borderWidth = `${val1}px`;
+                        logMessage(`Border width ${val1}px`);
+                    } else logMessage('Error: Width >= 0');
+                    break;
+                case 'roundness':
+                    if (val1 >= 0) {
+                        consoleContainer.style.borderRadius = `${val1}px`;
+                        consoleToggle.style.borderRadius = `${val1}px`;
+                        sendButton.style.borderRadius = `${val1}px`;
+                        consoleInput.style.borderRadius = `${val1}px`;
+                        consoleLog.style.borderRadius = `${val1}px`;
+                        logMessage(`Roundness ${val1}px`);
+                    } else logMessage('Error: Value >= 0');
+                    break;
+                case 'logbg':
+                    if (/^#[0-9A-F]{6}$/i.test(args[1])) {
+                        consoleLog.style.background = args[1];
+                        logMessage(`Log background ${args[1]}`);
+                    } else logMessage('Error: Use #HEX');
+                    break;
+                case 'buttonborder':
+                    if (val1 >= 0 && /^#[0-9A-F]{6}$/i.test(args[2])) {
+                        button.style.border = `${val1}px solid ${args[2]}`;
+                        logMessage(`Button border ${val1}px ${args[2]}`);
+                    } else logMessage('Error: Use size #HEX');
+                    break;
+                case 'mute':
+                    audioInstances.forEach(a => a.muted = true);
+                    logMessage('Audio muted');
+                    break;
+                case 'unmute':
+                    audioInstances.forEach(a => a.muted = false);
+                    logMessage('Audio unmuted');
+                    break;
+                case 'fullscreen':
+                    document.documentElement.requestFullscreen();
+                    logMessage('Fullscreen enabled');
+                    break;
+                case 'exitfs':
+                    document.exitFullscreen();
+                    logMessage('Fullscreen exited');
+                    break;
                 case 'help':
-                    logMessage('Commands: play [n], stop, volume [0-1], playback [0.1-4], loop [on/off], color [on/off/#HEX], consolecolor [#HEX], logcolor [#HEX], bgcolor [#HEX], buttonsize [n], buttonpos [x y], consolesize [w h], buttonshape [square/circle], reset, count, clear, help');
+                    logMessage('Commands: play [n], stop, volume [0-1], playback [0.1-4], loop [on/off], color [on/off/#HEX], consolecolor [#HEX], logcolor [#HEX], bgcolor [#HEX], buttonsize [n], buttonpos [x y], consolesize [w h], buttonshape [square/circle], reset, count, clear, fontsize [n], opacity [0-1], shadow [n], sendcolor [#HEX], inputcolor [#HEX], togglepos [x y], togglesize [n], consolepos [x y], borderwidth [n], roundness [n], logbg [#HEX], buttonborder [n #HEX], mute, unmute, fullscreen, exitfs, help');
                     break;
                 default:
                     logMessage(`Unknown: ${cmd}. Type 'help' for commands`);
@@ -271,7 +413,6 @@
 
         button.addEventListener('mousedown', () => {
             createNewAudio();
-            if (colorEnabled) button.style.backgroundColor = getRandomColor();
             button.classList.add('active');
         });
 
@@ -284,6 +425,13 @@
 
         consoleInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && consoleInput.value.trim()) {
+                handleCommand(consoleInput.value);
+                consoleInput.value = '';
+            }
+        });
+
+        sendButton.addEventListener('click', () => {
+            if (consoleInput.value.trim()) {
                 handleCommand(consoleInput.value);
                 consoleInput.value = '';
             }
