@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SndTagX Booba</title>
+    <title>Ultimate SndTagX Console</title>
     <style>
         body {
             margin: 0;
@@ -147,7 +147,7 @@
         let currentColor = 'transparent';
 
         // Utility Functions
-        const getRandomColor = () => `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`;
+        const getRandomColor = () => `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
         const logMessage = (msg) => {
             const entry = document.createElement('div');
             entry.textContent = `> ${msg}`;
@@ -159,7 +159,7 @@
             audio.loop = true;
             audio.playbackRate = playbackRate;
             audio.volume = 0.5;
-            audio.play();
+            audio.play().catch(err => logMessage('Audio error: ' + err.message));
             audioInstances.push(audio);
             return audio;
         };
@@ -205,9 +205,11 @@
                     } else logMessage('Error: Playback 0.1-4');
                     break;
                 case 'loop':
-                    const loop = args[1] === 'on';
-                    audioInstances.forEach(a => a.loop = loop);
-                    logMessage(`Looping ${args[1]}`);
+                    if (args[1] === 'on' || args[1] === 'off') {
+                        const loop = args[1] === 'on';
+                        audioInstances.forEach(a => a.loop = loop);
+                        logMessage(`Looping ${args[1]}`);
+                    } else logMessage('Error: Use on/off');
                     break;
                 case 'color':
                     if (args[1] === 'on') {
@@ -279,8 +281,42 @@
                 case 'reset':
                     audioInstances.forEach(a => a.pause());
                     audioInstances = [];
-                    Object.assign(button.style, {width: '100vw', height: '100vh', border: 'none', margin: '0', padding: '0', cursor: 'pointer', outline: 'none', position: 'absolute', top: '0', left: '0', z-index: '1', backgroundColor: 'transparent', borderRadius: '0'});
-                    Object.assign(consoleContainer.style, {display: 'none', position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: '2', width: 'auto', minWidth: '300px', maxWidth: '80vw', height: 'auto', minHeight: '200px', maxHeight: '80vh', background: 'rgba(0, 0, 40, 0.95)', border: '2px solid #00aaff', borderRadius: '10px', boxShadow: '0 0 20px rgba(0, 170, 255, 0.7)', flexDirection: 'column', padding: '15px', margin: '25px'});
+                    Object.assign(button.style, {
+                        width: '100vw',
+                        height: '100vh',
+                        border: 'none',
+                        margin: '0',
+                        padding: '0',
+                        cursor: 'pointer',
+                        outline: 'none',
+                        position: 'absolute',
+                        top: '0',
+                        left: '0',
+                        zIndex: '1',
+                        backgroundColor: 'transparent',
+                        borderRadius: '0'
+                    });
+                    Object.assign(consoleContainer.style, {
+                        display: 'none',
+                        position: 'fixed',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: '2',
+                        width: 'auto',
+                        minWidth: '300px',
+                        maxWidth: '80vw',
+                        height: 'auto',
+                        minHeight: '200px',
+                        maxHeight: '80vh',
+                        background: 'rgba(0, 0, 40, 0.95)',
+                        border: '2px solid #00aaff',
+                        borderRadius: '10px',
+                        boxShadow: '0 0 20px rgba(0, 170, 255, 0.7)',
+                        flexDirection: 'column',
+                        padding: '15px',
+                        margin: '25px'
+                    });
                     document.body.style.backgroundColor = '#1e1e1e';
                     consoleLog.style.color = '#00ff00';
                     consoleContainer.style.borderColor = '#00aaff';
@@ -341,7 +377,7 @@
                     if (val1 > 0) {
                         consoleToggle.style.width = `${val1}px`;
                         consoleToggle.style.height = `${val1}px`;
-                        consoleToggle.style.lineHeight = `${val1-4}px`;
+                        consoleToggle.style.lineHeight = `${val1 - 4}px`;
                         logMessage(`Toggle size ${val1}px`);
                     } else logMessage('Error: Size > 0');
                     break;
@@ -391,11 +427,11 @@
                     logMessage('Audio unmuted');
                     break;
                 case 'fullscreen':
-                    document.documentElement.requestFullscreen();
+                    document.documentElement.requestFullscreen().catch(() => logMessage('Fullscreen not supported'));
                     logMessage('Fullscreen enabled');
                     break;
                 case 'exitfs':
-                    document.exitFullscreen();
+                    document.exitFullscreen().catch(() => logMessage('Not in fullscreen'));
                     logMessage('Fullscreen exited');
                     break;
                 case 'help':
