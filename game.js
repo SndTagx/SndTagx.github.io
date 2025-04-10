@@ -115,52 +115,74 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     const achievements = [
-        { id: 1, name: "Новичок", type: "coins", goal: 10000, reward: 5000, desc: "Собери 10000 монет" },
-        { id: 2, name: "Кликовый мастер", type: "coins", goal: 100000, reward: 20000, desc: "Собери 100000 монет" },
-        { id: 3, name: "Улучшатор", type: "upgrades", goal: 25, reward: 50000, desc: "Купи 25 улучшений" },
-        { id: 4, name: "Возрождённый", type: "rebirths", goal: 1, reward: 100000, desc: "Соверши 1 перерождение" },
-        { id: 5, name: "Комбо-гуру", type: "combo", goal: 3, reward: 150000, desc: "Достигни комбо 3x" },
-        { id: 6, name: "Монетный магнат", type: "coins", goal: 500000, reward: 75000, desc: "Собери 500000 монет" },
-        { id: 7, name: "Улучшение эксперта", type: "upgrades", goal: 50, reward: 100000, desc: "Купи 50 улучшений" },
-        { id: 8, name: "Дважды рождённый", type: "rebirths", goal: 2, reward: 200000, desc: "Соверши 2 перерождения" },
-        { id: 9, name: "Миллионер", type: "coins", goal: 1000000, reward: 150000, desc: "Собери 1M монет" },
-        { id: 10, name: "Мастер кликов", type: "coins", goal: 5000000, reward: 500000, desc: "Собери 5M монет" },
-        { id: 11, name: "Улучшатор-эпик", type: "upgrades", goal: 100, reward: 250000, desc: "Купи 100 улучшений" },
-        { id: 12, name: "Трижды рождённый", type: "rebirths", goal: 3, reward: 400000, desc: "Соверши 3 перерождения" },
-        { id: 13, name: "Богач", type: "coins", goal: 10000000, reward: 1000000, desc: "Собери 10M монет" },
-        { id: 14, name: "Улучшение титана", type: "upgrades", goal: 200, reward: 500000, desc: "Купи 200 улучшений" },
-        { id: 15, name: "Пять перерождений", type: "rebirths", goal: 5, reward: 750000, desc: "Соверши 5 перерождений" },
-        { id: 16, name: "Мультимиллионер", type: "coins", goal: 50000000, reward: 2000000, desc: "Собери 50M монет" },
-        { id: 17, name: "Улучшение бога", type: "upgrades", goal: 500, reward: 1500000, desc: "Купи 500 улучшений" },
-        { id: 18, name: "Вечный возрождённый", type: "rebirths", goal: 10, reward: 3000000, desc: "Соверши 10 перерождений" },
-        { id: 19, name: "Пудж Найден", type: "skin", goal: "Skins/KirillSkin.jpg", reward: 50000, desc: "Найди и купи пуджа" },
-        { id: 20, name: "Магазинный маньяк", type: "shop", goal: 10, reward: 100000, desc: "Купи 10 предметов в магазине" },
-        { id: 21, name: "Богач второго уровня", type: "coins", goal: 100000000, reward: 5000000, desc: "Собери 100M монет" },
-        { id: 22, name: "Улучшение легенды", type: "upgrades", goal: 1000, reward: 3000000, desc: "Купи 1000 улучшений" },
-        { id: 23, name: "Возрождение мастера", type: "rebirths", goal: 20, reward: 10000000, desc: "Соверши 20 перерождений" },
-        { id: 24, name: "Собиратель скинов", type: "skins", goal: 5, reward: 250000, desc: "Разблокируй 5 скинов" },
-        { id: 25, name: "Трильярдер", type: "coins", goal: 1000000000, reward: 25000000, desc: "Собери 1B монет" },
-        { id: 26, name: "Пассивный доход", type: "coinsPerSec", goal: 1000, reward: 500000, desc: "Достигни 1000 монет/сек" },
-        { id: 27, name: "Ветеран кликов", type: "clicks", goal: 100000, reward: 1000000, desc: "Соверши 100K кликов" },
-        { id: 28, name: "Магазинный король", type: "shop", goal: 50, reward: 2000000, desc: "Купи 50 предметов в магазине" },
+        { id: 1, name: "Новичок", type: "coins", goal: 1000, reward: 500, desc: "Собери 1000 монет" },
+        { id: 2, name: "Начинающий кликер", type: "clicks", goal: 1000, reward: 1000, desc: "Соверши 1000 кликов" },
+        { id: 3, name: "Улучшатор", type: "upgrades", goal: 10, reward: 2500, desc: "Купи 10 улучшений" },
+        { id: 4, name: "Возрождённый", type: "rebirths", goal: 1, reward: 5000, desc: "Соверши 1 перерождение" },
+        { id: 5, name: "Комбо-новичок", type: "combo", goal: 2, reward: 7500, desc: "Достигни комбо 2x" },
+        { id: 6, name: "Собиратель", type: "coins", goal: 10000, reward: 10000, desc: "Собери 10000 монет" },
+        { id: 7, name: "Кликовый мастер", type: "clicks", goal: 10000, reward: 15000, desc: "Соверши 10000 кликов" },
+        { id: 8, name: "Магазинный новичок", type: "shop", goal: 5, reward: 20000, desc: "Купи 5 предметов в магазине" },
+        { id: 9, name: "Улучшение эксперта", type: "upgrades", goal: 25, reward: 25000, desc: "Купи 25 улучшений" },
+        { id: 10, name: "Дважды рождённый", type: "rebirths", goal: 2, reward: 30000, desc: "Соверши 2 перерождения" },
+        { id: 11, name: "Монетный магнат", type: "coins", goal: 100000, reward: 40000, desc: "Собери 100000 монет" },
+        { id: 12, name: "Комбо-гуру", type: "combo", goal: 3, reward: 50000, desc: "Достигни комбо 3x" },
+        { id: 13, name: "Ветеран кликов", type: "clicks", goal: 50000, reward: 60000, desc: "Соверши 50000 кликов" },
+        { id: 14, name: "Улучшатор-эпик", type: "upgrades", goal: 50, reward: 75000, desc: "Купи 50 улучшений" },
+        { id: 15, name: "Трижды рождённый", type: "rebirths", goal: 3, reward: 100000, desc: "Соверши 3 перерождения" },
+        { id: 16, name: "Миллионер", type: "coins", goal: 1000000, reward: 150000, desc: "Собери 1M монет" },
+        { id: 17, name: "Магазинный маньяк", type: "shop", goal: 15, reward: 200000, desc: "Купи 15 предметов в магазине" },
+        { id: 18, name: "Пассивный доход", type: "coinsPerSec", goal: 100, reward: 250000, desc: "Достигни 100 монет/сек" },
+        { id: 19, name: "Улучшение титана", type: "upgrades", goal: 100, reward: 300000, desc: "Купи 100 улучшений" },
+        { id: 20, name: "Пять перерождений", type: "rebirths", goal: 5, reward: 400000, desc: "Соверши 5 перерождений" },
+        { id: 21, name: "Мультимиллионер", type: "coins", goal: 10000000, reward: 500000, desc: "Собери 10M монет" },
+        { id: 22, name: "Собиратель скинов", type: "skins", goal: 5, reward: 600000, desc: "Разблокируй 5 скинов" },
+        { id: 23, name: "Кликовый бог", type: "clicks", goal: 100000, reward: 750000, desc: "Соверши 100K кликов" },
+        { id: 24, name: "Пудж Найден", type: "skin", goal: "Skins/KirillSkin.jpg", reward: 800000, desc: "Найди и купи пуджа" },
+        { id: 25, name: "Улучшение легенды", type: "upgrades", goal: 250, reward: 1000000, desc: "Купи 250 улучшений" },
+        { id: 26, name: "Десять перерождений", type: "rebirths", goal: 10, reward: 1250000, desc: "Соверши 10 перерождений" },
+        { id: 27, name: "Богач", type: "coins", goal: 100000000, reward: 1500000, desc: "Собери 100M монет" },
+        { id: 28, name: "Магазинный король", type: "shop", goal: 30, reward: 2000000, desc: "Купи 30 предметов в магазине" },
+        { id: 29, name: "Пассивный мастер", type: "coinsPerSec", goal: 1000, reward: 2500000, desc: "Достигни 1000 монет/сек" },
+        { id: 30, name: "Улучшение бога", type: "upgrades", goal: 500, reward: 3000000, desc: "Купи 500 улучшений" },
+        { id: 31, name: "Вечный возрождённый", type: "rebirths", goal: 15, reward: 4000000, desc: "Соверши 15 перерождений" },
+        { id: 32, name: "Трильярдер", type: "coins", goal: 1000000000, reward: 5000000, desc: "Собери 1B монет" },
+        { id: 33, name: "Легенда кликов", type: "clicks", goal: 500000, reward: 6000000, desc: "Соверши 500K кликов" },
+        { id: 34, name: "Коллекционер", type: "skins", goal: 8, reward: 7500000, desc: "Разблокируй 8 скинов" },
+        { id: 35, name: "Магазинный император", type: "shop", goal: 50, reward: 10000000, desc: "Купи 50 предметов в магазине" },
     ];
 
     const dailyRewards = [
-        { day: 1, reward: 1000 },
-        { day: 2, reward: 10000 },
-        { day: 3, reward: 25000 },
-        { day: 4, reward: 50000 },
-        { day: 5, reward: 75000 },
-        { day: 6, reward: 100000 },
-        { day: 7, reward: 200000 },
-        { day: 8, reward: 500000 },
-        { day: 9, reward: 1000000 },
-        { day: 10, reward: 1500000 },
-        { day: 11, reward: 2000000 },
-        { day: 12, reward: 2500000 },
-        { day: 13, reward: 3000000 },
-        { day: 14, reward: 3500000 },
-        { day: 15, reward: 4000000 },
+        { day: 1, reward: 100 },
+        { day: 2, reward: 250 },
+        { day: 3, reward: 500 },
+        { day: 4, reward: 1000 },
+        { day: 5, reward: 2000 },
+        { day: 6, reward: 3500 },
+        { day: 7, reward: 5000 },
+        { day: 8, reward: 7500 },
+        { day: 9, reward: 10000 },
+        { day: 10, reward: 15000 },
+        { day: 11, reward: 20000 },
+        { day: 12, reward: 30000 },
+        { day: 13, reward: 40000 },
+        { day: 14, reward: 50000 },
+        { day: 15, reward: 75000 },
+        { day: 16, reward: 100000 },
+        { day: 17, reward: 150000 },
+        { day: 18, reward: 200000 },
+        { day: 19, reward: 300000 },
+        { day: 20, reward: 400000 },
+        { day: 21, reward: 500000 },
+        { day: 22, reward: 750000 },
+        { day: 23, reward: 1000000 },
+        { day: 24, reward: 1500000 },
+        { day: 25, reward: 2000000 },
+        { day: 26, reward: 3000000 },
+        { day: 27, reward: 4000000 },
+        { day: 28, reward: 5000000 },
+        { day: 29, reward: 7500000 },
+        { day: 30, reward: 10000000 },
     ];
 
     const CLICK_THRESHOLD = 10;
@@ -205,34 +227,43 @@ document.addEventListener('DOMContentLoaded', () => {
         theme: 'night',
         lastUpdateTime: Date.now(),
         tempBoosts: {},
-        shopQuantities: Array(20).fill(0), // Updated for more shop items
+        shopQuantities: Array(14).fill(0), // Updated for more shop items
         totalShopPurchases: 0,
         lastClickTime: null,
         sessionTime: 0,
     };
 
     const shopItemsBase = [
-        { name: "+1 Coin Per Click", effect: (gd) => gd.coinsPerClick++, cost: (gd) => Math.floor(50 * Math.pow(1.15, gd.coinsPerClick)), maxQty: 50 },
-        { name: "+1 Coin/sec", effect: (gd) => gd.coinsPerSec++, cost: (gd) => Math.floor(100 * Math.pow(1.2, gd.coinsPerSec)), maxQty: 100 },
-        { name: "+5 Coins Per Click", effect: (gd) => gd.coinsPerClick += 5, cost: (gd) => Math.floor(200 * Math.pow(1.25, gd.coinsPerClick / 5)), maxQty: 20 },
-        { name: "+10% Combo Boost", effect: (gd) => gd.comboBoost += 0.1, cost: (gd) => Math.floor(5000 * Math.pow(1.3, gd.comboBoost * 10)), maxQty: 10 },
-        { name: "Half Upgrade Cost", effect: (gd) => gd.upgradeCost = Math.max(10, Math.floor(gd.upgradeCost / 2)), cost: (gd) => gd.upgradeCost * 5, maxQty: 5 },
-        { name: "Instant 100k Coins", effect: (gd) => gd.count += 100000, cost: () => 75000, maxQty: 3 },
-        { name: "Double Coins/sec (5min)", effect: (gd) => activateTempBoost('coinsPerSec', 2, 300), cost: () => 100000, maxQty: 1 },
-        { name: "+10 Coin/sec", effect: (gd) => gd.coinsPerSec += 10, cost: (gd) => Math.floor(1000 * Math.pow(1.3, gd.coinsPerSec / 10)), maxQty: 50 },
-        { name: "Triple Coins Per Click (10min)", effect: (gd) => activateTempBoost('coinsPerClick', 3, 600), cost: () => 250000, maxQty: 2 },
-        { name: "Instant 1M Coins", effect: (gd) => gd.count += 1000000, cost: () => 500000, maxQty: 5 },
-        { name: "+25% Rebirth Bonus", effect: (gd) => gd.rebirths += Math.floor(gd.rebirths * 0.25), cost: (gd) => gd.rebirthCost / 2, maxQty: 3 },
-        { name: "Reduce Rebirth Cost by 10%", effect: (gd) => gd.rebirthCost = Math.floor(gd.rebirthCost * 0.9), cost: (gd) => gd.rebirthCost, maxQty: 10 },
-        { name: "+50 Coins Per Click", effect: (gd) => gd.coinsPerClick += 50, cost: (gd) => Math.floor(10000 * Math.pow(1.4, gd.coinsPerClick / 50)), maxQty: 15 },
-        { name: "Instant Level Up", effect: (gd) => { gd.level++; gd.xpToNextLevel = calculateXPForLevel(gd.level + 1); }, cost: (gd) => gd.xpToNextLevel * 100, maxQty: 10 },
-        { name: "Permanent +5 Coins/sec", effect: (gd) => gd.coinsPerSec += 5, cost: (gd) => 200000 * Math.pow(1.25, gd.coinsPerSec / 5), maxQty: 25 },
-        // New Shop Items
-        { name: "Instant 10M Coins", effect: (gd) => gd.count += 10000000, cost: () => 5000000, maxQty: 3 },
-        { name: "+100 Coins Per Click", effect: (gd) => gd.coinsPerClick += 100, cost: (gd) => Math.floor(50000 * Math.pow(1.5, gd.coinsPerClick / 100)), maxQty: 10 },
+        { name: "+1 Coin Per Click", effect: (gd) => gd.coinsPerClick++, cost: (gd) => Math.floor(50 * Math.pow(1.15, gd.coinsPerClick)), maxQty: 100 },
+        { name: "+1 Coin/sec", effect: (gd) => gd.coinsPerSec++, cost: (gd) => Math.floor(75 * Math.pow(1.2, gd.coinsPerSec)), maxQty: 150 },
+        { name: "+5 Coins Per Click", effect: (gd) => gd.coinsPerClick += 5, cost: (gd) => Math.floor(200 * Math.pow(1.25, gd.coinsPerClick / 5)), maxQty: 50 },
+        { name: "+10% Combo Boost", effect: (gd) => gd.comboBoost += 0.1, cost: (gd) => Math.floor(1000 * Math.pow(1.3, gd.comboBoost * 10)), maxQty: 20 },
+        { name: "Half Upgrade Cost", effect: (gd) => gd.upgradeCost = Math.max(10, Math.floor(gd.upgradeCost / 2)), cost: (gd) => gd.upgradeCost * 5, maxQty: 10 },
+        { name: "Instant 10k Coins", effect: (gd) => gd.count += 10000, cost: () => 7500, maxQty: 5 },
+        { name: "Double Coins/sec (5min)", effect: (gd) => activateTempBoost('coinsPerSec', 2, 300), cost: () => 20000, maxQty: 3 },
+        { name: "+5 Coin/sec", effect: (gd) => gd.coinsPerSec += 5, cost: (gd) => Math.floor(500 * Math.pow(1.25, gd.coinsPerSec / 5)), maxQty: 75 },
+        { name: "Triple Coins Per Click (10min)", effect: (gd) => activateTempBoost('coinsPerClick', 3, 600), cost: () => 50000, maxQty: 2 },
+        { name: "Instant 100k Coins", effect: (gd) => gd.count += 100000, cost: () => 75000, maxQty: 5 },
+        { name: "+20% Rebirth Bonus", effect: (gd) => gd.rebirths += Math.floor(gd.rebirths * 0.2), cost: (gd) => gd.rebirthCost / 3, maxQty: 5 },
+        { name: "Reduce Rebirth Cost by 10%", effect: (gd) => gd.rebirthCost = Math.floor(gd.rebirthCost * 0.9), cost: (gd) => gd.rebirthCost / 2, maxQty: 15 },
+        { name: "+25 Coins Per Click", effect: (gd) => gd.coinsPerClick += 25, cost: (gd) => Math.floor(5000 * Math.pow(1.3, gd.coinsPerClick / 25)), maxQty: 25 },
+        { name: "Instant Level Up", effect: (gd) => { gd.level++; gd.xpToNextLevel = calculateXPForLevel(gd.level + 1); }, cost: (gd) => gd.xpToNextLevel * 50, maxQty: 20 },
+        { name: "Permanent +2 Coins/sec", effect: (gd) => gd.coinsPerSec += 2, cost: (gd) => 10000 * Math.pow(1.2, gd.coinsPerSec / 2), maxQty: 50 },
+        { name: "Instant 1M Coins", effect: (gd) => gd.count += 1000000, cost: () => 500000, maxQty: 3 },
+        { name: "+50 Coins Per Click", effect: (gd) => gd.coinsPerClick += 50, cost: (gd) => Math.floor(25000 * Math.pow(1.35, gd.coinsPerClick / 50)), maxQty: 15 },
         { name: "Quad Coins/sec (15min)", effect: (gd) => activateTempBoost('coinsPerSec', 4, 900), cost: () => 1000000, maxQty: 2 },
-        { name: "Reduce Upgrade Cost by 25%", effect: (gd) => gd.upgradeCost = Math.max(10, Math.floor(gd.upgradeCost * 0.75)), cost: (gd) => gd.upgradeCost * 10, maxQty: 5 },
-        { name: "Permanent +2% Click Efficiency", effect: (gd) => gd.coinsPerClick *= 1.02, cost: (gd) => 250000 * Math.pow(1.3, gd.coinsPerClick), maxQty: 20 },
+        { name: "Reduce Upgrade Cost by 20%", effect: (gd) => gd.upgradeCost = Math.max(10, Math.floor(gd.upgradeCost * 0.8)), cost: (gd) => gd.upgradeCost * 8, maxQty: 5 },
+        { name: "Permanent +1% Click Efficiency", effect: (gd) => gd.coinsPerClick *= 1.01, cost: (gd) => 50000 * Math.pow(1.25, gd.coinsPerClick), maxQty: 25 },
+        { name: "+10 Coin/sec", effect: (gd) => gd.coinsPerSec += 10, cost: (gd) => Math.floor(10000 * Math.pow(1.3, gd.coinsPerSec / 10)), maxQty: 30 },
+        { name: "Instant 5M Coins", effect: (gd) => gd.count += 5000000, cost: () => 2500000, maxQty: 2 },
+        { name: "Double Coins Per Click (20min)", effect: (gd) => activateTempBoost('coinsPerClick', 2, 1200), cost: () => 1500000, maxQty: 3 },
+        { name: "+100 Coins Per Click", effect: (gd) => gd.coinsPerClick += 100, cost: (gd) => Math.floor(100000 * Math.pow(1.4, gd.coinsPerClick / 100)), maxQty: 10 },
+        { name: "Permanent +5% Combo Boost", effect: (gd) => gd.comboBoost += 0.05, cost: (gd) => 75000 * Math.pow(1.35, gd.comboBoost * 20), maxQty: 15 },
+        { name: "Instant 10M Coins", effect: (gd) => gd.count += 10000000, cost: () => 5000000, maxQty: 2 },
+        { name: "+25 Coin/sec", effect: (gd) => gd.coinsPerSec += 25, cost: (gd) => Math.floor(50000 * Math.pow(1.35, gd.coinsPerSec / 25)), maxQty: 20 },
+        { name: "Reduce Rebirth Cost by 25%", effect: (gd) => gd.rebirthCost = Math.floor(gd.rebirthCost * 0.75), cost: (gd) => gd.rebirthCost, maxQty: 5 },
+        { name: "Permanent +10 Coins/sec", effect: (gd) => gd.coinsPerSec += 10, cost: (gd) => 250000 * Math.pow(1.3, gd.coinsPerSec / 10), maxQty: 15 },
+        { name: "Quintuple Coins/sec (30min)", effect: (gd) => activateTempBoost('coinsPerSec', 5, 1800), cost: () => 10000000, maxQty: 1 },
     ];
 
     let gameData = loadGameData();
@@ -258,33 +289,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Updated Save/Load Functions
+    // Cookie-based Save/Load Functions
+    function setCookie(name, value, days) {
+        const expires = new Date();
+        expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+        const cookieString = `${name}=${encodeURIComponent(value)};expires=${expires.toUTCString()};path=/`;
+        document.cookie = cookieString;
+    }
+
+    function getCookie(name) {
+        const nameEQ = name + "=";
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.indexOf(nameEQ) === 0) {
+                return decodeURIComponent(cookie.substring(nameEQ.length));
+            }
+        }
+        return null;
+    }
+
     function saveGameData() {
         try {
-            const saveData = {
+            const saveData = JSON.stringify({
                 ...gameData,
                 lastUpdateTime: Date.now()
-            };
-            localStorage.setItem('gameData', JSON.stringify(saveData));
+            });
+            setCookie('gameData', saveData, 365); // Save for 1 year
             return true;
         } catch (e) {
-            console.error("Error saving game data:", e);
+            console.error("Error saving game data to cookie:", e);
             return false;
         }
     }
 
     function loadGameData() {
         try {
-            const savedData = localStorage.getItem('gameData');
+            const savedData = getCookie('gameData');
             let loadedData = savedData ? JSON.parse(savedData) : {};
 
-            // Merge with defaults
             const completeData = {
                 ...defaultGameData,
                 ...loadedData
             };
 
-            // Validate critical data
             completeData.count = Number(completeData.count) || 0;
             completeData.coinsPerClick = Number(completeData.coinsPerClick) || 1;
             completeData.upgradeLevel = Number(completeData.upgradeLevel) || 0;
@@ -293,7 +341,6 @@ document.addEventListener('DOMContentLoaded', () => {
             completeData.rebirthCost = Number(completeData.rebirthCost) || 1000000;
             completeData.currentSkin = completeData.currentSkin || 'Skins/SvetlanaSkin.jpg';
             
-            // Ensure arrays are properly initialized
             completeData.unlockedSkins = Array.isArray(completeData.unlockedSkins) 
                 ? completeData.unlockedSkins 
                 : ['Skins/SvetlanaSkin.jpg'];
@@ -307,7 +354,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? completeData.tempBoosts 
                 : {};
 
-            // Validate currentSkin
             if (!completeData.unlockedSkins.includes(completeData.currentSkin)) {
                 completeData.currentSkin = 'Skins/SvetlanaSkin.jpg';
                 completeData.unlockedSkins = ['Skins/SvetlanaSkin.jpg'];
@@ -317,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
             saveGameData();
             return completeData;
         } catch (e) {
-            console.error("Error loading game data, resetting to defaults:", e);
+            console.error("Error loading game data from cookie, resetting to defaults:", e);
             const defaultData = { ...defaultGameData };
             saveGameData();
             return defaultData;
@@ -385,7 +431,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetGameData() {
-        localStorage.removeItem('gameData');
+        document.cookie = 'gameData=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;';
         gameData = { ...defaultGameData, shopQuantities: Array(shopItemsBase.length).fill(0) };
         saveGameData();
         updateUI();
@@ -436,6 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function formatNumber(num) {
+        if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
         if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
         if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
         if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
@@ -446,7 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
     preloadSounds();
     updateUI();
     if (!gameData.tutorialShown) {
-        alert("Welcome to SndTagXClicker!\n\n- Click to earn coins and XP.\n- Buy upgrades or rebirths.\n- Unlock skins, achievements, and shop items.\n- Enjoy the new night theme and expanded content!");
+        alert("Welcome to SndTagXClicker!\n\n- Click to earn coins and XP.\n- Buy upgrades or rebirths.\n- Unlock skins, achievements, and shop items.\n- Enjoy the expanded content and balanced progression!");
         gameData.tutorialShown = true;
         saveGameData();
     }
