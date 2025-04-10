@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resetDailyRewards: document.getElementById('resetDailyRewards'),
     };
 
-    // Game Data and Constants (unchanged)
+    // Game Data and Constants
     const skins = [
         { skin: "Skins/SvetlanaSkin.jpg", cost: 0, name: "🔢Svetlana (Free)", sound: "Sounds/SvetlanaSkin.mp3" },
         { skin: "Skins/LeshaSkin.jpg", cost: 1, name: "😍Lesha (1)", sound: "Sounds/LeshaSkin.mp3" },
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
         theme: 'night',
         lastUpdateTime: Date.now(),
         tempBoosts: {},
-        shopQuantities: Array(15).fill(0),
+        shopQuantities: Array(20).fill(0), // Updated for more shop items
         totalShopPurchases: 0,
         lastClickTime: null,
         sessionTime: 0,
@@ -227,6 +227,12 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: "+50 Coins Per Click", effect: (gd) => gd.coinsPerClick += 50, cost: (gd) => Math.floor(10000 * Math.pow(1.4, gd.coinsPerClick / 50)), maxQty: 15 },
         { name: "Instant Level Up", effect: (gd) => { gd.level++; gd.xpToNextLevel = calculateXPForLevel(gd.level + 1); }, cost: (gd) => gd.xpToNextLevel * 100, maxQty: 10 },
         { name: "Permanent +5 Coins/sec", effect: (gd) => gd.coinsPerSec += 5, cost: (gd) => 200000 * Math.pow(1.25, gd.coinsPerSec / 5), maxQty: 25 },
+        // New Shop Items
+        { name: "Instant 10M Coins", effect: (gd) => gd.count += 10000000, cost: () => 5000000, maxQty: 3 },
+        { name: "+100 Coins Per Click", effect: (gd) => gd.coinsPerClick += 100, cost: (gd) => Math.floor(50000 * Math.pow(1.5, gd.coinsPerClick / 100)), maxQty: 10 },
+        { name: "Quad Coins/sec (15min)", effect: (gd) => activateTempBoost('coinsPerSec', 4, 900), cost: () => 1000000, maxQty: 2 },
+        { name: "Reduce Upgrade Cost by 25%", effect: (gd) => gd.upgradeCost = Math.max(10, Math.floor(gd.upgradeCost * 0.75)), cost: (gd) => gd.upgradeCost * 10, maxQty: 5 },
+        { name: "Permanent +2% Click Efficiency", effect: (gd) => gd.coinsPerClick *= 1.02, cost: (gd) => 250000 * Math.pow(1.3, gd.coinsPerClick), maxQty: 20 },
     ];
 
     let gameData = loadGameData();
@@ -241,17 +247,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalShopPages = Math.ceil(shopItemsBase.length / ITEMS_PER_PAGE);
     let clicksPerSecond = 0;
 
+    // Audio handling
+    const audioElements = {};
+    function preloadSounds() {
+        skins.forEach(skin => {
+            if (!audioElements[skin.sound]) {
+                audioElements[skin.sound] = new Audio(skin.sound);
+                audioElements[skin.sound].preload = 'auto';
+            }
+        });
+    }
+
     // Updated Save/Load Functions
     function saveGameData() {
         try {
-            const now = Date.now();
-            // Save each property separately
-            Object.entries({
+            const saveData = {
                 ...gameData,
-                lastUpdateTime: now
-            }).forEach(([key, value]) => {
-                localStorage.setItem(`game_${key}`, JSON.stringify(value));
-            });
+                lastUpdateTime: Date.now()
+            };
+            localStorage.setItem('gameData', JSON.stringify(saveData));
             return true;
         } catch (e) {
             console.error("Error saving game data:", e);
@@ -261,28 +275,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadGameData() {
         try {
-            let loadedData = {};
-            
-            // Load each property if it exists
-            Object.keys(defaultGameData).forEach(key => {
-                const storedValue = localStorage.getItem(`game_${key}`);
-                if (storedValue !== null) {
-                    loadedData[key] = JSON.parse(storedValue);
-                }
-            });
+            const savedData = localStorage.getItem('gameData');
+            let loadedData = savedData ? JSON.parse(savedData) : {};
 
-            // If no data loaded at all, use default
-            if (Object.keys(loadedData).length === 0) {
-                loadedData = { ...defaultGameData };
-            }
-
-            // Merge with defaults and validate
+            // Merge with defaults
             const completeData = {
                 ...defaultGameData,
                 ...loadedData
             };
 
-            // Validate and fix critical data
+            // Validate critical data
             completeData.count = Number(completeData.count) || 0;
             completeData.coinsPerClick = Number(completeData.coinsPerClick) || 1;
             completeData.upgradeLevel = Number(completeData.upgradeLevel) || 0;
@@ -305,14 +307,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? completeData.tempBoosts 
                 : {};
 
-            // Validate currentSkin is in unlockedSkins
+            // Validate currentSkin
             if (!completeData.unlockedSkins.includes(completeData.currentSkin)) {
                 completeData.currentSkin = 'Skins/SvetlanaSkin.jpg';
                 completeData.unlockedSkins = ['Skins/SvetlanaSkin.jpg'];
             }
 
             updateOfflineProgress(completeData);
-            saveGameData(); // Save the corrected data
+            saveGameData();
             return completeData;
         } catch (e) {
             console.error("Error loading game data, resetting to defaults:", e);
@@ -341,7 +343,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 ...importedData
             };
             
-            // Ensure arrays are properly initialized after import
             gameData.unlockedSkins = Array.isArray(gameData.unlockedSkins) 
                 ? gameData.unlockedSkins 
                 : ['Skins/SvetlanaSkin.jpg'];
@@ -355,7 +356,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? gameData.tempBoosts 
                 : {};
 
-            // Validate currentSkin
             if (!gameData.unlockedSkins.includes(gameData.currentSkin)) {
                 gameData.currentSkin = 'Skins/SvetlanaSkin.jpg';
                 gameData.unlockedSkins = ['Skins/SvetlanaSkin.jpg'];
@@ -385,15 +385,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetGameData() {
-        Object.keys(gameData).forEach(key => {
-            localStorage.removeItem(`game_${key}`);
-        });
+        localStorage.removeItem('gameData');
         gameData = { ...defaultGameData, shopQuantities: Array(shopItemsBase.length).fill(0) };
         saveGameData();
         updateUI();
     }
 
-    // XP and Level Functions (unchanged)
+    // XP and Level Functions
     function calculateXPForLevel(level) {
         return Math.floor(BASE_XP * Math.pow(LEVEL_GROWTH_FACTOR, level - 1));
     }
@@ -406,13 +404,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // UI Updates (unchanged)
+    // UI Updates
     function updateUI() {
         elements.mainButton.style.backgroundImage = `url('${gameData.currentSkin}')`;
         elements.upgradeButton.style.backgroundImage = `url('${gameData.currentSkin}')`;
         elements.rebirthButton.style.backgroundImage = `url('${gameData.currentSkin}')`;
         elements.coinIcon.src = gameData.currentSkin;
-        elements.clickSound.src = skins.find(s => s.skin === gameData.currentSkin).sound;
+        const currentSkinData = skins.find(s => s.skin === gameData.currentSkin);
+        elements.clickSound.src = currentSkinData.sound;
         elements.coinCount.textContent = formatNumber(gameData.count);
         elements.upgradeCostLabel.textContent = `Cost: ${formatNumber(gameData.upgradeCost)}`;
         elements.upgradeCountLabel.textContent = `Count: ${gameData.upgradeLevel}`;
@@ -444,6 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Initial Setup
+    preloadSounds();
     updateUI();
     if (!gameData.tutorialShown) {
         alert("Welcome to SndTagXClicker!\n\n- Click to earn coins and XP.\n- Buy upgrades or rebirths.\n- Unlock skins, achievements, and shop items.\n- Enjoy the new night theme and expanded content!");
@@ -451,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveGameData();
     }
 
-    // Event Listeners (unchanged)
+    // Event Listeners
     elements.clickArea.addEventListener('mousedown', e => {
         e.preventDefault();
         holdTimeout = setTimeout(() => elements.adminPanel.style.display = 'block', 3000);
@@ -465,9 +465,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     elements.mainButton.addEventListener('click', e => {
         if (detectAutoclicker()) return;
-        elements.clickSound.play().catch(e => console.error('Sound error:', e));
+        const currentSkinSound = skins.find(s => s.skin === gameData.currentSkin).sound;
+        audioElements[currentSkinSound].currentTime = 0;
+        audioElements[currentSkinSound].play().catch(e => console.error('Sound error:', e));
         updateCombo();
-        const coinsGained = gameData.coinsPerClick * (gameData.rebirths + 1) * getComboMultiplier();
+        const coinsGained = getEffectiveCoinsPerClick() * (gameData.rebirths + 1) * getComboMultiplier();
         gameData.count += coinsGained;
         gameData.totalClicksCount++;
         gameData.totalCoinsEarned += coinsGained;
@@ -574,7 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDebugStats();
     });
 
-    // Admin Panel Event Listeners (unchanged)
+    // Admin Panel Event Listeners
     elements.setCoins.addEventListener('click', () => {
         gameData.count = parseInt(elements.adminCoins.value) || 0;
         saveGameData();
@@ -761,7 +763,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDebugStats();
     });
 
-    // Game Logic (unchanged)
+    // Game Logic
     function updateCombo() {
         gameData.clickCombo = Math.min(gameData.clickCombo + 1, MAX_COMBO_CLICKS);
         clearTimeout(comboTimeout);
@@ -804,6 +806,10 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.mainButton.disabled = true;
         gameData.autoclickTriggerCount++;
         saveGameData();
+        setTimeout(() => {
+            elements.jumpscare.style.display = 'none';
+            elements.mainButton.disabled = false;
+        }, 2000);
     }
 
     function createFlyingCoin(e) {
@@ -844,7 +850,7 @@ document.addEventListener('DOMContentLoaded', () => {
                (ach.type === "clicks" && gameData.totalClicksCount >= ach.goal);
     }
 
-    // Rendering Functions (unchanged)
+    // Rendering Functions
     function renderSkinPage() {
         elements.skinPages.innerHTML = '';
         const start = currentSkinPage * ITEMS_PER_PAGE;
