@@ -417,7 +417,6 @@
           <div class="button-group">
             <button id="submit-answer">Submit Answer</button>
             <button id="play-hint">Play Hint</button>
-            <button id="next-question">Next Question</button>
             <button id="stop-game">Stop Game</button>
           </div>
           <div class="feedback" id="game-feedback"></div>
@@ -482,7 +481,6 @@
     const gameOutput = document.getElementById('game-output');
     const submitAnswerButton = document.getElementById('submit-answer');
     const playHintButton = document.getElementById('play-hint');
-    const nextQuestionButton = document.getElementById('next-question');
     const stopGameButton = document.getElementById('stop-game');
     const gameFeedback = document.getElementById('game-feedback');
     const gameScoreDisplay = document.getElementById('game-score');
@@ -580,6 +578,7 @@
     // Load settings from localStorage
     function loadSettings() {
       try {
+        if (!window.localStorage) return;
         DOT_DURATION = parseInt(localStorage.getItem('dotDuration')) || 100;
         DASH_DURATION = parseInt(localStorage.getItem('dashDuration')) || 300;
         SYMBOL_SPACE = parseInt(localStorage.getItem('symbolSpace')) || 100;
@@ -629,45 +628,48 @@
           gamePlay.classList.add('hidden');
         }
       } catch (e) {
-        console.error('Error loading settings from localStorage:', e);
+        console.warn('Failed to load settings from localStorage:', e);
       }
     }
 
     // Save settings to localStorage
     function saveSettings() {
       try {
-        localStorage.setItem('dotDuration', DOT_DURATION);
-        localStorage.setItem('dashDuration', DASH_DURATION);
-        localStorage.setItem('symbolSpace', SYMBOL_SPACE);
-        localStorage.setItem('letterSpace', LETTER_SPACE);
-        localStorage.setItem('wordSpace', WORD_SPACE);
-        localStorage.setItem('showOutput', showOutput);
+        if (!window.localStorage) return;
+        localStorage.setItem('dotDuration', String(DOT_DURATION));
+        localStorage.setItem('dashDuration', String(DASH_DURATION));
+        localStorage.setItem('symbolSpace', String(SYMBOL_SPACE));
+        localStorage.setItem('letterSpace', String(LETTER_SPACE));
+        localStorage.setItem('wordSpace', String(WORD_SPACE));
+        localStorage.setItem('showOutput', String(showOutput));
         localStorage.setItem('currentDifficulty', currentDifficulty);
-        localStorage.setItem('isEncodeMode', isEncodeMode);
-        localStorage.setItem('score', score);
-        localStorage.setItem('currentQuestion', currentQuestion);
-        localStorage.setItem('currentAnswer', currentAnswer);
+        localStorage.setItem('isEncodeMode', String(isEncodeMode));
+        localStorage.setItem('score', String(score));
+        localStorage.setItem('currentQuestion', currentQuestion || '');
+        localStorage.setItem('currentAnswer', currentAnswer || '');
         localStorage.setItem('gameActive', gamePlay.classList.contains('hidden') ? 'false' : 'true');
       } catch (e) {
-        console.error('Error saving settings to localStorage:', e);
+        console.warn('Failed to save settings to localStorage:', e);
       }
     }
 
     // Save input to localStorage
     function saveInput(element, key) {
       try {
-        localStorage.setItem(key, element.value);
+        if (!window.localStorage) return;
+        localStorage.setItem(key, element.value || '');
       } catch (e) {
-        console.error(`Error saving ${key} to localStorage:`, e);
+        console.warn(`Failed to save ${key} to localStorage:`, e);
       }
     }
 
     // Save output to localStorage
     function saveOutput(element, key) {
       try {
-        localStorage.setItem(key, element.textContent);
+        if (!window.localStorage) return;
+        localStorage.setItem(key, element.textContent || '');
       } catch (e) {
-        console.error(`Error saving ${key} to localStorage:`, e);
+        console.warn(`Failed to save ${key} to localStorage:`, e);
       }
     }
 
@@ -682,23 +684,42 @@
       }
     }
 
+    // Normalize Morse code input
+    function normalizeMorse(morse) {
+      if (!morse) return '';
+      // Normalize spaces around slashes and between letters
+      return morse.trim()
+        .replace(/\s*\/\s*/g, ' / ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
     // Text to Morse conversion
     function textToMorse(text) {
       if (!text) return '';
+      // Split by spaces to handle words
       return text.toUpperCase()
-        .split('')
-        .map(char => morseCode[char] || char)
-        .join(' ')
-        .replace(/\/ /g, '/');
+        .split(' ')
+        .map(word => word.split('')
+          .map(char => morseCode[char] || '')
+          .filter(code => code)
+          .join(' '))
+        .filter(word => word)
+        .join(' / ');
     }
 
     // Morse to text conversion
     function morseToText(morse) {
       if (!morse) return '';
-      return morse.trim()
-        .split(' ')
-        .map(code => textFromMorse[code] || code)
-        .join('');
+      morse = normalizeMorse(morse);
+      // Split by slashes to handle words
+      return morse.split(' / ')
+        .map(word => word.split(' ')
+          .map(code => textFromMorse[code] || '')
+          .filter(char => char)
+          .join(''))
+        .filter(word => word)
+        .join(' ');
     }
 
     // Debounce function for input handling
@@ -724,7 +745,7 @@
     // Update sound output with spans for highlighting
     const updateSoundOutput = debounce(() => {
       const text = soundInput.value.trim();
-      const morse = text ? (/^[.\-\/ ]+$/.test(text) ? text : textToMorse(text)) : 'Morse code to play...';
+      const morse = text ? (/^[.\-\/ ]+$/.test(text) ? normalizeMorse(text) : textToMorse(text)) : 'Morse code to play...';
       if (morse === 'Morse code to play...') {
         soundOutput.textContent = morse;
       } else {
@@ -796,7 +817,8 @@
         return;
       }
 
-      const codes = /^[.\-\/ ]+$/.test(morse) ? morse.trim().split(' ') : textToMorse(morse).split(' ');
+      morse = normalizeMorse(morse);
+      const codes = /^[.\-\/ ]+$/.test(morse) ? morse.split(' ') : textToMorse(morse).split(' ');
       let symbolIndex = 0;
 
       for (const code of codes) {
@@ -880,9 +902,10 @@
     }
 
     // Check game answer
-    function checkAnswer() {
-      const userAnswer = gameInput.value.trim().toUpperCase();
-      const isCorrect = userAnswer === currentAnswer;
+    async function checkAnswer() {
+      const userAnswer = normalizeMorse(gameInput.value.trim().toUpperCase());
+      const normalizedAnswer = normalizeMorse(currentAnswer);
+      const isCorrect = userAnswer === normalizedAnswer;
       if (isCorrect) {
         score++;
         gameFeedback.textContent = 'Correct!';
@@ -893,6 +916,11 @@
       }
       gameScoreDisplay.textContent = score;
       saveSettings();
+
+      // Show result for 2 seconds, then proceed to next question
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      gameFeedback.textContent = '';
+      generateQuestion();
     }
 
     // Stop game and return to start menu
@@ -1004,7 +1032,6 @@
 
     submitAnswerButton.addEventListener('click', checkAnswer);
     playHintButton.addEventListener('click', () => playMorseCode(currentQuestion, gameOutput));
-    nextQuestionButton.addEventListener('click', generateQuestion);
     stopGameButton.addEventListener('click', stopGame);
 
     // Initialize
