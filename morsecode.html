@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MorseCode</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            background: #000000;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            background: rgba(10, 10, 10, 0.9);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+
+        h1 {
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            background: #1a1a1a;
+            border: 2px solid #444;
+            border-bottom: none;
+            padding: 0.5rem 1rem;
+            margin: 0 0.2rem;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: #ffffff;
+            color: #000000;
+            border-bottom: 2px solid #ffffff;
+        }
+
+        .tab:hover {
+            background: #333;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .input-group {
+            margin: 1rem 0;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            background: #1a1a1a;
+            border: 2px solid #444;
+            border-radius: 8px;
+            color: #ffffff;
+            padding: 1rem;
+            resize: none;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #ffffff;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        .output {
+            background: #1a1a1a;
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 100px;
+            margin-top: 1rem;
+            word-wrap: break-word;
+            font-size: 1rem;
+        }
+
+        .alphabet {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            background: #1a1a1a;
+            border: 2px solid #444;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .alphabet-item {
+            background: #222;
+            padding: 0.5rem;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            }
+            50% {
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            }
+            100% {
+                text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            }
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            textarea, .output {
+                height: 80px;
+            }
+
+            .alphabet {
+                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="pulse">Morse Code Translator</h1>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('translator')">Translator</div>
+            <div class="tab" onclick="switchTab('alphabet')">Morse Alphabet</div>
+        </div>
+
+        <div id="translator" class="tab-content active">
+            <div class="input-group">
+                <textarea id="textInput" placeholder="Enter text to convert to Morse code..." oninput="textToMorse()"></textarea>
+            </div>
+            <div class="input-group">
+                <textarea id="morseInput" placeholder="Enter Morse code to convert to text (use . and - separated by spaces)..." oninput="morseToText()"></textarea>
+            </div>
+            <div class="output" id="output">Result will appear here...</div>
+        </div>
+
+        <div id="alphabet" class="tab-content">
+            <div class="alphabet" id="morseAlphabet"></div>
+        </div>
+    </div>
+
+    <script>
+        const morseCode = {
+            'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.', 'G': '--.', 'H': '....',
+            'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---', 'P': '.--.',
+            'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+            'Y': '-.--', 'Z': '--..', '0': '-----', '1': '.----', '2': '..---', '3': '...--', '4': '....-',
+            '5': '.....', '6': '-....', '7': '--...', '8': '---..', '9': '----.',
+            '.': '.-.-.-', ',': '--..--', '?': '..--..', '!': '-.-.--'
+        };
+
+        function textToMorse() {
+            const input = document.getElementById('textInput').value.toUpperCase();
+            const morseInput = document.getElementById('morseInput');
+            let result = '';
+
+            morseInput.value = '';
+
+            if (input === '') {
+                result = 'Result will appear here...';
+            } else {
+                for (let char of input) {
+                    if (morseCode[char] || char === ' ') {
+                        result += (char === ' ' ? '/' : morseCode[char]) + ' ';
+                    } else {
+                        result = 'Invalid character detected!';
+                        break;
+                    }
+                }
+            }
+
+            document.getElementById('output').innerText = result.trim();
+        }
+
+        function morseToText() {
+            const input = document.getElementById('morseInput').value.trim();
+            const textInput = document.getElementById('textInput');
+            let result = '';
+
+            textInput.value = '';
+
+            if (input === '') {
+                result = 'Result will appear here...';
+            } else {
+                const codes = input.split(' ');
+                const reverseMorse = Object.fromEntries(
+                    Object.entries(morseCode).map(([k, v]) => [v, k])
+                );
+
+                for (let code of codes) {
+                    if (code === '/') {
+                        result += ' ';
+                    } else if (reverseMorse[code]) {
+                        result += reverseMorse[code];
+                    } else {
+                        result = 'Invalid Morse code detected!';
+                        break;
+                    }
+                }
+            }
+
+            document.getElementById('output').innerText = result;
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function populateAlphabet() {
+            const alphabetDiv = document.getElementById('morseAlphabet');
+            for (let [char, code] of Object.entries(morseCode)) {
+                const item = document.createElement('div');
+                item.className = 'alphabet-item';
+                item.innerText = `${char}: ${code}`;
+                alphabetDiv.appendChild(item);
+            }
+        }
+
+        populateAlphabet();
+    </script>
+</body>
+</html>
