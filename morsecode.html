@@ -37,9 +37,9 @@
     }
 
     textarea, .output {
-      background-color: #111;
+      background-color: #000;
       color: #fff;
-      border: 1px solid #333;
+      border: 1px solid #fff;
       border-radius: 5px;
       padding: 10px;
       font-size: 16px;
@@ -49,6 +49,12 @@
       outline: none;
       width: 100%;
       box-sizing: border-box;
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+
+    textarea::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+      text-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
     }
 
     .output {
@@ -56,24 +62,25 @@
       overflow-y: auto;
     }
 
-    .sound-output {
+    .sound-output, .game-output {
       min-height: 50px;
       flex: 0.5;
     }
 
     .tab-switcher {
-      background-color: #111;
+      background-color: #000;
       padding: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-top: 1px solid #333;
+      border-top: 1px solid #fff;
       transition: transform 0.3s ease;
       position: fixed;
       bottom: 0;
       width: 100%;
       box-sizing: border-box;
       z-index: 10;
+      box-shadow: 0 -2px 5px rgba(255, 255, 255, 0.3);
     }
 
     .tabs {
@@ -85,10 +92,18 @@
       padding: 5px 15px;
       cursor: pointer;
       border-radius: 5px;
+      transition: all 0.2s ease;
+    }
+
+    .tab:hover {
+      background-color: #222;
+      text-shadow: 0 0 10px #fff;
     }
 
     .tab.active {
-      background-color: #333;
+      background-color: #fff;
+      color: #000;
+      text-shadow: none;
     }
 
     .toggle-switcher {
@@ -97,19 +112,22 @@
       position: fixed;
       bottom: 40px;
       right: 20px;
-      background-color: #111;
-      border: 1px solid #333;
-      border-radius: 5px;
+      background-color: #000;
+      border: 1px solid #fff;
+      border-radius: 50%;
       width: 40px;
+      height: 40px;
+      line-height: 30px;
       text-align: center;
       animation: glow-pulse 2s infinite;
       z-index: 11;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     }
 
     @keyframes glow-pulse {
-      0% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
-      50% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.9); }
-      100% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+      0% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+      50% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.9); }
+      100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
     }
 
     .hidden {
@@ -124,49 +142,165 @@
     }
 
     .morse-item {
-      background-color: #111;
+      background-color: #000;
       padding: 5px;
       border-radius: 3px;
       text-align: center;
+      border: 1px solid #fff;
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
     }
 
     .hidden-tabs {
       transform: translateY(100%);
     }
 
-    .sound-controls {
+    .sound-controls, .game-controls {
       display: flex;
       flex-direction: column;
       gap: 10px;
       padding: 10px;
     }
 
+    .settings-menu {
+      background: rgba(0, 0, 0, 0.9);
+      border: 1px solid #fff;
+      border-radius: 5px;
+      padding: 10px;
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      width: 300px;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    .settings-menu.visible {
+      transform: translateX(0);
+    }
+
     button {
-      background-color: #333;
+      background-color: #000;
       color: #fff;
-      border: 1px solid #555;
+      border: 1px solid #fff;
       padding: 10px;
       border-radius: 5px;
       cursor: pointer;
       font-family: monospace;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
     }
 
     button:hover {
-      background-color: #444;
+      background-color: #222;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+      transform: scale(1.05);
     }
 
     .button-group {
       display: flex;
       gap: 10px;
     }
+
+    .symbol-span {
+      padding: 2px;
+      border-radius: 3px;
+      transition: background-color 0.2s ease;
+    }
+
+    .highlight {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .settings-input {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .settings-input label {
+      flex: 0 0 150px;
+      font-size: 14px;
+    }
+
+    .settings-input input[type="number"] {
+      background: #000;
+      color: #fff;
+      border: 1px solid #fff;
+      border-radius: 3px;
+      padding: 5px;
+      width: 80px;
+      font-family: monospace;
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    }
+
+    .game-start, .game-play {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .difficulty-button.active {
+      background-color: #fff;
+      color: #000;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .mode-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mode-toggle input[type="checkbox"] {
+      appearance: none;
+      width: 40px;
+      height: 20px;
+      background: #000;
+      border: 1px solid #fff;
+      border-radius: 10px;
+      position: relative;
+      cursor: pointer;
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    }
+
+    .mode-toggle input[type="checkbox"]:checked {
+      background: #fff;
+    }
+
+    .mode-toggle input[type="checkbox"]::before {
+      content: '';
+      width: 16px;
+      height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s ease;
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+
+    .mode-toggle input[type="checkbox"]:checked::before {
+      transform: translateX(20px);
+      background: #000;
+    }
+
+    .feedback {
+      color: #0f0;
+      min-height: 20px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div id="translator-tab" class="tab-content">
-      <div class="io-container">
-        <textarea id="input" placeholder="Type text or Morse code here..." class="text-glow"></textarea>
-        <div id="output" class="output text-glow"></div>
+      <div class="io-container text-glow">
+        <label for="input">Enter Text or Morse Code:</label>
+        <textarea id="input" placeholder="Type text or Morse code here..."></textarea>
+        <label for="output">Output: Translated text or Morse code will appear here</label>
+        <div id="output" class="output"></div>
       </div>
     </div>
 
@@ -176,15 +310,74 @@
 
     <div id="sound-tab" class="tab-content hidden">
       <div class="sound-controls text-glow">
-        <textarea id="sound-input" placeholder="Type text or Morse code for sound..." class="text-glow"></textarea>
-        <div id="sound-output" class="output sound-output text-glow">Morse code to play...</div>
+        <textarea id="sound-input" placeholder="Type text or Morse code for sound..."></textarea>
+        <div id="sound-output" class="output sound-output">Morse code to play...</div>
         <div class="button-group">
           <button id="play-morse">Play Morse Code</button>
           <button id="stop-morse">Stop Playback</button>
+          <button id="toggle-settings">Show Settings</button>
         </div>
         <div class="button-group">
           <button id="play-dot">.</button>
           <button id="play-dash">-</button>
+        </div>
+        <div class="settings-menu text-glow" id="settings-menu">
+          <div class="settings-input">
+            <label for="dot-duration">Dot Duration (ms):</label>
+            <input type="number" id="dot-duration" min="50" max="200" step="1" value="100">
+          </div>
+          <div class="settings-input">
+            <label for="dash-duration">Dash Duration (ms):</label>
+            <input type="number" id="dash-duration" min="150" max="600" step="1" value="300">
+          </div>
+          <div class="settings-input">
+            <label for="symbol-space">Symbol Space (ms):</label>
+            <input type="number" id="symbol-space" min="50" max="200" step="1" value="100">
+          </div>
+          <div class="settings-input">
+            <label for="letter-space">Letter Space (ms):</label>
+            <input type="number" id="letter-space" min="150" max="600" step="1" value="300">
+          </div>
+          <div class="settings-input">
+            <label for="word-space">Word Space (ms):</label>
+            <input type="number" id="word-space" min="350" max="1400" step="1" value="700">
+          </div>
+          <button id="close-settings">Close Settings</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="game-tab" class="tab-content hidden">
+      <div class="game-controls text-glow">
+        <div class="game-start" id="game-start">
+          <div class="button-group">
+            <button class="difficulty-button active" data-difficulty="easy">Easy</button>
+            <button class="difficulty-button" data-difficulty="medium">Medium</button>
+            <button class="difficulty-button" data-difficulty="hard">Hard</button>
+          </div>
+          <div class="mode-toggle">
+            <label>Mode:</label>
+            <input type="checkbox" id="game-mode" checked>
+            <span id="mode-label">Encode (Text to Morse)</span>
+          </div>
+          <div>
+            <input type="checkbox" id="show-output" checked>
+            <label for="show-output">Show Input Translation</label>
+          </div>
+          <button id="start-game">Start Game</button>
+        </div>
+        <div class="game-play hidden" id="game-play">
+          <div id="game-prompt"></div>
+          <textarea id="game-input" placeholder="Enter your answer..."></textarea>
+          <div id="game-output" class="output game-output hidden"></div>
+          <div class="button-group">
+            <button id="submit-answer">Submit Answer</button>
+            <button id="play-hint">Play Hint</button>
+            <button id="next-question">Next Question</button>
+            <button id="stop-game">Stop Game</button>
+          </div>
+          <div class="feedback" id="game-feedback"></div>
+          <div>Score: <span id="game-score">0</span></div>
         </div>
       </div>
     </div>
@@ -195,6 +388,7 @@
       <div class="tab active text-glow" data-tab="translator">Translator</div>
       <div class="tab text-glow" data-tab="alphabet">Alphabet</div>
       <div class="tab text-glow" data-tab="sound">Sound</div>
+      <div class="tab text-glow" data-tab="game">Game</div>
     </div>
   </div>
 
@@ -229,17 +423,114 @@
     const stopButton = document.getElementById('stop-morse');
     const playDotButton = document.getElementById('play-dot');
     const playDashButton = document.getElementById('play-dash');
+    const toggleSettingsButton = document.getElementById('toggle-settings');
+    const closeSettingsButton = document.getElementById('close-settings');
+    const settingsMenu = document.getElementById('settings-menu');
+    const dotDurationInput = document.getElementById('dot-duration');
+    const dashDurationInput = document.getElementById('dash-duration');
+    const symbolSpaceInput = document.getElementById('symbol-space');
+    const letterSpaceInput = document.getElementById('letter-space');
+    const wordSpaceInput = document.getElementById('word-space');
+    const gameStart = document.getElementById('game-start');
+    const gamePlay = document.getElementById('game-play');
+    const startGameButton = document.getElementById('start-game');
+    const gamePrompt = document.getElementById('game-prompt');
+    const gameInput = document.getElementById('game-input');
+    const gameOutput = document.getElementById('game-output');
+    const submitAnswerButton = document.getElementById('submit-answer');
+    const playHintButton = document.getElementById('play-hint');
+    const nextQuestionButton = document.getElementById('next-question');
+    const stopGameButton = document.getElementById('stop-game');
+    const gameFeedback = document.getElementById('game-feedback');
+    const gameScoreDisplay = document.getElementById('game-score');
+    const difficultyButtons = document.querySelectorAll('.difficulty-button');
+    const gameModeCheckbox = document.getElementById('game-mode');
+    const modeLabel = document.getElementById('mode-label');
+    const showOutputCheckbox = document.getElementById('show-output');
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     let oscillator = null;
     let isPlaying = false;
 
-    const DOT_DURATION = 100;
-    const DASH_DURATION = DOT_DURATION * 3;
-    const SYMBOL_SPACE = DOT_DURATION;
-    const LETTER_SPACE = DOT_DURATION * 3;
-    const WORD_SPACE = DOT_DURATION * 7;
+    // Sound settings with defaults
+    let DOT_DURATION = 100;
+    let DASH_DURATION = 300;
+    let SYMBOL_SPACE = 100;
+    let LETTER_SPACE = 300;
+    let WORD_SPACE = 700;
 
+    // Game data
+    const gameWords = {
+      easy: [
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+        'CAT', 'DOG', 'SUN', 'MOON', 'STAR', 'TREE', 'BIRD', 'PEN', 'HAT', 'BOX', 'CAR', 'KEY', 'SKY', 'SEA', 'HILL', 'WIND', 'RAIN', 'SNOW',
+        'FISH', 'COW', 'PIG', 'ANT', 'BEE', 'FOX', 'WOLF', 'DEER', 'BEAR', 'LION', 'TIGER', 'ZEBRA', 'SNAKE', 'EAGLE', 'OWL', 'BAT',
+        'RED', 'BLUE', 'GREEN', 'YELLOW', 'PINK', 'BLACK', 'WHITE', 'GOLD', 'SILVER', 'ROSE', 'TULIP', 'OAK', 'MAPLE', 'PINE', 'CLOUD', 'STORM',
+        'FIRE', 'ICE', 'DIRT', 'SAND', 'ROCK', 'PATH', 'ROAD', 'GATE', 'DOOR', 'WALL', 'FENCE', 'BRIDGE', 'BOAT', 'SHIP', 'JET', 'BIKE'
+      ],
+      medium: [
+        'HOUSE', 'SCHOOL', 'RIVER', 'FOREST', 'GOOD DAY', 'HI THERE', 'TRAIN', 'APPLE', 'BOOKS', 'QUICK FOX', 'WARM SUN', 'COLD NIGHT',
+        'BRIGHT', 'DARK SKY', 'GREEN HILL', 'BLUE SEA', 'RED ROSE', 'WHITE SNOW', 'YELLOW STAR', 'PINK CLOUD', 'GOLD RING', 'SILVER MOON',
+        'FARMER', 'BAKER', 'COOK', 'NURSE', 'DOCTOR', 'PILOT', 'SINGER', 'DANCER', 'WRITER', 'PAINTER', 'BUILDER', 'DRIVER', 'TEACHER',
+        'MARKET', 'STORE', 'SHOP', 'TOWN', 'CITY', 'VILLAGE', 'CASTLE', 'TOWER', 'BARN', 'SHED', 'HUT', 'TENT', 'CAMP', 'BEACH', 'LAKE',
+        'POND', 'STREAM', 'BROOK', 'FALLS', 'CAVE', 'MINE', 'HALL', 'ROOM', 'KITCHEN', 'BATH', 'BEDROOM', 'GARDEN', 'PARK', 'FIELD', 'MEADOW',
+        'DESERT', 'JUNGLE', 'SWAMP', 'PLAIN', 'VALLEY', 'CANYON', 'CLIFF', 'RIDGE', 'PEAK', 'SUMMIT', 'TRAIL', 'WAVE', 'TIDE', 'SHORE',
+        'BREEZE', 'GUST', 'STORM', 'FOG', 'MIST', 'HAIL', 'FROST', 'DEW', 'SPARK', 'FLAME', 'ASH', 'SMOKE', 'DUST', 'MUD', 'CLAY', 'STONE',
+        'PEBBLE', 'BOULDER', 'GEM', 'CRYSTAL', 'METAL', 'WOOD', 'GLASS', 'PAPER'
+      ],
+      hard: [
+        'SAVE OUR SHIP', 'GOOD MORNING', 'CALL FOR HELP', 'MEET AT NOON', 'EMERGENCY CALL', 'SEND MESSAGE', 'WEATHER REPORT', 'ARRIVE TONIGHT',
+        'CHECK POSITION', 'REQUEST AID', 'DISTRESS SIGNAL', 'CLEAR THE WAY', 'STAY ON COURSE', 'CHANGE DIRECTION', 'FULL SPEED AHEAD', 'STOP IMMEDIATELY',
+        'RETURN TO BASE', 'PREPARE TO LAND', 'TAKE OFF NOW', 'CONFIRM ARRIVAL', 'REPORT STATUS', 'MAINTAIN RADIO', 'SWITCH FREQUENCY', 'SEND COORDINATES',
+        'EVACUATE AREA', 'SECURE THE ZONE', 'DEPLOY TEAM', 'RESCUE OPERATION', 'SUPPLY DROP', 'MEDICAL AID', 'SEARCH AND FIND', 'LOCATE TARGET',
+        'ESTABLISH CONTACT', 'BREAK SILENCE', 'REPEAT MESSAGE', 'VERIFY SIGNAL', 'STANDBY FOR INFO', 'UPDATE REQUIRED', 'MISSION COMPLETE', 'ABORT OPERATION',
+        'HOLD POSITION', 'ADVANCE FORWARD', 'RETREAT NOW', 'DEFEND THE LINE', 'ATTACK AT DAWN', 'CEASE FIRE', 'NEGOTIATE PEACE', 'SIGN THE TREATY',
+        'DECLARE VICTORY', 'SURRENDER NOW', 'RAISE THE FLAG', 'LOWER THE SAILS', 'ANCHOR THE SHIP', 'LOAD THE CARGO', 'UNLOAD SUPPLIES', 'INSPECT THE GEAR',
+        'REPAIR THE HULL', 'REFUEL THE JET', 'RECHARGE POWER', 'ACTIVATE SYSTEM', 'SHUTDOWN ENGINE', 'OPEN THE GATES', 'CLOSE THE DOORS', 'LOCK THE VAULT',
+        'UNLOCK THE CODE', 'HACK THE SYSTEM', 'BYPASS SECURITY', 'INSTALL UPDATE', 'RUN DIAGNOSTICS', 'CHECK THE MAP', 'PLOT THE ROUTE', 'FOLLOW THE PATH',
+        'AVOID THE STORM', 'CROSS THE BRIDGE', 'CLIMB THE PEAK', 'DESCEND THE CLIFF', 'ENTER THE CAVE', 'EXIT THE TUNNEL', 'EXPLORE THE RUINS', 'DISCOVER TREASURE',
+        'COLLECT SAMPLES', 'ANALYZE DATA', 'RECORD FINDINGS', 'PUBLISH REPORT', 'SHARE THE NEWS', 'BROADCAST LIVE', 'STREAM THE EVENT', 'HOST THE SHOW',
+        'INVITE GUESTS', 'PLAN THE TRIP', 'BOOK THE FLIGHT', 'RENT THE CAR', 'RESERVE A ROOM', 'PACK THE BAGS', 'BOARD THE TRAIN', 'CATCH THE BUS',
+        'WATCH THE SKY', 'LISTEN TO WIND', 'FEEL THE RAIN', 'TOUCH THE STARS', 'DREAM OF PEACE', 'HOPE FOR LOVE', 'LIVE FOR TODAY', 'BUILD TOMORROW'
+      ]
+    };
+
+    let currentDifficulty = 'easy';
+    let isEncodeMode = true;
+    let showOutput = true;
+    let currentQuestion = '';
+    let currentAnswer = '';
+    let score = 0;
+
+    // Load settings from localStorage
+    function loadSettings() {
+      DOT_DURATION = parseInt(localStorage.getItem('dotDuration')) || 100;
+      DASH_DURATION = parseInt(localStorage.getItem('dashDuration')) || 300;
+      SYMBOL_SPACE = parseInt(localStorage.getItem('symbolSpace')) || 100;
+      LETTER_SPACE = parseInt(localStorage.getItem('letterSpace')) || 300;
+      WORD_SPACE = parseInt(localStorage.getItem('wordSpace')) || 700;
+      showOutput = localStorage.getItem('showOutput') !== 'false';
+
+      dotDurationInput.value = DOT_DURATION;
+      dashDurationInput.value = DASH_DURATION;
+      symbolSpaceInput.value = SYMBOL_SPACE;
+      letterSpaceInput.value = LETTER_SPACE;
+      wordSpaceInput.value = WORD_SPACE;
+      showOutputCheckbox.checked = showOutput;
+    }
+
+    // Save settings to localStorage
+    function saveSettings() {
+      localStorage.setItem('dotDuration', DOT_DURATION);
+      localStorage.setItem('dashDuration', DASH_DURATION);
+      localStorage.setItem('symbolSpace', SYMBOL_SPACE);
+      localStorage.setItem('letterSpace', LETTER_SPACE);
+      localStorage.setItem('wordSpace', WORD_SPACE);
+      localStorage.setItem('showOutput', showOutput);
+    }
+
+    // Generate Morse table
     function generateMorseTable() {
       for (const [char, code] of Object.entries(morseCode)) {
         const item = document.createElement('div');
@@ -249,33 +540,60 @@
       }
     }
 
+    // Text to Morse conversion
     function textToMorse(text) {
       return text.toUpperCase().split('').map(char =>
         morseCode[char] || char
       ).join(' ');
     }
 
+    // Morse to text conversion
     function morseToText(morse) {
       return morse.split(' ').map(code =>
         textFromMorse[code] || code
       ).join('');
     }
 
+    // Update translator output
     function updateTranslatorOutput() {
       const text = input.value.trim();
       if (!text) {
         output.textContent = '';
         return;
       }
-
       output.textContent = /^[.\-\/ ]+$/.test(text) ? morseToText(text) : textToMorse(text);
     }
 
+    // Update sound output with spans for highlighting
     function updateSoundOutput() {
       const text = soundInput.value.trim();
-      soundOutput.textContent = text ? (/^[.\-\/ ]+$/.test(text) ? text : textToMorse(text)) : 'Morse code to play...';
+      const morse = text ? (/^[.\-\/ ]+$/.test(text) ? text : textToMorse(text)) : 'Morse code to play...';
+      if (morse === 'Morse code to play...') {
+        soundOutput.textContent = morse;
+      } else {
+        soundOutput.innerHTML = morse
+          .split('')
+          .map((symbol, index) => `<span class="symbol-span" data-index="${index}">${symbol}</span>`)
+          .join('');
+      }
     }
 
+    // Update game output to translate user input
+    function updateGameOutput() {
+      if (!showOutput) {
+        gameOutput.classList.add('hidden');
+        return;
+      }
+      gameOutput.classList.remove('hidden');
+      const userInput = gameInput.value.trim();
+      if (!userInput) {
+        gameOutput.textContent = '';
+        return;
+      }
+      gameOutput.textContent = isEncodeMode ? morseToText(userInput) : textToMorse(userInput);
+    }
+
+    // Play single symbol
     async function playSymbol(symbol) {
       if (isPlaying) return;
       isPlaying = true;
@@ -293,28 +611,56 @@
       isPlaying = false;
     }
 
-    async function playMorseCode() {
+    // Play Morse code with highlighting
+    async function playMorseCode(morse, outputElement) {
       if (isPlaying) return;
       isPlaying = true;
 
-      const morse = soundInput.value.trim();
+      // Lock input if provided
+      if (outputElement === soundOutput) {
+        soundInput.disabled = true;
+        soundInput.style.cursor = 'not-allowed';
+      } else if (outputElement === gameOutput) {
+        gameInput.disabled = true;
+        gameInput.style.cursor = 'not-allowed';
+      }
+
       if (!morse) {
+        if (outputElement === soundOutput) {
+          soundInput.disabled = false;
+          soundInput.style.cursor = 'auto';
+        } else if (outputElement === gameOutput) {
+          gameInput.disabled = false;
+          gameInput.style.cursor = 'auto';
+        }
         isPlaying = false;
         return;
       }
 
       const codes = /^[.\-\/ ]+$/.test(morse) ? morse.split(' ') : textToMorse(morse).split(' ');
+      let symbolIndex = 0;
 
       for (const code of codes) {
         if (!isPlaying) break;
 
         if (code === '/') {
-          await new Promise(resolve => setTimeout(resolve, WORD_SPACE));
+          const slashSpan = outputElement.querySelector(`[data-index="${symbolIndex}"]`);
+          if (slashSpan) {
+            slashSpan.classList.add('highlight');
+            await new Promise(resolve => setTimeout(resolve, WORD_SPACE));
+            slashSpan.classList.remove('highlight');
+          }
+          symbolIndex += 2;
           continue;
         }
 
         for (const symbol of code) {
           if (!isPlaying) break;
+
+          const currentSpan = outputElement.querySelector(`[data-index="${symbolIndex}"]`);
+          if (currentSpan) {
+            currentSpan.classList.add('highlight');
+          }
 
           oscillator = audioCtx.createOscillator();
           oscillator.type = 'sine';
@@ -326,28 +672,99 @@
           await new Promise(resolve => setTimeout(resolve, duration));
 
           oscillator.stop();
+          if (currentSpan) {
+            currentSpan.classList.remove('highlight');
+          }
+
           await new Promise(resolve => setTimeout(resolve, SYMBOL_SPACE));
+          symbolIndex++;
         }
 
         await new Promise(resolve => setTimeout(resolve, LETTER_SPACE - SYMBOL_SPACE));
+        symbolIndex++;
       }
 
+      if (outputElement === soundOutput) {
+        soundInput.disabled = false;
+        soundInput.style.cursor = 'auto';
+      } else if (outputElement === gameOutput) {
+        gameInput.disabled = false;
+        gameInput.style.cursor = 'auto';
+      }
       isPlaying = false;
     }
 
-    function stopMorseCode() {
+    // Stop Morse code playback
+    function stopMorseCode(outputElement) {
       isPlaying = false;
       if (oscillator) {
         oscillator.stop();
         oscillator = null;
       }
+      if (outputElement === soundOutput) {
+        soundInput.disabled = false;
+        soundInput.style.cursor = 'auto';
+        soundOutput.querySelectorAll('.symbol-span').forEach(span => span.classList.remove('highlight'));
+      } else if (outputElement === gameOutput) {
+        gameInput.disabled = false;
+        gameInput.style.cursor = 'auto';
+        gameOutput.querySelectorAll('.symbol-span').forEach(span => span.classList.remove('highlight'));
+      }
     }
 
+    // Generate new game question
+    function generateQuestion() {
+      const words = gameWords[currentDifficulty];
+      currentQuestion = words[Math.floor(Math.random() * words.length)];
+      currentAnswer = isEncodeMode ? textToMorse(currentQuestion) : morseToText(currentQuestion);
+      gamePrompt.textContent = isEncodeMode ? `Translate: ${currentQuestion}` : `Decode: ${currentQuestion}`;
+      gameInput.value = '';
+      gameFeedback.textContent = '';
+      updateGameOutput();
+    }
+
+    // Check game answer
+    function checkAnswer() {
+      const userAnswer = gameInput.value.trim().toUpperCase();
+      const isCorrect = userAnswer === (isEncodeMode ? textToMorse(currentQuestion) : morseToText(currentQuestion));
+      if (isCorrect) {
+        score++;
+        gameFeedback.textContent = 'Correct!';
+        gameFeedback.style.color = '#0f0';
+      } else {
+        gameFeedback.textContent = `Incorrect. Correct answer: ${isEncodeMode ? textToMorse(currentQuestion) : morseToText(currentQuestion)}`;
+        gameFeedback.style.color = '#f00';
+      }
+      gameScoreDisplay.textContent = score;
+    }
+
+    // Stop game and return to start menu
+    function stopGame() {
+      score = 0;
+      gameScoreDisplay.textContent = score;
+      gamePrompt.textContent = '';
+      gameInput.value = '';
+      gameFeedback.textContent = '';
+      gameOutput.textContent = '';
+      gamePlay.classList.add('hidden');
+      gameStart.classList.remove('hidden');
+    }
+
+    // Validate and update sound settings
+    function updateSoundSetting(input, min, max, key) {
+      let value = parseInt(input.value);
+      if (isNaN(value) || value < min) value = min;
+      if (value > max) value = max;
+      input.value = value;
+      window[key] = value;
+      saveSettings();
+    }
+
+    // Event listeners
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
         tabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-
         tabContents.forEach(content => content.classList.add('hidden'));
         document.getElementById(`${tab.dataset.tab}-tab`).classList.remove('hidden');
       });
@@ -360,15 +777,72 @@
       toggleArrow.textContent = switcherVisible ? '▼' : '▲';
     });
 
+    let settingsVisible = false;
+    toggleSettingsButton.addEventListener('click', () => {
+      settingsVisible = true;
+      settingsMenu.classList.add('visible');
+      toggleSettingsButton.style.display = 'none';
+    });
+
+    closeSettingsButton.addEventListener('click', () => {
+      settingsVisible = false;
+      settingsMenu.classList.remove('visible');
+      toggleSettingsButton.style.display = 'inline-block';
+    });
+
     input.addEventListener('input', updateTranslatorOutput);
     soundInput.addEventListener('input', updateSoundOutput);
-    playButton.addEventListener('click', playMorseCode);
-    stopButton.addEventListener('click', stopMorseCode);
+    gameInput.addEventListener('input', updateGameOutput);
+    playButton.addEventListener('click', () => playMorseCode(soundInput.value.trim(), soundOutput));
+    stopButton.addEventListener('click', () => stopMorseCode(soundOutput));
     playDotButton.addEventListener('click', () => playSymbol('.'));
     playDashButton.addEventListener('click', () => playSymbol('-'));
 
+    dotDurationInput.addEventListener('input', () => updateSoundSetting(dotDurationInput, 50, 200, 'DOT_DURATION'));
+    dashDurationInput.addEventListener('input', () => updateSoundSetting(dashDurationInput, 150, 600, 'DASH_DURATION'));
+    symbolSpaceInput.addEventListener('input', () => updateSoundSetting(symbolSpaceInput, 50, 200, 'SYMBOL_SPACE'));
+    letterSpaceInput.addEventListener('input', () => updateSoundSetting(letterSpaceInput, 150, 600, 'LETTER_SPACE'));
+    wordSpaceInput.addEventListener('input', () => updateSoundSetting(wordSpaceInput, 350, 1400, 'WORD_SPACE'));
+
+    // Game listeners
+    difficultyButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        difficultyButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        currentDifficulty = button.dataset.difficulty;
+      });
+    });
+
+    gameModeCheckbox.addEventListener('change', () => {
+      isEncodeMode = gameModeCheckbox.checked;
+      modeLabel.textContent = isEncodeMode ? 'Encode (Text to Morse)' : 'Decode (Morse to Text)';
+      updateGameOutput();
+    });
+
+    showOutputCheckbox.addEventListener('change', () => {
+      showOutput = showOutputCheckbox.checked;
+      saveSettings();
+      updateGameOutput();
+    });
+
+    startGameButton.addEventListener('click', () => {
+      gameStart.classList.add('hidden');
+      gamePlay.classList.remove('hidden');
+      score = 0;
+      gameScoreDisplay.textContent = score;
+      generateQuestion();
+    });
+
+    submitAnswerButton.addEventListener('click', checkAnswer);
+    playHintButton.addEventListener('click', () => playMorseCode(isEncodeMode ? textToMorse(currentQuestion) : currentQuestion, gameOutput));
+    nextQuestionButton.addEventListener('click', generateQuestion);
+    stopGameButton.addEventListener('click', stopGame);
+
+    // Initialize
     generateMorseTable();
     updateSoundOutput();
+    loadSettings();
+    updateTranslatorOutput();
   </script>
 </body>
 </html>
