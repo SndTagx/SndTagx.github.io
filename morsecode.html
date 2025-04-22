@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>-..-</title>
+  <title>Morse Translator</title>
   <style>
     body {
       background-color: #000;
@@ -400,7 +400,7 @@
           <div>Score: <span id="game-score">0</span></div>
         </div>
       </div>
-    </ Settings-section>
+    </div>
   </div>
 
   <div class="tab-switcher hidden-tabs">
@@ -476,18 +476,57 @@
     let LETTER_SPACE = 300;
     let WORD_SPACE = 700;
 
-    // Game data
+    // Game data with expanded word lists
     const gameWords = {
       easy: [
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-        'CAT', 'DOG', 'SUN', 'MOON', 'STAR', 'TREE', 'BIRD', 'PEN', 'HAT', 'BOX'
+        'CAT', 'DOG', 'SUN', 'MOON', 'STAR', 'TREE', 'BIRD', 'PEN', 'HAT', 'BOX', 'CAR', 'KEY', 'SKY', 'SEA', 'HILL',
+        'WIND', 'RAIN', 'SNOW', 'FISH', 'COW', 'PIG', 'ANT', 'BEE', 'FOX', 'WOLF', 'DEER', 'BEAR', 'LION', 'TIGER',
+        'ZEBRA', 'SNAKE', 'EAGLE', 'OWL', 'BAT', 'RED', 'BLUE', 'GREEN', 'YELLOW', 'PINK', 'BLACK', 'WHITE', 'GOLD',
+        'SILVER', 'ROSE', 'TULIP', 'OAK', 'MAPLE', 'PINE', 'CLOUD', 'STORM', 'FIRE', 'ICE', 'DIRT', 'SAND', 'ROCK',
+        'PATH', 'ROAD', 'GATE', 'DOOR', 'WALL', 'FENCE', 'BRIDGE', 'BOAT', 'SHIP', 'JET', 'BIKE', 'BALL', 'CUP',
+        'PLATE', 'FORK', 'SPOON', 'CHAIR', 'TABLE', 'BED', 'LAMP', 'CLOCK', 'BAG', 'SHOE', 'COAT', 'SHIRT', 'PANTS'
       ],
       medium: [
-        'HOUSE', 'SCHOOL', 'RIVER', 'FOREST', 'GOOD DAY', 'HI THERE', 'TRAIN', 'APPLE', 'BOOKS', 'QUICK FOX'
+        'HOUSE', 'SCHOOL', 'RIVER', 'FOREST', 'GOOD DAY', 'HI THERE', 'TRAIN', 'APPLE', 'BOOKS', 'QUICK FOX',
+        'WARM SUN', 'COLD NIGHT', 'BRIGHT', 'DARK SKY', 'GREEN HILL', 'BLUE SEA', 'RED ROSE', 'WHITE SNOW',
+        'YELLOW STAR', 'PINK CLOUD', 'GOLD RING', 'SILVER MOON', 'FARMER', 'BAKER', 'COOK', 'NURSE', 'DOCTOR',
+        'PILOT', 'SINGER', 'DANCER', 'WRITER', 'PAINTER', 'BUILDER', 'DRIVER', 'TEACHER', 'MARKET', 'STORE',
+        'SHOP', 'TOWN', 'CITY', 'VILLAGE', 'CASTLE', 'TOWER', 'BARN', 'SHED', 'HUT', 'TENT', 'CAMP', 'BEACH',
+        'LAKE', 'POND', 'STREAM', 'BROOK', 'FALLS', 'CAVE', 'MINE', 'HALL', 'ROOM', 'KITCHEN', 'BATH', 'BEDROOM',
+        'GARDEN', 'PARK', 'FIELD', 'MEADOW', 'DESERT', 'JUNGLE', 'SWAMP', 'PLAIN', 'VALLEY', 'CANYON', 'CLIFF',
+        'RIDGE', 'PEAK', 'SUMMIT', 'TRAIL', 'WAVE', 'TIDE', 'SHORE', 'BREEZE', 'GUST', 'STORM', 'FOG', 'MIST',
+        'HAIL', 'FROST', 'DEW', 'SPARK', 'FLAME', 'ASH', 'SMOKE', 'DUST', 'MUD', 'CLAY', 'STONE', 'PEBBLE',
+        'BOULDER', 'GEM', 'CRYSTAL', 'METAL', 'WOOD', 'GLASS', 'PAPER', 'LEATHER', 'CLOTH', 'STRING', 'ROPE',
+        'CHAIN', 'WHEEL', 'ENGINE', 'WINDOW', 'FLOOR', 'CEILING', 'STAIRS', 'ROOF', 'LANTERN', 'CANDLE'
       ],
       hard: [
-        'SAVE OUR SHIP', 'GOOD MORNING', 'CALL FOR HELP', 'MEET AT NOON', 'EMERGENCY CALL', 'SEND MESSAGE', 'WEATHER REPORT'
+        'SAVE OUR SHIP', 'GOOD MORNING', 'CALL FOR HELP', 'MEET AT NOON', 'EMERGENCY CALL', 'SEND MESSAGE',
+        'WEATHER REPORT', 'ARRIVE TONIGHT', 'CHECK POSITION', 'REQUEST AID', 'DISTRESS SIGNAL', 'CLEAR THE WAY',
+        'STAY ON COURSE', 'CHANGE DIRECTION', 'FULL SPEED AHEAD', 'STOP IMMEDIATELY', 'RETURN TO BASE',
+        'PREPARE TO LAND', 'TAKE OFF NOW', 'CONFIRM ARRIVAL', 'REPORT STATUS', 'MAINTAIN RADIO',
+        'SWITCH FREQUENCY', 'SEND COORDINATES', 'EVACUATE AREA', 'SECURE THE ZONE', 'DEPLOY TEAM',
+        'RESCUE OPERATION', 'SUPPLY DROP', 'MEDICAL AID', 'SEARCH AND FIND', 'LOCATE TARGET',
+        'ESTABLISH CONTACT', 'BREAK SILENCE', 'REPEAT MESSAGE', 'VERIFY SIGNAL', 'STANDBY FOR INFO',
+        'UPDATE REQUIRED', 'MISSION COMPLETE', 'ABORT OPERATION', 'HOLD POSITION', 'ADVANCE FORWARD',
+        'RETREAT NOW', 'DEFEND THE LINE', 'ATTACK AT DAWN', 'CEASE FIRE', 'NEGOTIATE PEACE',
+        'SIGN THE TREATY', 'DECLARE VICTORY', 'SURRENDER NOW', 'RAISE THE FLAG', 'LOWER THE SAILS',
+        'ANCHOR THE SHIP', 'LOAD THE CARGO', 'UNLOAD SUPPLIES', 'INSPECT THE GEAR', 'REPAIR THE HULL',
+        'REFUEL THE JET', 'RECHARGE POWER', 'ACTIVATE SYSTEM', 'SHUTDOWN ENGINE', 'OPEN THE GATES',
+        'CLOSE THE DOORS', 'LOCK THE VAULT', 'UNLOCK THE CODE', 'HACK THE SYSTEM', 'BYPASS SECURITY',
+        'INSTALL UPDATE', 'RUN DIAGNOSTICS', 'CHECK THE MAP', 'PLOT THE ROUTE', 'FOLLOW THE PATH',
+        'AVOID THE STORM', 'CROSS THE BRIDGE', 'CLIMB THE PEAK', 'DESCEND THE CLIFF', 'ENTER THE CAVE',
+        'EXIT THE TUNNEL', 'EXPLORE THE RUINS', 'DISCOVER TREASURE', 'COLLECT SAMPLES', 'ANALYZE DATA',
+        'RECORD FINDINGS', 'PUBLISH REPORT', 'SHARE THE NEWS', 'BROADCAST LIVE', 'STREAM THE EVENT',
+        'HOST THE SHOW', 'INVITE GUESTS', 'PLAN THE TRIP', 'BOOK THE FLIGHT', 'RENT THE CAR',
+        'RESERVE A ROOM', 'PACK THE BAGS', 'BOARD THE TRAIN', 'CATCH THE BUS', 'WATCH THE SKY',
+        'LISTEN TO WIND', 'FEEL THE RAIN', 'TOUCH THE STARS', 'DREAM OF PEACE', 'HOPE FOR LOVE',
+        'LIVE FOR TODAY', 'BUILD TOMORROW', 'RADIO CHECK', 'OVERRIDE SYSTEM', 'LAUNCH SEQUENCE',
+        'NAVIGATION ERROR', 'SYSTEM FAILURE', 'CRITICAL ALERT', 'EMERGENCY EXIT', 'BACKUP POWER',
+        'REBOOT SYSTEM', 'CALIBRATE SENSOR', 'TRANSMIT DATA', 'RECEIVE SIGNAL', 'DECODE MESSAGE',
+        'ENCRYPT CODE', 'SATELLITE LINK', 'ORBITAL PATH', 'GRAVITY PULL', 'SOLAR FLARE',
+        'METEOR SHOWER', 'SPACE STATION', 'LUNAR SURFACE', 'MARTIAN SOIL', 'GALACTIC CORE'
       ]
     };
 
@@ -786,7 +825,7 @@
     input.addEventListener('input', updateTranslatorOutput);
     soundInput.addEventListener('input', updateSoundOutput);
     gameInput.addEventListener('input', updateGameOutput);
-    playButton UnhideAll('click', () => playMorseCode(soundInput.value.trim(), soundOutput));
+    playButton.addEventListener('click', () => playMorseCode(soundInput.value.trim(), soundOutput));
     stopButton.addEventListener('click', () => stopMorseCode(soundOutput));
     playDotButton.addEventListener('click', () => playSymbol('.'));
     playDashButton.addEventListener('click', () => playSymbol('-'));
