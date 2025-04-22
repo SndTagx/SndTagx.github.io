@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Morse Translator</title>
+  <title>-..-</title>
   <style>
     body {
       background-color: #000;
@@ -27,6 +27,7 @@
       flex-direction: column;
       padding: 20px;
       gap: 10px;
+      overflow-y: auto;
     }
 
     .io-container {
@@ -136,18 +137,27 @@
 
     .morse-table {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
       gap: 10px;
       margin-top: 10px;
+      padding: 10px;
+      height: calc(100% - 20px);
+      overflow-y: auto;
     }
 
     .morse-item {
       background-color: #000;
-      padding: 5px;
-      border-radius: 3px;
+      padding: 10px;
+      border-radius: 5px;
       text-align: center;
       border: 1px solid #fff;
       box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .morse-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
     }
 
     .hidden-tabs {
@@ -159,24 +169,6 @@
       flex-direction: column;
       gap: 10px;
       padding: 10px;
-    }
-
-    .settings-menu {
-      background: rgba(0, 0, 0, 0.9);
-      border: 1px solid #fff;
-      border-radius: 5px;
-      padding: 10px;
-      position: absolute;
-      right: 20px;
-      top: 20px;
-      width: 300px;
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-    }
-
-    .settings-menu.visible {
-      transform: translateX(0);
     }
 
     button {
@@ -197,9 +189,15 @@
       transform: scale(1.05);
     }
 
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     .button-group {
       display: flex;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     .symbol-span {
@@ -210,6 +208,16 @@
 
     .highlight {
       background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .settings-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid #fff;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
     }
 
     .settings-input {
@@ -291,6 +299,20 @@
       color: #0f0;
       min-height: 20px;
     }
+
+    @media (max-width: 600px) {
+      .morse-table {
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+      }
+
+      .settings-input label {
+        flex: 0 0 100px;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+    }
   </style>
 </head>
 <body>
@@ -315,13 +337,11 @@
         <div class="button-group">
           <button id="play-morse">Play Morse Code</button>
           <button id="stop-morse">Stop Playback</button>
-          <button id="toggle-settings">Show Settings</button>
-        </div>
-        <div class="button-group">
           <button id="play-dot">.</button>
           <button id="play-dash">-</button>
         </div>
-        <div class="settings-menu text-glow" id="settings-menu">
+        <div class="settings-section text-glow">
+          <h3>Sound Settings</h3>
           <div class="settings-input">
             <label for="dot-duration">Dot Duration (ms):</label>
             <input type="number" id="dot-duration" min="50" max="200" step="1" value="100">
@@ -342,7 +362,6 @@
             <label for="word-space">Word Space (ms):</label>
             <input type="number" id="word-space" min="350" max="1400" step="1" value="700">
           </div>
-          <button id="close-settings">Close Settings</button>
         </div>
       </div>
     </div>
@@ -350,6 +369,7 @@
     <div id="game-tab" class="tab-content hidden">
       <div class="game-controls text-glow">
         <div class="game-start" id="game-start">
+          <h3>Start Morse Code Game</h3>
           <div class="button-group">
             <button class="difficulty-button active" data-difficulty="easy">Easy</button>
             <button class="difficulty-button" data-difficulty="medium">Medium</button>
@@ -380,7 +400,7 @@
           <div>Score: <span id="game-score">0</span></div>
         </div>
       </div>
-    </div>
+    </ Settings-section>
   </div>
 
   <div class="tab-switcher hidden-tabs">
@@ -423,9 +443,6 @@
     const stopButton = document.getElementById('stop-morse');
     const playDotButton = document.getElementById('play-dot');
     const playDashButton = document.getElementById('play-dash');
-    const toggleSettingsButton = document.getElementById('toggle-settings');
-    const closeSettingsButton = document.getElementById('close-settings');
-    const settingsMenu = document.getElementById('settings-menu');
     const dotDurationInput = document.getElementById('dot-duration');
     const dashDurationInput = document.getElementById('dash-duration');
     const symbolSpaceInput = document.getElementById('symbol-space');
@@ -464,35 +481,13 @@
       easy: [
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-        'CAT', 'DOG', 'SUN', 'MOON', 'STAR', 'TREE', 'BIRD', 'PEN', 'HAT', 'BOX', 'CAR', 'KEY', 'SKY', 'SEA', 'HILL', 'WIND', 'RAIN', 'SNOW',
-        'FISH', 'COW', 'PIG', 'ANT', 'BEE', 'FOX', 'WOLF', 'DEER', 'BEAR', 'LION', 'TIGER', 'ZEBRA', 'SNAKE', 'EAGLE', 'OWL', 'BAT',
-        'RED', 'BLUE', 'GREEN', 'YELLOW', 'PINK', 'BLACK', 'WHITE', 'GOLD', 'SILVER', 'ROSE', 'TULIP', 'OAK', 'MAPLE', 'PINE', 'CLOUD', 'STORM',
-        'FIRE', 'ICE', 'DIRT', 'SAND', 'ROCK', 'PATH', 'ROAD', 'GATE', 'DOOR', 'WALL', 'FENCE', 'BRIDGE', 'BOAT', 'SHIP', 'JET', 'BIKE'
+        'CAT', 'DOG', 'SUN', 'MOON', 'STAR', 'TREE', 'BIRD', 'PEN', 'HAT', 'BOX'
       ],
       medium: [
-        'HOUSE', 'SCHOOL', 'RIVER', 'FOREST', 'GOOD DAY', 'HI THERE', 'TRAIN', 'APPLE', 'BOOKS', 'QUICK FOX', 'WARM SUN', 'COLD NIGHT',
-        'BRIGHT', 'DARK SKY', 'GREEN HILL', 'BLUE SEA', 'RED ROSE', 'WHITE SNOW', 'YELLOW STAR', 'PINK CLOUD', 'GOLD RING', 'SILVER MOON',
-        'FARMER', 'BAKER', 'COOK', 'NURSE', 'DOCTOR', 'PILOT', 'SINGER', 'DANCER', 'WRITER', 'PAINTER', 'BUILDER', 'DRIVER', 'TEACHER',
-        'MARKET', 'STORE', 'SHOP', 'TOWN', 'CITY', 'VILLAGE', 'CASTLE', 'TOWER', 'BARN', 'SHED', 'HUT', 'TENT', 'CAMP', 'BEACH', 'LAKE',
-        'POND', 'STREAM', 'BROOK', 'FALLS', 'CAVE', 'MINE', 'HALL', 'ROOM', 'KITCHEN', 'BATH', 'BEDROOM', 'GARDEN', 'PARK', 'FIELD', 'MEADOW',
-        'DESERT', 'JUNGLE', 'SWAMP', 'PLAIN', 'VALLEY', 'CANYON', 'CLIFF', 'RIDGE', 'PEAK', 'SUMMIT', 'TRAIL', 'WAVE', 'TIDE', 'SHORE',
-        'BREEZE', 'GUST', 'STORM', 'FOG', 'MIST', 'HAIL', 'FROST', 'DEW', 'SPARK', 'FLAME', 'ASH', 'SMOKE', 'DUST', 'MUD', 'CLAY', 'STONE',
-        'PEBBLE', 'BOULDER', 'GEM', 'CRYSTAL', 'METAL', 'WOOD', 'GLASS', 'PAPER'
+        'HOUSE', 'SCHOOL', 'RIVER', 'FOREST', 'GOOD DAY', 'HI THERE', 'TRAIN', 'APPLE', 'BOOKS', 'QUICK FOX'
       ],
       hard: [
-        'SAVE OUR SHIP', 'GOOD MORNING', 'CALL FOR HELP', 'MEET AT NOON', 'EMERGENCY CALL', 'SEND MESSAGE', 'WEATHER REPORT', 'ARRIVE TONIGHT',
-        'CHECK POSITION', 'REQUEST AID', 'DISTRESS SIGNAL', 'CLEAR THE WAY', 'STAY ON COURSE', 'CHANGE DIRECTION', 'FULL SPEED AHEAD', 'STOP IMMEDIATELY',
-        'RETURN TO BASE', 'PREPARE TO LAND', 'TAKE OFF NOW', 'CONFIRM ARRIVAL', 'REPORT STATUS', 'MAINTAIN RADIO', 'SWITCH FREQUENCY', 'SEND COORDINATES',
-        'EVACUATE AREA', 'SECURE THE ZONE', 'DEPLOY TEAM', 'RESCUE OPERATION', 'SUPPLY DROP', 'MEDICAL AID', 'SEARCH AND FIND', 'LOCATE TARGET',
-        'ESTABLISH CONTACT', 'BREAK SILENCE', 'REPEAT MESSAGE', 'VERIFY SIGNAL', 'STANDBY FOR INFO', 'UPDATE REQUIRED', 'MISSION COMPLETE', 'ABORT OPERATION',
-        'HOLD POSITION', 'ADVANCE FORWARD', 'RETREAT NOW', 'DEFEND THE LINE', 'ATTACK AT DAWN', 'CEASE FIRE', 'NEGOTIATE PEACE', 'SIGN THE TREATY',
-        'DECLARE VICTORY', 'SURRENDER NOW', 'RAISE THE FLAG', 'LOWER THE SAILS', 'ANCHOR THE SHIP', 'LOAD THE CARGO', 'UNLOAD SUPPLIES', 'INSPECT THE GEAR',
-        'REPAIR THE HULL', 'REFUEL THE JET', 'RECHARGE POWER', 'ACTIVATE SYSTEM', 'SHUTDOWN ENGINE', 'OPEN THE GATES', 'CLOSE THE DOORS', 'LOCK THE VAULT',
-        'UNLOCK THE CODE', 'HACK THE SYSTEM', 'BYPASS SECURITY', 'INSTALL UPDATE', 'RUN DIAGNOSTICS', 'CHECK THE MAP', 'PLOT THE ROUTE', 'FOLLOW THE PATH',
-        'AVOID THE STORM', 'CROSS THE BRIDGE', 'CLIMB THE PEAK', 'DESCEND THE CLIFF', 'ENTER THE CAVE', 'EXIT THE TUNNEL', 'EXPLORE THE RUINS', 'DISCOVER TREASURE',
-        'COLLECT SAMPLES', 'ANALYZE DATA', 'RECORD FINDINGS', 'PUBLISH REPORT', 'SHARE THE NEWS', 'BROADCAST LIVE', 'STREAM THE EVENT', 'HOST THE SHOW',
-        'INVITE GUESTS', 'PLAN THE TRIP', 'BOOK THE FLIGHT', 'RENT THE CAR', 'RESERVE A ROOM', 'PACK THE BAGS', 'BOARD THE TRAIN', 'CATCH THE BUS',
-        'WATCH THE SKY', 'LISTEN TO WIND', 'FEEL THE RAIN', 'TOUCH THE STARS', 'DREAM OF PEACE', 'HOPE FOR LOVE', 'LIVE FOR TODAY', 'BUILD TOMORROW'
+        'SAVE OUR SHIP', 'GOOD MORNING', 'CALL FOR HELP', 'MEET AT NOON', 'EMERGENCY CALL', 'SEND MESSAGE', 'WEATHER REPORT'
       ]
     };
 
@@ -532,6 +527,7 @@
 
     // Generate Morse table
     function generateMorseTable() {
+      morseTable.innerHTML = '';
       for (const [char, code] of Object.entries(morseCode)) {
         const item = document.createElement('div');
         item.className = 'morse-item';
@@ -542,30 +538,44 @@
 
     // Text to Morse conversion
     function textToMorse(text) {
-      return text.toUpperCase().split('').map(char =>
-        morseCode[char] || char
-      ).join(' ');
+      if (!text) return '';
+      return text.toUpperCase()
+        .split('')
+        .map(char => morseCode[char] || char)
+        .join(' ')
+        .replace(/\/ /g, '/');
     }
 
     // Morse to text conversion
     function morseToText(morse) {
-      return morse.split(' ').map(code =>
-        textFromMorse[code] || code
-      ).join('');
+      if (!morse) return '';
+      return morse.trim()
+        .split(' ')
+        .map(code => textFromMorse[code] || code)
+        .join('');
+    }
+
+    // Debounce function for input handling
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
     }
 
     // Update translator output
-    function updateTranslatorOutput() {
+    const updateTranslatorOutput = debounce(() => {
       const text = input.value.trim();
-      if (!text) {
-        output.textContent = '';
-        return;
-      }
-      output.textContent = /^[.\-\/ ]+$/.test(text) ? morseToText(text) : textToMorse(text);
-    }
+      output.textContent = text ? (/^[.\-\/ ]+$/.test(text) ? morseToText(text) : textToMorse(text)) : '';
+    }, 300);
 
     // Update sound output with spans for highlighting
-    function updateSoundOutput() {
+    const updateSoundOutput = debounce(() => {
       const text = soundInput.value.trim();
       const morse = text ? (/^[.\-\/ ]+$/.test(text) ? text : textToMorse(text)) : 'Morse code to play...';
       if (morse === 'Morse code to play...') {
@@ -576,10 +586,10 @@
           .map((symbol, index) => `<span class="symbol-span" data-index="${index}">${symbol}</span>`)
           .join('');
       }
-    }
+    }, 300);
 
     // Update game output to translate user input
-    function updateGameOutput() {
+    const updateGameOutput = debounce(() => {
       if (!showOutput) {
         gameOutput.classList.add('hidden');
         return;
@@ -590,13 +600,17 @@
         gameOutput.textContent = '';
         return;
       }
-      gameOutput.textContent = isEncodeMode ? morseToText(userInput) : textToMorse(userInput);
-    }
+      gameOutput.innerHTML = (isEncodeMode ? morseToText(userInput) : textToMorse(userInput))
+        .split('')
+        .map((symbol, index) => `<span class="symbol-span" data-index="${index}">${symbol}</span>`)
+        .join('');
+    }, 300);
 
     // Play single symbol
     async function playSymbol(symbol) {
       if (isPlaying) return;
       isPlaying = true;
+      playButton.disabled = true;
 
       oscillator = audioCtx.createOscillator();
       oscillator.type = 'sine';
@@ -608,36 +622,32 @@
       await new Promise(resolve => setTimeout(resolve, duration));
 
       oscillator.stop();
+      oscillator = null;
       isPlaying = false;
+      playButton.disabled = false;
     }
 
     // Play Morse code with highlighting
     async function playMorseCode(morse, outputElement) {
       if (isPlaying) return;
       isPlaying = true;
+      playButton.disabled = true;
+      playHintButton.disabled = true;
 
-      // Lock input if provided
-      if (outputElement === soundOutput) {
-        soundInput.disabled = true;
-        soundInput.style.cursor = 'not-allowed';
-      } else if (outputElement === gameOutput) {
-        gameInput.disabled = true;
-        gameInput.style.cursor = 'not-allowed';
-      }
+      const inputElement = outputElement === soundOutput ? soundInput : gameInput;
+      inputElement.disabled = true;
+      inputElement.style.cursor = 'not-allowed';
 
       if (!morse) {
-        if (outputElement === soundOutput) {
-          soundInput.disabled = false;
-          soundInput.style.cursor = 'auto';
-        } else if (outputElement === gameOutput) {
-          gameInput.disabled = false;
-          gameInput.style.cursor = 'auto';
-        }
+        inputElement.disabled = false;
+        inputElement.style.cursor = 'auto';
         isPlaying = false;
+        playButton.disabled = false;
+        playHintButton.disabled = false;
         return;
       }
 
-      const codes = /^[.\-\/ ]+$/.test(morse) ? morse.split(' ') : textToMorse(morse).split(' ');
+      const codes = /^[.\-\/ ]+$/.test(morse) ? morse.trim().split(' ') : textToMorse(morse).split(' ');
       let symbolIndex = 0;
 
       for (const code of codes) {
@@ -684,14 +694,11 @@
         symbolIndex++;
       }
 
-      if (outputElement === soundOutput) {
-        soundInput.disabled = false;
-        soundInput.style.cursor = 'auto';
-      } else if (outputElement === gameOutput) {
-        gameInput.disabled = false;
-        gameInput.style.cursor = 'auto';
-      }
+      inputElement.disabled = false;
+      inputElement.style.cursor = 'auto';
       isPlaying = false;
+      playButton.disabled = false;
+      playHintButton.disabled = false;
     }
 
     // Stop Morse code playback
@@ -701,23 +708,20 @@
         oscillator.stop();
         oscillator = null;
       }
-      if (outputElement === soundOutput) {
-        soundInput.disabled = false;
-        soundInput.style.cursor = 'auto';
-        soundOutput.querySelectorAll('.symbol-span').forEach(span => span.classList.remove('highlight'));
-      } else if (outputElement === gameOutput) {
-        gameInput.disabled = false;
-        gameInput.style.cursor = 'auto';
-        gameOutput.querySelectorAll('.symbol-span').forEach(span => span.classList.remove('highlight'));
-      }
+      const inputElement = outputElement === soundOutput ? soundInput : gameInput;
+      inputElement.disabled = false;
+      inputElement.style.cursor = 'auto';
+      outputElement.querySelectorAll('.symbol-span').forEach(span => span.classList.remove('highlight'));
+      playButton.disabled = false;
+      playHintButton.disabled = false;
     }
 
     // Generate new game question
     function generateQuestion() {
       const words = gameWords[currentDifficulty];
       currentQuestion = words[Math.floor(Math.random() * words.length)];
-      currentAnswer = isEncodeMode ? textToMorse(currentQuestion) : morseToText(currentQuestion);
-      gamePrompt.textContent = isEncodeMode ? `Translate: ${currentQuestion}` : `Decode: ${currentQuestion}`;
+      currentAnswer = isEncodeMode ? textToMorse(currentQuestion) : currentQuestion;
+      gamePrompt.textContent = isEncodeMode ? `Encode: ${currentQuestion}` : `Decode: ${currentQuestion}`;
       gameInput.value = '';
       gameFeedback.textContent = '';
       updateGameOutput();
@@ -726,13 +730,14 @@
     // Check game answer
     function checkAnswer() {
       const userAnswer = gameInput.value.trim().toUpperCase();
-      const isCorrect = userAnswer === (isEncodeMode ? textToMorse(currentQuestion) : morseToText(currentQuestion));
+      const correctAnswer = isEncodeMode ? textToMorse(currentQuestion) : morseToText(currentQuestion);
+      const isCorrect = userAnswer === correctAnswer;
       if (isCorrect) {
         score++;
         gameFeedback.textContent = 'Correct!';
         gameFeedback.style.color = '#0f0';
       } else {
-        gameFeedback.textContent = `Incorrect. Correct answer: ${isEncodeMode ? textToMorse(currentQuestion) : morseToText(currentQuestion)}`;
+        gameFeedback.textContent = `Incorrect. Correct answer: ${correctAnswer}`;
         gameFeedback.style.color = '#f00';
       }
       gameScoreDisplay.textContent = score;
@@ -748,6 +753,7 @@
       gameOutput.textContent = '';
       gamePlay.classList.add('hidden');
       gameStart.classList.remove('hidden');
+      stopMorseCode(gameOutput);
     }
 
     // Validate and update sound settings
@@ -777,23 +783,10 @@
       toggleArrow.textContent = switcherVisible ? '▼' : '▲';
     });
 
-    let settingsVisible = false;
-    toggleSettingsButton.addEventListener('click', () => {
-      settingsVisible = true;
-      settingsMenu.classList.add('visible');
-      toggleSettingsButton.style.display = 'none';
-    });
-
-    closeSettingsButton.addEventListener('click', () => {
-      settingsVisible = false;
-      settingsMenu.classList.remove('visible');
-      toggleSettingsButton.style.display = 'inline-block';
-    });
-
     input.addEventListener('input', updateTranslatorOutput);
     soundInput.addEventListener('input', updateSoundOutput);
     gameInput.addEventListener('input', updateGameOutput);
-    playButton.addEventListener('click', () => playMorseCode(soundInput.value.trim(), soundOutput));
+    playButton UnhideAll('click', () => playMorseCode(soundInput.value.trim(), soundOutput));
     stopButton.addEventListener('click', () => stopMorseCode(soundOutput));
     playDotButton.addEventListener('click', () => playSymbol('.'));
     playDashButton.addEventListener('click', () => playSymbol('-'));
@@ -816,7 +809,7 @@
     gameModeCheckbox.addEventListener('change', () => {
       isEncodeMode = gameModeCheckbox.checked;
       modeLabel.textContent = isEncodeMode ? 'Encode (Text to Morse)' : 'Decode (Morse to Text)';
-      updateGameOutput();
+      if (currentQuestion) generateQuestion();
     });
 
     showOutputCheckbox.addEventListener('change', () => {
