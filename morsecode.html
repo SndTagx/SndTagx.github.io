@@ -3,22 +3,68 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Interactive Morse code translator, sound player, and game. Learn and practice Morse code with ease." />
   <title>-..-</title>
   <style>
     body {
       background-color: #000;
       color: #fff;
-      font-family: monospace;
+      font-family: 'Courier New', monospace;
       margin: 0;
       padding: 0;
       display: flex;
       flex-direction: column;
       height: 100vh;
       overflow: hidden;
+      position: relative;
+    }
+
+    /* Animated Background */
+    .background-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(0deg, rgba(255,255,255,0.05) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.3;
+      z-index: -1;
+      animation: gridMove 20s linear infinite;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-50px); }
+    }
+
+    /* Dynamic Themes */
+    body.theme-default {
+      --primary-glow: rgba(255, 255, 255, 0.7);
+      --highlight-bg: #222;
+      --active-bg: #fff;
+      --active-text: #000;
+    }
+
+    body.theme-neon {
+      background-color: #0a1a2b;
+      --primary-glow: rgba(0, 255, 255, 0.7);
+      --highlight-bg: #1e3a5f;
+      --active-bg: #00ffcc;
+      --active-text: #000;
+    }
+
+    body.theme-sepia {
+      background-color: #2c1e12;
+      --primary-glow: rgba(255, 204, 153, 0.7);
+      --highlight-bg: #4a3726;
+      --active-bg: #ffcc99;
+      --active-text: #000;
     }
 
     .text-glow {
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+      text-shadow: 0 0 8px var(--primary-glow);
     }
 
     .container {
@@ -38,7 +84,7 @@
     }
 
     textarea, .output {
-      background-color: #000;
+      background-color: transparent;
       color: #fff;
       border: 1px solid #fff;
       border-radius: 5px;
@@ -50,12 +96,18 @@
       outline: none;
       width: 100%;
       box-sizing: border-box;
-      box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 8px var(--primary-glow);
+      transition: box-shadow 0.3s ease;
+    }
+
+    textarea:focus, button:focus, .tab:focus, .settings-toggle:focus {
+      box-shadow: 0 0 12px var(--primary-glow);
+      outline: 2px solid var(--primary-glow);
     }
 
     textarea::placeholder {
       color: rgba(255, 255, 255, 0.5);
-      text-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
+      text-shadow: 0 0 3px var(--primary-glow);
     }
 
     .output {
@@ -68,71 +120,112 @@
       flex: 0.5;
     }
 
+    /* Hamburger Menu Tab Switcher */
     .tab-switcher {
       background-color: #000;
       padding: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       border-top: 1px solid #fff;
-      transition: transform 0.3s ease;
       position: fixed;
       bottom: 0;
       width: 100%;
       box-sizing: border-box;
       z-index: 10;
-      box-shadow: 0 -2px 5px rgba(255, 255, 255, 0.3);
+      box-shadow: 0 -2px 8px var(--primary-glow);
+      transition: transform 0.3s ease;
     }
 
     .tabs {
       display: flex;
       gap: 10px;
+      justify-content: center;
     }
 
     .tab {
-      padding: 5px 15px;
+      padding: 8px 15px;
       cursor: pointer;
       border-radius: 5px;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
+      text-align: center;
+      box-shadow: 0 0 5px var(--primary-glow);
     }
 
-    .tab:hover {
-      background-color: #222;
-      text-shadow: 0 0 10px #fff;
+    .tab:hover, .tab:focus {
+      background-color: var(--highlight-bg);
+      text-shadow: 0 0 12px var(--primary-glow);
+      transform: scale(1.05);
     }
 
     .tab.active {
-      background-color: #fff;
-      color: #000;
+      background-color: var(--active-bg);
+      color: var(--active-text);
       text-shadow: none;
+      box-shadow: 0 0 12px var(--primary-glow);
     }
 
-    .toggle-switcher {
+    .hamburger {
+      display: none;
       cursor: pointer;
-      padding: 5px;
+      padding: 10px;
+      font-size: 24px;
+      background-color: transparent;
+      border: none;
+      color: #fff;
       position: fixed;
-      bottom: 40px;
-      right: 20px;
-      background-color: #000;
-      border: 1px solid #fff;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      line-height: 30px;
-      text-align: center;
-      animation: glow-pulse 2s infinite;
+      bottom: 10px;
+      right: 10px;
       z-index: 11;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 8px var(--primary-glow);
+      border-radius: 50%;
     }
 
-    @keyframes glow-pulse {
-      0% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
-      50% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.9); }
-      100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+    .mobile-menu {
+      position: fixed;
+      top: 0;
+      right: -250px;
+      width: 250px;
+      height: 100%;
+      background-color: #000;
+      border-left: 1px solid #fff;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 12;
+      transition: right 0.3s ease;
+      box-shadow: -2px 0 8px var(--primary-glow);
     }
 
-    .hidden {
-      display: none !important;
+    .mobile-menu.open {
+      right: 0;
+    }
+
+    .mobile-menu .tab {
+      width: 100%;
+      text-align: left;
+    }
+
+    .close-menu {
+      align-self: flex-end;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .tab-switcher {
+        display: none;
+      }
+      .hamburger {
+        display: block;
+      }
+    }
+
+    @media (min-width: 601px) {
+      .mobile-menu {
+        display: none;
+      }
     }
 
     .morse-table {
@@ -145,26 +238,34 @@
       overflow-y: auto;
     }
 
+    @media (min-width: 768px) {
+      .morse-table {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .morse-table {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+
     .morse-item {
-      background-color: #000;
+      background-color: transparent;
       padding: 10px;
       border-radius: 5px;
       text-align: center;
       border: 1px solid #fff;
-      box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 8px var(--primary-glow);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .morse-item:hover {
       transform: scale(1.05);
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+      box-shadow: 0 0 12px var(--primary-glow);
     }
 
-    .hidden-tabs {
-      transform: translateY(100%);
-    }
-
-    .sound-controls, .game-controls {
+    .sound-controls, .game-controls, .settings-controls {
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -172,20 +273,20 @@
     }
 
     button {
-      background-color: #000;
+      background-color: transparent;
       color: #fff;
       border: 1px solid #fff;
       padding: 10px;
       border-radius: 5px;
       cursor: pointer;
-      font-family: monospace;
-      transition: all 0.2s ease;
-      box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+      font-family: 'Courier New', monospace;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 8px var(--primary-glow);
     }
 
     button:hover {
-      background-color: #222;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+      background-color: var(--highlight-bg);
+      box-shadow: 0 0 12px var(--primary-glow);
       transform: scale(1.05);
     }
 
@@ -211,7 +312,7 @@
     }
 
     .highlight {
-      background-color: rgba(255, 255, 255, 0.3);
+      background-color: var(--primary-glow);
     }
 
     .settings-menu {
@@ -221,7 +322,7 @@
       padding: 10px;
       border: 1px solid #fff;
       border-radius: 5px;
-      box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 8px var(--primary-glow);
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.3s ease, padding 0.3s ease;
@@ -233,21 +334,20 @@
     }
 
     .settings-toggle {
-      background-color: #000;
+      background-color: transparent;
       color: #fff;
       border: 1px solid #fff;
       padding: 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-family: monospace;
-      transition: all 0.2s ease;
-      box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+      font-family: 'Courier New', monospace;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 8px var(--primary-glow);
       text-align: center;
+      cursor: pointer;
     }
 
     .settings-toggle:hover {
-      background-color: #222;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+      background-color: var(--highlight-bg);
+      box-shadow: 0 0 12px var(--primary-glow);
       transform: scale(1.05);
     }
 
@@ -263,15 +363,15 @@
       text-align: left;
     }
 
-    .settings-grid input[type="number"] {
-      background: #000;
+    .settings-grid input[type="number"], .settings-grid select {
+      background: transparent;
       color: #fff;
       border: 1px solid #fff;
       border-radius: 3px;
       padding: 5px;
       width: 80px;
-      font-family: monospace;
-      box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+      font-family: 'Courier New', monospace;
+      box-shadow: 0 0 8px var(--primary-glow);
     }
 
     .game-section {
@@ -282,9 +382,9 @@
     }
 
     .difficulty-button.active {
-      background-color: #fff;
-      color: #000;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+      background-color: var(--active-bg);
+      color: var(--active-text);
+      box-shadow: 0 0 12px var(--primary-glow);
     }
 
     .mode-toggle {
@@ -297,16 +397,16 @@
       appearance: none;
       width: 40px;
       height: 20px;
-      background: #000;
+      background: transparent;
       border: 1px solid #fff;
       border-radius: 10px;
       position: relative;
       cursor: pointer;
-      box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 8px var(--primary-glow);
     }
 
     .mode-toggle input[type="checkbox"]:checked {
-      background: #fff;
+      background: var(--active-bg);
     }
 
     .mode-toggle input[type="checkbox"]::before {
@@ -319,17 +419,97 @@
       top: 2px;
       left: 2px;
       transition: transform 0.2s ease;
-      box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 5px var(--primary-glow);
     }
 
     .mode-toggle input[type="checkbox"]:checked::before {
       transform: translateX(20px);
-      background: #000;
+      background: var(--active-text);
     }
 
     .feedback {
       color: #0f0;
       min-height: 20px;
+    }
+
+    .feedback.correct {
+      animation: flashGreen 0.5s;
+    }
+
+    .feedback.incorrect {
+      animation: shake 0.3s;
+      color: #f00;
+    }
+
+    @keyframes flashGreen {
+      0%, 100% { background-color: transparent; }
+      50% { background-color: rgba(0, 255, 0, 0.3); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    /* Onboarding Tutorial */
+    .tutorial-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .tutorial-overlay.active {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .tutorial-modal {
+      background: #000;
+      border: 1px solid #fff;
+      border-radius: 5px;
+      padding: 20px;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    .tutorial-modal h2 {
+      margin: 0 0 10px;
+    }
+
+    .tutorial-modal p {
+      margin: 0 0 20px;
+    }
+
+    .tutorial-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    /* About Section */
+    .about-content {
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .about-content h2 {
+      margin-top: 0;
+    }
+
+    .about-content ul {
+      padding-left: 20px;
     }
 
     @media (max-width: 600px) {
@@ -344,17 +524,22 @@
       .button-group {
         flex-direction: column;
       }
+
+      .tutorial-modal {
+        max-width: 90%;
+      }
     }
   </style>
 </head>
-<body>
+<body class="theme-default">
+  <div class="background-grid" id="background-grid"></div>
   <div class="container">
     <div id="translator-tab" class="tab-content">
       <div class="io-container text-glow">
         <label for="input">Enter Text or Morse Code:</label>
-        <textarea id="input" placeholder="Type text or Morse code here..."></textarea>
+        <textarea id="input" placeholder="Type text or Morse code here..." tabindex="1"></textarea>
         <label for="output">Output: Translated text or Morse code will appear here</label>
-        <div id="output" class="output"></div>
+        <div id="output" class="output" tabindex="2"></div>
       </div>
     </div>
 
@@ -364,27 +549,27 @@
 
     <div id="sound-tab" class="tab-content hidden">
       <div class="sound-controls text-glow">
-        <textarea id="sound-input" placeholder="Type text or Morse code for sound..."></textarea>
-        <div id="sound-output" class="output sound-output">Morse code to play...</div>
+        <textarea id="sound-input" placeholder="Type text or Morse code for sound..." tabindex="3"></textarea>
+        <div id="sound-output" class="output sound-output" tabindex="4">Morse code to play...</div>
         <div class="button-group">
-          <button id="play-morse">Play Morse Code</button>
-          <button id="stop-morse">Stop Playback</button>
-          <button id="play-dot">.</button>
-          <button id="play-dash">-</button>
+          <button id="play-morse" tabindex="5">Play Morse Code</button>
+          <button id="stop-morse" tabindex="6">Stop Playback</button>
+          <button id="play-dot" tabindex="7">.</button>
+          <button id="play-dash" tabindex="8">-</button>
         </div>
-        <button class="settings-toggle" id="settings-toggle">Sound Settings ▼</button>
+        <button class="settings-toggle" id="settings-toggle" tabindex="9">Sound Settings ▼</button>
         <div class="settings-menu text-glow" id="settings-menu">
           <div class="settings-grid">
             <label for="dot-duration">Dot Duration (ms):</label>
-            <input type="number" id="dot-duration" min="50" max="200" step="1" value="100">
+            <input type="number" id="dot-duration" min="50" max="200" step="1" value="100" tabindex="10">
             <label for="dash-duration">Dash Duration (ms):</label>
-            <input type="number" id="dash-duration" min="150" max="600" step="1" value="300">
+            <input type="number" id="dash-duration" min="150" max="600" step="1" value="300" tabindex="11">
             <label for="symbol-space">Symbol Space (ms):</label>
-            <input type="number" id="symbol-space" min="50" max="200" step="1" value="100">
+            <input type="number" id="symbol-space" min="50" max="200" step="1" value="100" tabindex="12">
             <label for="letter-space">Letter Space (ms):</label>
-            <input type="number" id="letter-space" min="150" max="600" step="1" value="300">
+            <input type="number" id="letter-space" min="150" max="600" step="1" value="300" tabindex="13">
             <label for="word-space">Word Space (ms):</label>
-            <input type="number" id="word-space" min="350" max="1400" step="1" value="700">
+            <input type="number" id="word-space" min="350" max="1400" step="1" value="700" tabindex="14">
           </div>
         </div>
       </div>
@@ -394,48 +579,109 @@
       <div class="game-controls text-glow">
         <div class="game-section" id="game-start">
           <h3>Start Morse Code Game</h3>
+          <div>High Scores: Easy: <span id="high-score-easy">0</span> | Medium: <span id="high-score-medium">0</span> | Hard: <span id="high-score-hard">0</span></div>
           <div class="button-group">
-            <button class="difficulty-button active" data-difficulty="easy">Easy</button>
-            <button class="difficulty-button" data-difficulty="medium">Medium</button>
-            <button class="difficulty-button" data-difficulty="hard">Hard</button>
+            <button class="difficulty-button active" data-difficulty="easy" tabindex="15">Easy</button>
+            <button class="difficulty-button" data-difficulty="medium" tabindex="16">Medium</button>
+            <button class="difficulty-button" data-difficulty="hard" tabindex="17">Hard</button>
           </div>
           <div class="mode-toggle">
             <label>Mode:</label>
-            <input type="checkbox" id="game-mode" checked>
+            <input type="checkbox" id="game-mode" checked tabindex="18">
             <span id="mode-label">Encode (Text to Morse)</span>
           </div>
           <div>
-            <input type="checkbox" id="show-output" checked>
+            <input type="checkbox" id="show-output" checked tabindex="19">
             <label for="show-output">Show Input Translation</label>
           </div>
-          <button id="start-game">Start Game</button>
+          <button id="start-game" tabindex="20">Start Game</button>
         </div>
         <div class="game-section hidden" id="game-play">
-          <div id="game-prompt"></div>
-          <textarea id="game-input" placeholder="Enter your answer..."></textarea>
-          <div id="game-output" class="output game-output hidden"></div>
+          <div id="game-prompt" tabindex="21"></div>
+          <textarea id="game-input" placeholder="Enter your answer..." tabindex="22"></textarea>
+          <div id="game-output" class="output game-output hidden" tabindex="23"></div>
           <div class="button-group">
-            <button id="submit-answer">Submit Answer</button>
-            <button id="play-hint">Play Hint</button>
-            <button id="stop-game">Stop Game</button>
+            <button id="submit-answer" tabindex="24">Submit Answer</button>
+            <button id="play-hint" tabindex="25">Play Hint</button>
+            <button id="stop-game" tabindex="26">Stop Game</button>
           </div>
-          <div class="feedback" id="game-feedback"></div>
+          <div class="feedback" id="game-feedback" tabindex="27"></div>
           <div>Score: <span id="game-score">0</span></div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="tab-switcher hidden-tabs">
-    <div class="tabs">
-      <div class="tab active text-glow" data-tab="translator">Translator</div>
-      <div class="tab text-glow" data-tab="alphabet">Alphabet</div>
-      <div class="tab text-glow" data-tab="sound">Sound</div>
-      <div class="tab text-glow" data-tab="game">Game</div>
+    <div id="settings-tab" class="tab-content hidden">
+      <div class="settings-controls text-glow">
+        <h3>Settings</h3>
+        <div class="settings-grid">
+          <label for="theme-selector">Theme:</label>
+          <select id="theme-selector" tabindex="28">
+            <option value="default">Default</option>
+            <option value="neon">Neon</option>
+            <option value="sepia">Sepia</option>
+          </select>
+          <label for="background-toggle">Animated Background:</label>
+          <input type="checkbox" id="background-toggle" checked tabindex="29">
+        </div>
+      </div>
+    </div>
+
+    <div id="about-tab" class="tab-content hidden">
+      <div class="about-content text-glow">
+        <h2>About Morse Code</h2>
+        <p>Morse code is a method used in telecommunication to encode text characters as sequences of two different signal durations, called dots and dashes.</p>
+        <h3>History</h3>
+        <p>Developed in the 1830s by Samuel Morse and Alfred Vail, Morse code was used extensively in telegraphy and early radio communication.</p>
+        <h3>Uses</h3>
+        <ul>
+          <li>Maritime communication (e.g., SOS distress signal)</li>
+          <li>Military operations</li>
+          <li>Amateur radio</li>
+          <li>Assistive technology for people with disabilities</li>
+        </ul>
+        <h3>Fun Facts</h3>
+        <ul>
+          <li>The SOS signal (…---…) was chosen for its simplicity, not as an acronym.</li>
+          <li>Morse code is still used by some aviators and hobbyists today.</li>
+          <li>It can be transmitted via light, sound, or even touch.</li>
+        </ul>
+      </div>
     </div>
   </div>
 
-  <div class="toggle-switcher text-glow" id="toggle-arrow">▲</div>
+  <div class="tab-switcher">
+    <div class="tabs">
+      <div class="tab active text-glow" data-tab="translator" tabindex="30">Translator</div>
+      <div class="tab text-glow" data-tab="alphabet" tabindex="31">Alphabet</div>
+      <div class="tab text-glow" data-tab="sound" tabindex="32">Sound</div>
+      <div class="tab text-glow" data-tab="game" tabindex="33">Game</div>
+      <div class="tab text-glow" data-tab="settings" tabindex="34">Settings</div>
+      <div class="tab text-glow" data-tab="about" tabindex="35">About</div>
+    </div>
+  </div>
+
+  <button class="hamburger" id="hamburger" aria-label="Open menu" tabindex="36">☰</button>
+  <div class="mobile-menu" id="mobile-menu">
+    <button class="close-menu" id="close-menu" aria-label="Close menu">✕</button>
+    <div class="tab text-glow" data-tab="translator" tabindex="37">Translator</div>
+    <div class="tab text-glow" data-tab="alphabet" tabindex="38">Alphabet</div>
+    <div class="tab text-glow" data-tab="sound" tabindex="39">Sound</div>
+    <div class="tab text-glow" data-tab="game" tabindex="40">Game</div>
+    <div class="tab text-glow" data-tab="settings" tabindex="41">Settings</div>
+    <div class="tab text-glow" data-tab="about" tabindex="42">About</div>
+  </div>
+
+  <div class="tutorial-overlay" id="tutorial-overlay">
+    <div class="tutorial-modal text-glow">
+      <h2>Welcome to Morse Code!</h2>
+      <p id="tutorial-text"></p>
+      <div class="tutorial-buttons">
+        <button id="tutorial-skip" tabindex="43">Skip</button>
+        <button id="tutorial-next" tabindex="44">Next</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     const morseCode = {
@@ -459,7 +705,6 @@
     const soundOutput = document.getElementById('sound-output');
     const tabs = document.querySelectorAll('.tab');
     const tabContents = document.querySelectorAll('.tab-content');
-    const toggleArrow = document.getElementById('toggle-arrow');
     const tabSwitcher = document.querySelector('.tab-switcher');
     const morseTable = document.getElementById('morse-table');
     const playButton = document.getElementById('play-morse');
@@ -489,6 +734,18 @@
     const modeLabel = document.getElementById('mode-label');
     const showOutputCheckbox = document.getElementById('show-output');
     const gameControls = document.querySelector('.game-controls');
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const closeMenu = document.getElementById('close-menu');
+    const themeSelector = document.getElementById('theme-selector');
+    const backgroundToggle = document.getElementById('background-toggle');
+    const tutorialOverlay = document.getElementById('tutorial-overlay');
+    const tutorialText = document.getElementById('tutorial-text');
+    const tutorialSkip = document.getElementById('tutorial-skip');
+    const tutorialNext = document.getElementById('tutorial-next');
+    const highScoreEasy = document.getElementById('high-score-easy');
+    const highScoreMedium = document.getElementById('high-score-medium');
+    const highScoreHard = document.getElementById('high-score-hard');
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     let oscillator = null;
@@ -574,6 +831,18 @@
     let currentQuestion = '';
     let currentAnswer = '';
     let score = 0;
+    let highScores = { easy: 0, medium: 0, hard: 0 };
+
+    // Onboarding Tutorial
+    const tutorialSteps = [
+      "Welcome! This app lets you translate, learn, and play with Morse code.",
+      "Use the Translator tab to convert text to Morse code or vice versa.",
+      "The Alphabet tab shows the Morse code for each character.",
+      "In the Sound tab, hear your text or Morse code played aloud.",
+      "Test your skills in the Game tab with encode or decode challenges.",
+      "Customize your experience in the Settings tab. Enjoy!"
+    ];
+    let currentTutorialStep = 0;
 
     // Load settings from localStorage
     function loadSettings() {
@@ -588,8 +857,12 @@
         currentDifficulty = localStorage.getItem('currentDifficulty') || 'easy';
         isEncodeMode = localStorage.getItem('isEncodeMode') !== 'false';
         score = parseInt(localStorage.getItem('score')) || 0;
+        highScores = JSON.parse(localStorage.getItem('highScores')) || { easy: 0, medium: 0, hard: 0 };
         currentQuestion = localStorage.getItem('currentQuestion') || '';
         currentAnswer = localStorage.getItem('currentAnswer') || '';
+        const activeTab = localStorage.getItem('activeTab') || 'translator';
+        const theme = localStorage.getItem('theme') || 'default';
+        const backgroundEnabled = localStorage.getItem('backgroundEnabled') !== 'false';
 
         // Load inputs
         input.value = localStorage.getItem('translatorInput') || '';
@@ -611,7 +884,21 @@
         gameModeCheckbox.checked = isEncodeMode;
         modeLabel.textContent = isEncodeMode ? 'Encode (Text to Morse)' : 'Decode (Morse to Text)';
         gameScoreDisplay.textContent = score;
+        highScoreEasy.textContent = highScores.easy;
+        highScoreMedium.textContent = highScores.medium;
+        highScoreHard.textContent = highScores.hard;
         gameControls.classList.toggle('decode-mode', !isEncodeMode);
+        themeSelector.value = theme;
+        document.body.className = `theme-${theme}`;
+        backgroundToggle.checked = backgroundEnabled;
+        document.getElementById('background-grid').style.display = backgroundEnabled ? 'block' : 'none';
+
+        // Set active tab
+        tabs.forEach(t => t.classList.remove('active'));
+        tabContents.forEach(c => c.classList.add('hidden'));
+        const activeTabElement = document.querySelector(`.tab[data-tab="${activeTab}"]`);
+        if (activeTabElement) activeTabElement.classList.add('active');
+        document.getElementById(`${activeTab}-tab`).classList.remove('hidden');
 
         // Set difficulty button
         difficultyButtons.forEach(btn => {
@@ -626,6 +913,12 @@
         } else {
           gameStart.classList.remove('hidden');
           gamePlay.classList.add('hidden');
+        }
+
+        // Show tutorial if first visit
+        if (!localStorage.getItem('tutorialCompleted')) {
+          tutorialOverlay.classList.add('active');
+          tutorialText.textContent = tutorialSteps[0];
         }
       } catch (e) {
         console.warn('Failed to load settings from localStorage:', e);
@@ -645,9 +938,13 @@
         localStorage.setItem('currentDifficulty', currentDifficulty);
         localStorage.setItem('isEncodeMode', String(isEncodeMode));
         localStorage.setItem('score', String(score));
+        localStorage.setItem('highScores', JSON.stringify(highScores));
         localStorage.setItem('currentQuestion', currentQuestion || '');
         localStorage.setItem('currentAnswer', currentAnswer || '');
         localStorage.setItem('gameActive', gamePlay.classList.contains('hidden') ? 'false' : 'true');
+        localStorage.setItem('activeTab', document.querySelector('.tab.active').dataset.tab);
+        localStorage.setItem('theme', themeSelector.value);
+        localStorage.setItem('backgroundEnabled', String(backgroundToggle.checked));
       } catch (e) {
         console.warn('Failed to save settings to localStorage:', e);
       }
@@ -680,6 +977,7 @@
         const item = document.createElement('div');
         item.className = 'morse-item';
         item.innerHTML = `<strong>${char}</strong><br>${code}`;
+        item.tabIndex = 0;
         morseTable.appendChild(item);
       }
     }
@@ -687,7 +985,6 @@
     // Normalize Morse code input
     function normalizeMorse(morse) {
       if (!morse) return '';
-      // Normalize spaces around slashes and between letters
       return morse.trim()
         .replace(/\s*\/\s*/g, ' / ')
         .replace(/\s+/g, ' ')
@@ -697,7 +994,6 @@
     // Text to Morse conversion
     function textToMorse(text) {
       if (!text) return '';
-      // Split by spaces to handle words
       return text.toUpperCase()
         .split(' ')
         .map(word => word.split('')
@@ -712,7 +1008,6 @@
     function morseToText(morse) {
       if (!morse) return '';
       morse = normalizeMorse(morse);
-      // Split by slashes to handle words
       return morse.split(' / ')
         .map(word => word.split(' ')
           .map(code => textFromMorse[code] || '')
@@ -738,6 +1033,10 @@
     // Update translator output
     const updateTranslatorOutput = debounce(() => {
       const text = input.value.trim();
+      if (/[^.\-\/ ]/.test(text) && text) {
+        output.textContent = 'Invalid Morse code. Use only dots (.), dashes (-), spaces, and slashes (/).';
+        return;
+      }
       output.textContent = text ? (/^[.\-\/ ]+$/.test(text) ? morseToText(text) : textToMorse(text)) : '';
       saveOutput(output, 'translatorOutput');
     }, 300);
@@ -745,6 +1044,10 @@
     // Update sound output with spans for highlighting
     const updateSoundOutput = debounce(() => {
       const text = soundInput.value.trim();
+      if (/[^.\-\/ ]/.test(text) && text) {
+        soundOutput.textContent = 'Invalid Morse code. Use only dots (.), dashes (-), spaces, and slashes (/).';
+        return;
+      }
       const morse = text ? (/^[.\-\/ ]+$/.test(text) ? normalizeMorse(text) : textToMorse(text)) : 'Morse code to play...';
       if (morse === 'Morse code to play...') {
         soundOutput.textContent = morse;
@@ -765,6 +1068,10 @@
       }
       gameOutput.classList.remove('hidden');
       const userInput = gameInput.value.trim();
+      if (/[^.\-\/ ]/.test(userInput) && userInput) {
+        gameOutput.textContent = 'Invalid Morse code. Use only dots (.), dashes (-), spaces, and slashes (/).';
+        return;
+      }
       if (!userInput) {
         gameOutput.textContent = '';
       } else {
@@ -896,6 +1203,7 @@
       gamePrompt.textContent = isEncodeMode ? `Encode: ${word}` : `Decode: ${currentQuestion}`;
       gameInput.value = '';
       gameFeedback.textContent = '';
+      gameFeedback.classList.remove('correct', 'incorrect');
       saveSettings();
       saveInput(gameInput, 'gameInput');
       updateGameOutput();
@@ -904,22 +1212,33 @@
     // Check game answer
     async function checkAnswer() {
       const userAnswer = normalizeMorse(gameInput.value.trim().toUpperCase());
+      if (/[^.\-\/ ]/.test(userAnswer) && userAnswer) {
+        gameFeedback.textContent = 'Invalid Morse code. Use only dots (.), dashes (-), spaces, and slashes (/).';
+        gameFeedback.classList.add('incorrect');
+        return;
+      }
       const normalizedAnswer = normalizeMorse(currentAnswer);
       const isCorrect = userAnswer === normalizedAnswer;
       if (isCorrect) {
         score++;
         gameFeedback.textContent = 'Correct!';
-        gameFeedback.style.color = '#0f0';
+        gameFeedback.classList.add('correct');
+        gameFeedback.classList.remove('incorrect');
+        if (score > highScores[currentDifficulty]) {
+          highScores[currentDifficulty] = score;
+          document.getElementById(`high-score-${currentDifficulty}`).textContent = score;
+        }
       } else {
         gameFeedback.textContent = `Incorrect. Correct answer: ${currentAnswer}`;
-        gameFeedback.style.color = '#f00';
+        gameFeedback.classList.add('incorrect');
+        gameFeedback.classList.remove('correct');
       }
       gameScoreDisplay.textContent = score;
       saveSettings();
 
-      // Show result for 2 seconds, then proceed to next question
       await new Promise(resolve => setTimeout(resolve, 2000));
       gameFeedback.textContent = '';
+      gameFeedback.classList.remove('correct', 'incorrect');
       generateQuestion();
     }
 
@@ -932,6 +1251,7 @@
       gamePrompt.textContent = '';
       gameInput.value = '';
       gameFeedback.textContent = '';
+      gameFeedback.classList.remove('correct', 'incorrect');
       gameOutput.textContent = '';
       gamePlay.classList.add('hidden');
       gameStart.classList.remove('hidden');
@@ -951,21 +1271,28 @@
       saveSettings();
     }
 
+    // Switch tabs
+    function switchTab(tabName) {
+      tabs.forEach(t => t.classList.remove('active'));
+      tabContents.forEach(c => c.classList.add('hidden'));
+      const tabElement = document.querySelector(`.tab[data-tab="${tabName}"]`);
+      if (tabElement) tabElement.classList.add('active');
+      document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+      saveSettings();
+      mobileMenu.classList.remove('open');
+    }
+
     // Event listeners
     tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        tabContents.forEach(content => content.classList.add('hidden'));
-        document.getElementById(`${tab.dataset.tab}-tab`).classList.remove('hidden');
-      });
+      tab.addEventListener('click', () => switchTab(tab.dataset.tab));
     });
 
-    let switcherVisible = false;
-    toggleArrow.addEventListener('click', () => {
-      switcherVisible = !switcherVisible;
-      tabSwitcher.classList.toggle('hidden-tabs', !switcherVisible);
-      toggleArrow.textContent = switcherVisible ? '▼' : '▲';
+    hamburger.addEventListener('click', () => {
+      mobileMenu.classList.add('open');
+    });
+
+    closeMenu.addEventListener('click', () => {
+      mobileMenu.classList.remove('open');
     });
 
     input.addEventListener('input', () => {
@@ -1033,6 +1360,47 @@
     submitAnswerButton.addEventListener('click', checkAnswer);
     playHintButton.addEventListener('click', () => playMorseCode(currentQuestion, gameOutput));
     stopGameButton.addEventListener('click', stopGame);
+
+    // Settings listeners
+    themeSelector.addEventListener('change', () => {
+      document.body.className = `theme-${themeSelector.value}`;
+      saveSettings();
+    });
+
+    backgroundToggle.addEventListener('change', () => {
+      document.getElementById('background-grid').style.display = backgroundToggle.checked ? 'block' : 'none';
+      saveSettings();
+    });
+
+    // Tutorial listeners
+    tutorialNext.addEventListener('click', () => {
+      currentTutorialStep++;
+      if (currentTutorialStep < tutorialSteps.length) {
+        tutorialText.textContent = tutorialSteps[currentTutorialStep];
+      } else {
+        tutorialOverlay.classList.remove('active');
+        localStorage.setItem('tutorialCompleted', 'true');
+      }
+    });
+
+    tutorialSkip.addEventListener('click', () => {
+      tutorialOverlay.classList.remove('active');
+      localStorage.setItem('tutorialCompleted', 'true');
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && document.activeElement === gameInput) {
+        checkAnswer();
+      }
+      if (e.key === 't') {
+        const currentTab = document.querySelector('.tab.active');
+        const allTabs = Array.from(tabs);
+        const currentIndex = allTabs.indexOf(currentTab);
+        const nextIndex = (currentIndex + 1) % allTabs.length;
+        switchTab(allTabs[nextIndex].dataset.tab);
+      }
+    });
 
     // Initialize
     generateMorseTable();
