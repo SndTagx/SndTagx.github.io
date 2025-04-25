@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="Interactive Morse code translator, sound player, and game. Learn and practice Morse code with ease." />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interactive Morse code translator, sound player, and game.">
   <title>-..-</title>
   <style>
     body {
-      background-color: #000;
+      background: #000;
       color: #fff;
       font-family: 'Courier New', monospace;
       margin: 0;
@@ -16,19 +16,16 @@
       flex-direction: column;
       height: 100vh;
       overflow: hidden;
-      position: relative;
-      --primary-glow: rgba(255,255,255,0.8);
-      --highlight-bg: #333;
-      --active-bg: #fff;
-      --active-text: #000;
-      --accent: #aaa;
+      --glow: rgba(255,255,255,0.8);
+      --hl: #333;
+      --act-bg: #fff;
+      --act-txt: #000;
+      --acc: #aaa;
     }
 
-    *:focus {
-      outline: none;
-    }
+    *:focus { outline: none; }
 
-    .background {
+    .bg {
       position: fixed;
       top: 0;
       left: 0;
@@ -41,18 +38,18 @@
 
     .bg-vortex {
       background: radial-gradient(circle, rgba(255,255,255,0.2) 10%, transparent 10%, transparent 20%, rgba(255,255,255,0.2) 20%);
-      animation: vortexSpin 12s linear infinite;
+      animation: spin 12s linear infinite;
       display: block;
     }
 
-    @keyframes vortexSpin {
+    @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
 
-    .text-glow {
-      text-shadow: 0 0 10px var(--primary-glow), 0 0 20px var(--accent);
-      transition: text-shadow 0.3s ease;
+    .glow {
+      text-shadow: 0 0 10px var(--glow), 0 0 20px var(--acc);
+      transition: text-shadow 0.3s;
     }
 
     .container {
@@ -64,17 +61,17 @@
       overflow-y: auto;
     }
 
-    .io-container {
+    .io {
       display: flex;
       flex-direction: column;
       flex: 1;
       gap: 10px;
     }
 
-    textarea, .output {
-      background-color: rgba(0,0,0,0.5);
+    textarea, .out {
+      background: rgba(0,0,0,0.5);
       color: #fff;
-      border: 1px solid var(--accent);
+      border: 1px solid var(--acc);
       border-radius: 5px;
       padding: 10px;
       font-size: 16px;
@@ -83,43 +80,43 @@
       min-height: 100px;
       width: 100%;
       box-sizing: border-box;
-      box-shadow: 0 0 12px var(--primary-glow);
-      transition: box-shadow 0.3s ease, border-color 0.3s ease;
+      box-shadow: 0 0 12px var(--glow);
+      transition: box-shadow 0.3s, border-color 0.3s;
     }
 
-    textarea:focus, button:focus, .tab:focus, .settings-toggle:focus {
-      box-shadow: 0 0 20px var(--primary-glow), 0 0 30px var(--accent);
-      border-color: var(--primary-glow);
+    textarea:focus, button:focus, .tab:focus, .st:focus {
+      box-shadow: 0 0 20px var(--glow), 0 0 30px var(--acc);
+      border-color: var(--glow);
     }
 
     textarea::placeholder {
       color: rgba(255, 255, 255, 0.6);
-      text-shadow: 0 0 5px var(--accent);
+      text-shadow: 0 0 5px var(--acc);
     }
 
-    .output {
+    .out {
       white-space: pre-wrap;
       overflow-y: auto;
     }
 
-    .sound-output, .game-output {
+    .snd-out, .game-out {
       min-height: 50px;
       flex: 0.5;
     }
 
-    .tab-switcher {
-      background-color: rgba(0,0,0,0.8);
+    .ts {
+      background: rgba(0,0,0,0.8);
       padding: 10px;
       display: flex;
       align-items: center;
-      border-top: 1px solid var(--accent);
+      border-top: 1px solid var(--acc);
       position: fixed;
       bottom: 0;
       width: 100%;
       box-sizing: border-box;
       z-index: 10;
-      box-shadow: 0 -5px 15px var(--primary-glow);
-      transition: transform 0.3s ease;
+      box-shadow: 0 -5px 15px var(--glow);
+      transition: transform 0.3s;
     }
 
     .tabs {
@@ -129,78 +126,63 @@
       white-space: nowrap;
       width: 100%;
       scrollbar-width: thin;
-      scrollbar-color: var(--primary-glow) #000;
+      scrollbar-color: var(--glow) #000;
     }
 
-    .tabs::-webkit-scrollbar {
-      height: 8px;
-    }
-
-    .tabs::-webkit-scrollbar-thumb {
-      background: var(--primary-glow);
-      border-radius: 4px;
-    }
-
-    .tabs::-webkit-scrollbar-track {
-      background: #000;
-    }
+    .tabs::-webkit-scrollbar { height: 8px; }
+    .tabs::-webkit-scrollbar-thumb { background: var(--glow); border-radius: 4px; }
+    .tabs::-webkit-scrollbar-track { background: #000; }
 
     .tab {
       padding: 8px 15px;
       cursor: pointer;
       border-radius: 5px;
-      transition: all 0.3s ease;
+      transition: all 0.3s;
       text-align: center;
-      box-shadow: 0 0 8px var(--primary-glow);
+      box-shadow: 0 0 8px var(--glow);
       flex-shrink: 0;
     }
 
     .tab:hover, .tab:focus {
-      background-color: var(--highlight-bg);
-      text-shadow: 0 0 15px var(--primary-glow);
+      background: var(--hl);
+      text-shadow: 0 0 15px var(--glow);
       transform: scale(1.1);
     }
 
     .tab.active {
-      background-color: var(--active-bg);
-      color: var(--active-text);
+      background: var(--act-bg);
+      color: var(--act-txt);
       text-shadow: none;
-      box-shadow: 0 0 20px var(--primary-glow);
+      box-shadow: 0 0 20px var(--glow);
     }
 
-    .toggle-switcher {
+    .tog {
       cursor: pointer;
       padding: 5px;
       position: fixed;
       bottom: 40px;
       right: 20px;
-      background-color: rgba(0,0,0,0.8);
-      border: 1px solid var(--accent);
+      background: rgba(0,0,0,0.8);
+      border: 1px solid var(--acc);
       border-radius: 50%;
       width: 40px;
       height: 40px;
       line-height: 30px;
       text-align: center;
-      animation: glow-pulse 2s infinite;
+      animation: pulse 2s infinite;
       z-index: 11;
-      box-shadow: 0 0 15px var(--primary-glow);
+      box-shadow: 0 0 15px var(--glow);
     }
 
-    @keyframes glow-pulse {
-      0% { box-shadow: 0 0 5px var(--primary-glow); }
-      50% { box-shadow: 0 0 20px var(--primary-glow); }
-      100% { box-shadow: 0 0 5px var(--primary-glow); }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 5px var(--glow); }
+      50% { box-shadow: 0 0 20px var(--glow); }
     }
 
-    .hidden {
-      display: none !important;
-    }
+    .hid { display: none !important; }
+    .hid-tabs { transform: translateY(100%); }
 
-    .hidden-tabs {
-      transform: translateY(100%);
-    }
-
-    .morse-table {
+    .mt {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
       gap: 10px;
@@ -211,33 +193,29 @@
     }
 
     @media (min-width: 768px) {
-      .morse-table {
-        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-      }
+      .mt { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
     }
 
     @media (min-width: 1024px) {
-      .morse-table {
-        grid-template-columns: repeat(6, 1fr);
-      }
+      .mt { grid-template-columns: repeat(6, 1fr); }
     }
 
-    .morse-item {
-      background-color: rgba(0,0,0,0.5);
+    .mi {
+      background: rgba(0,0,0,0.5);
       padding: 10px;
       border-radius: 5px;
       text-align: center;
-      border: 1px solid var(--accent);
-      box-shadow: 0 0 10px var(--primary-glow);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border: 1px solid var(--acc);
+      box-shadow: 0 0 10px var(--glow);
+      transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .morse-item:hover {
+    .mi:hover {
       transform: scale(1.1);
-      box-shadow: 0 0 20px var(--primary-glow);
+      box-shadow: 0 0 20px var(--glow);
     }
 
-    .sound-controls, .game-controls {
+    .snd-ctrl, .game-ctrl {
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -245,20 +223,20 @@
     }
 
     button {
-      background-color: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.5);
       color: #fff;
-      border: 1px solid var(--accent);
+      border: 1px solid var(--acc);
       padding: 10px;
       border-radius: 5px;
       cursor: pointer;
       font-family: 'Courier New', monospace;
-      transition: all 0.3s ease;
-      box-shadow: 0 0 10px var(--primary-glow);
+      transition: all 0.3s;
+      box-shadow: 0 0 10px var(--glow);
     }
 
     button:hover {
-      background-color: var(--highlight-bg);
-      box-shadow: 0 0 20px var(--primary-glow);
+      background: var(--hl);
+      box-shadow: 0 0 20px var(--glow);
       transform: scale(1.05);
     }
 
@@ -267,82 +245,73 @@
       cursor: not-allowed;
     }
 
-    .button-group {
+    .btn-grp {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
     }
 
-    .game-controls.decode-mode #play-hint {
-      display: none;
-    }
+    .game-ctrl.decode-mode #ph { display: none; }
 
-    .symbol-span {
+    .sym {
       padding: 2px;
       border-radius: 3px;
-      transition: background-color 0.2s ease;
+      transition: background-color 0.2s;
     }
 
-    .highlight {
-      background-color: var(--primary-glow);
-    }
+    .hl { background: var(--glow); }
 
-    .settings-menu {
+    .sm {
       display: flex;
       flex-direction: column;
       gap: 10px;
       padding: 10px;
-      border: 1px solid var(--accent);
+      border: 1px solid var(--acc);
       border-radius: 5px;
-      box-shadow: 0 0 10px var(--primary-glow);
+      box-shadow: 0 0 10px var(--glow);
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.3s ease, padding 0.3s ease;
+      transition: max-height 0.3s, padding 0.3s;
     }
 
-    .settings-menu.open {
+    .sm.open {
       max-height: 500px;
       padding: 15px;
     }
 
-    .settings-toggle {
-      background-color: rgba(0,0,0,0.5);
+    .st {
+      background: rgba(0,0,0,0.5);
       color: #fff;
-      border: 1px solid var(--accent);
+      border: 1px solid var(--acc);
       padding: 10px;
       font-family: 'Courier New', monospace;
-      transition: all 0.3s ease;
-      box-shadow: 0 0 10px var(--primary-glow);
+      transition: all 0.3s;
+      box-shadow: 0 0 10px var(--glow);
       text-align: center;
       cursor: pointer;
     }
 
-    .settings-toggle:hover {
-      background-color: var(--highlight-bg);
-      box-shadow: 0 0 20px var(--primary-glow);
+    .st:hover {
+      background: var(--hl);
+      box-shadow: 0 0 20px var(--glow);
       transform: scale(1.05);
     }
 
-    .settings-grid {
+    .sg {
       display: grid;
       grid-template-columns: 1fr auto;
       gap: 10px;
       align-items: center;
     }
 
-    .settings-grid label {
-      font-size: 14px;
-      text-align: left;
-    }
-
-    .settings-grid input {
+    .sg input {
       background: rgba(0,0,0,0.5);
       color: #fff;
-      border: 1px solid var(--accent);
+      border: 1px solid var(--acc);
       border-radius: 3px;
       padding: 5px;
       font-family: 'Courier New', monospace;
-      box-shadow: 0 0 10px var(--primary-glow);
+      box-shadow: 0 0 10px var(--glow);
       width: 150px;
     }
 
@@ -354,34 +323,32 @@
     }
 
     .difficulty-button.active {
-      background-color: var(--active-bg);
-      color: var(--active-text);
-      box-shadow: 0 0 20px var(--primary-glow);
+      background: var(--act-bg);
+      color: var(--act-txt);
+      box-shadow: 0 0 20px var(--glow);
     }
 
-    .mode-toggle {
+    .to {
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    .mode-toggle input[type="checkbox"] {
+    .to input[type="checkbox"] {
       appearance: none;
       width: 40px;
       height: 20px;
       background: rgba(0,0,0,0.5);
-      border: 1px solid var(--accent);
+      border: 1px solid var(--acc);
       border-radius: 10px;
       position: relative;
       cursor: pointer;
-      box-shadow: 0 0 10px var(--primary-glow);
+      box-shadow: 0 0 10px var(--glow);
     }
 
-    .mode-toggle input[type="checkbox"]:checked {
-      background: var(--active-bg);
-    }
+    .to input[type="checkbox"]:checked { background: var(--act-bg); }
 
-    .mode-toggle input[type="checkbox"]::before {
+    .to input[type="checkbox"]::before {
       content: '';
       width: 16px;
       height: 16px;
@@ -390,32 +357,26 @@
       position: absolute;
       top: 2px;
       left: 2px;
-      transition: transform 0.2s ease;
-      box-shadow: 0 0 5px var(--primary-glow);
+      transition: transform 0.2s;
+      box-shadow: 0 0 5px var(--glow);
     }
 
-    .mode-toggle input[type="checkbox"]:checked::before {
+    .to input[type="checkbox"]:checked::before {
       transform: translateX(20px);
-      background: var(--active-text);
+      background: var(--act-txt);
     }
 
-    .feedback {
+    .fb {
       color: #0f0;
       min-height: 20px;
     }
 
-    .feedback.correct {
-      animation: flashGreen 0.5s;
-    }
+    .fb.correct { animation: fg 0.5s; }
+    .fb.incorrect { animation: shake 0.3s; color: #f00; }
 
-    .feedback.incorrect {
-      animation: shake 0.3s;
-      color: #f00;
-    }
-
-    @keyframes flashGreen {
-      0%, 100% { background-color: transparent; }
-      50% { background-color: rgba(0, 255, 0, 0.3); }
+    @keyframes fg {
+      0%, 100% { background: transparent; }
+      50% { background: rgba(0, 255, 0, 0.3); }
     }
 
     @keyframes shake {
@@ -424,7 +385,7 @@
       75% { transform: translateX(5px); }
     }
 
-    .tutorial-overlay {
+    .tut {
       position: fixed;
       top: 0;
       left: 0;
@@ -437,166 +398,154 @@
       z-index: 20;
       visibility: hidden;
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.3s;
     }
 
-    .tutorial-overlay.active {
+    .tut.active {
       visibility: visible;
       opacity: 1;
     }
 
-    .tutorial-modal {
+    .tm {
       background: rgba(0,0,0,0.8);
-      border: 1px solid var(--accent);
+      border: 1px solid var(--acc);
       border-radius: 5px;
       padding: 20px;
       max-width: 400px;
       width: 90%;
       text-align: center;
-      box-shadow: 0 0 20px var(--primary-glow);
-      position: relative;
+      box-shadow: 0 0 20px var(--glow);
       transform: translateY(0);
     }
 
-    .tutorial-modal h2 {
-      margin: 0 0 10px;
-    }
+    .tm h2 { margin: 0 0 10px; }
+    .tm p { margin: 0 0 20px; }
 
-    .tutorial-modal p {
-      margin: 0 0 20px;
-    }
-
-    .tutorial-buttons {
+    .tut-btns {
       display: flex;
       gap: 10px;
       justify-content: center;
     }
 
-    .about-content {
+    .abt {
       padding: 20px;
       line-height: 1.6;
     }
 
-    .about-content h2 {
-      margin-top: 0;
-    }
+    .abt h2 { margin-top: 0; }
+    .abt ul { padding-left: 20px; }
 
-    .about-content ul {
-      padding-left: 20px;
-    }
-
-    .high-scores {
+    .hs {
       display: flex;
       flex-direction: column;
       gap: 5px;
     }
 
     @media (max-width: 600px) {
-      .morse-table {
-        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
-      }
-
-      .button-group {
-        flex-direction: column;
-      }
-
-      .tutorial-modal {
-        max-width: 90%;
-      }
+      .mt { grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); }
+      .btn-grp { flex-direction: column; }
+      .tm { max-width: 90%; }
     }
   </style>
 </head>
 <body>
-  <div class="background bg-vortex" id="bg-vortex"></div>
+  <div class="bg bg-vortex" id="bg"></div>
 
   <div class="container">
-    <div id="translator-tab" class="tab-content">
-      <div class="io-container text-glow">
-        <label for="input">Enter Text or Morse Code:</label>
-        <textarea id="input" placeholder="Type text or Morse code here..." tabindex="1"></textarea>
-        <label for="output">Output: Translated text or Morse code will appear here</label>
-        <div id="output" class="output" tabindex="2"></div>
+    <div id="trans-tab" class="tab-content">
+      <div class="io glow">
+        <label for="i">Enter Text or Morse Code:</label>
+        <textarea id="i" placeholder="Type text or Morse code here..." tabindex="1"></textarea>
+        <label for="o">Output:</label>
+        <div id="o" class="out" tabindex="2"></div>
       </div>
     </div>
 
-    <div id="alphabet-tab" class="tab-content hidden">
-      <div class="morse-table text-glow" id="morse-table"></div>
+    <div id="alpha-tab" class="tab-content hid">
+      <div class="mt glow" id="mt"></div>
     </div>
 
-    <div id="sound-tab" class="tab-content hidden">
-      <div class="sound-controls text-glow">
-        <textarea id="sound-input" placeholder="Type text or Morse code for sound..." tabindex="3"></textarea>
-        <div id="sound-output" class="output sound-output" tabindex="4">Morse code to play...</div>
-        <div class="button-group">
-          <button id="play-morse" tabindex="5">Play Morse Code</button>
-          <button id="stop-morse" tabindex="6">Stop Playback</button>
-          <button id="play-dot" tabindex="7">.</button>
-          <button id="play-dash" tabindex="8">-</button>
+    <div id="snd-tab" class="tab-content hid">
+      <div class="snd-ctrl glow">
+        <textarea id="si" placeholder="Type text or Morse code for sound..." tabindex="3"></textarea>
+        <div id="so" class="out snd-out" tabindex="4">Morse code to play...</div>
+        <div class="btn-grp">
+          <button id="pm" tabindex="5">Play Morse Code</button>
+          <button id="sm" tabindex="6">Stop Playback</button>
+          <button id="pd" tabindex="7">.</button>
+          <button id="pda" tabindex="8">-</button>
         </div>
-        <button class="settings-toggle" id="settings-toggle" tabindex="9">Sound Settings ▼</button>
-        <div class="settings-menu text-glow" id="settings-menu">
-          <div class="settings-grid">
-            <label for="dot-duration">Dot Duration (ms):</label>
-            <input type="number" id="dot-duration" min="50" max="200" step="1" value="100" tabindex="10">
-            <label for="dash-duration">Dash Duration (ms):</label>
-            <input type="number" id="dash-duration" min="150" max="600" step="1" value="300" tabindex="11">
-            <label for="symbol-space">Symbol Space (ms):</label>
-            <input type="number" id="symbol-space" min="50" max="200" step="1" value="100" tabindex="12">
-            <label for="letter-space">Letter Space (ms):</label>
-            <input type="number" id="letter-space" min="150" max="600" step="1" value="300" tabindex="13">
-            <label for="word-space">Word Space (ms):</label>
-            <input type="number" id="word-space" min="350" max="1400" step="1" value="700" tabindex="14">
+        <button class="st" id="st" tabindex="9">Sound Settings ▼</button>
+        <div class="sm glow" id="sm">
+          <div class="sg">
+            <label for="dd">Dot Duration (ms):</label>
+            <input type="number" id="dd" min="50" max="200" step="1" value="100" tabindex="10">
+            <label for="dad">Dash Duration (ms):</label>
+            <input type="number" id="dad" min="150" max="600" step="1" value="300" tabindex="11">
+            <label for="ss">Symbol Space (ms):</label>
+            <input type="number" id="ss" min="50" max="200" step="1" value="100" tabindex="12">
+            <label for="lsp">Letter Space (ms):</label>
+            <input type="number" id="lsp" min="150" max="600" step="1" value="300" tabindex="13">
+            <label for="ws">Word Space (ms):</label>
+            <input type="number" id="ws" min="350" max="1400" step="1" value="700" tabindex="14">
           </div>
         </div>
       </div>
     </div>
 
-    <div id="game-tab" class="tab-content hidden">
-      <div class="game-controls text-glow">
-        <div class="game-section" id="game-start">
+    <div id="game-tab" class="tab-content hid">
+      <div class="game-ctrl glow">
+        <div class="game-section" id="gs">
           <h3>Start Morse Code Game</h3>
-          <div class="high-scores">
-            <div>Encode - Easy: <span id="high-score-encode-easy">0</span></div>
-            <div>Encode - Medium: <span id="high-score-encode-medium">0</span></div>
-            <div>Encode - Hard: <span id="high-score-encode-hard">0</span></div>
-            <div>Decode - Easy: <span id="high-score-decode-easy">0</span></div>
-            <div>Decode - Medium: <span id="high-score-decode-medium">0</span></div>
-            <div>Decode - Hard: <span id="high-score-decode-hard">0</span></div>
+          <div class="hs">
+            <div>Encode - Easy: <span id="hsee">0</span></div>
+            <div>Encode - Medium: <span id="hsem">0</span></div>
+            <div>Encode - Hard: <span id="hseh">0</span></div>
+            <div>Encode - Extreme: <span id="hsex">0</span></div>
+            <div>Decode - Easy: <span id="hsde">0</span></div>
+            <div>Decode - Medium: <span id="hsdm">0</span></div>
+            <div>Decode - Hard: <span id="hsdh">0</span></div>
+            <div>Decode - Extreme: <span id="hsdx">0</span></div>
           </div>
-          <div class="button-group">
+          <div class="btn-grp">
             <button class="difficulty-button active" data-difficulty="easy" tabindex="15">Easy</button>
             <button class="difficulty-button" data-difficulty="medium" tabindex="16">Medium</button>
             <button class="difficulty-button" data-difficulty="hard" tabindex="17">Hard</button>
+            <button class="difficulty-button" data-difficulty="extreme" tabindex="18">Extreme</button>
           </div>
-          <div class="mode-toggle">
+          <div class="to">
             <label>Mode:</label>
-            <input type="checkbox" id="game-mode" checked tabindex="18">
-            <span id="mode-label">Encode (Text to Morse)</span>
+            <input type="checkbox" id="gm" checked tabindex="19">
+            <span id="ml">Encode (Text to Morse)</span>
           </div>
           <div>
-            <input type="checkbox" id="show-output" checked tabindex="19">
-            <label for="show-output">Show Input Translation</label>
+            <input type="checkbox" id="soc" checked tabindex="20">
+            <label for="soc">Show Input Translation</label>
           </div>
-          <button id="start-game" tabindex="20">Start Game</button>
+          <div>
+            <input type="checkbox" id="lt" checked tabindex="21">
+            <label for="lt">Enable Lives</label>
+          </div>
+          <button id="sg" tabindex="22">Start Game</button>
         </div>
-        <div class="game-section hidden" id="game-play">
-          <div id="game-prompt" tabindex="21"></div>
-          <textarea id="game-input" placeholder="Enter your answer..." tabindex="22"></textarea>
-          <div id="game-output" class="output game-output hidden" tabindex="23"></div>
-          <div class="button-group">
-            <button id="submit-answer" tabindex="24">Submit Answer</button>
-            <button id="play-hint" tabindex="25">Play Hint</button>
-            <button id="stop-game" tabindex="26">Stop Game</button>
+        <div class="game-section hid" id="gp">
+          <div id="gpr" tabindex="23"></div>
+          <textarea id="gi" placeholder="Enter your answer..." tabindex="24"></textarea>
+          <div id="go" class="out game-out hid" tabindex="25"></div>
+          <div class="btn-grp">
+            <button id="sa" tabindex="26">Submit Answer</button>
+            <button id="ph" tabindex="27">Play Hint</button>
+            <button id="stg" tabindex="28">Stop Game</button>
           </div>
-          <div class="feedback" id="game-feedback" tabindex="27"></div>
-          <div>Score: <span id="game-score">0</span></div>
-          <div>Lives: <span id="game-lives">❤️❤️❤️</span></div>
+          <div class="fb" id="gf" tabindex="29"></div>
+          <div>Score: <span id="gsc">0</span></div>
+          <div>Lives: <span id="gl">❤️❤️❤️</span></div>
         </div>
       </div>
     </div>
 
-    <div id="about-tab" class="tab-content hidden">
-      <div class="about-content text-glow">
+    <div id="abt-tab" class="tab-content hid">
+      <div class="abt glow">
         <h2>About Morse Code</h2>
         <p>Morse code is a method used in telecommunication to encode text characters as sequences of two different signal durations, called dots and dashes.</p>
         <h3>History</h3>
@@ -618,31 +567,32 @@
     </div>
   </div>
 
-  <div class="tab-switcher">
+  <div class="ts">
     <div class="tabs">
-      <div class="tab active text-glow" data-tab="translator" tabindex="30">Translator</div>
-      <div class="tab text-glow" data-tab="alphabet" tabindex="31">Alphabet</div>
-      <div class="tab text-glow" data-tab="sound" tabindex="32">Sound</div>
-      <div class="tab text-glow" data-tab="game" tabindex="33">Game</div>
-      <div class="tab text-glow" data-tab="about" tabindex="34">About</div>
+      <div class="tab active glow" data-tab="trans" tabindex="30">Translator</div>
+      <div class="tab glow" data-tab="alpha" tabindex="31">Alphabet</div>
+      <div class="tab glow" data-tab="snd" tabindex="32">Sound</div>
+      <div class="tab glow" data-tab="game" tabindex="33">Game</div>
+      <div class="tab glow" data-tab="abt" tabindex="34">About</div>
     </div>
   </div>
 
-  <div class="toggle-switcher text-glow" id="toggle-arrow" tabindex="35">▲</div>
+  <div class="tog glow" id="ta" tabindex="35">▲</div>
 
-  <div class="tutorial-overlay" id="tutorial-overlay">
-    <div class="tutorial-modal text-glow">
+  <div class="tut" id="to">
+    <div class="tm glow">
       <h2>Welcome to Morse Code!</h2>
-      <p id="tutorial-text"></p>
-      <div class="tutorial-buttons">
-        <button id="tutorial-skip" tabindex="36">Skip</button>
-        <button id="tutorial-next" tabindex="37">Next</button>
+      <p id="tt"></p>
+      <div class="tut-btns">
+        <button id="ts" tabindex="36">Skip</button>
+        <button id="tn" tabindex="37">Next</button>
       </div>
     </div>
   </div>
 
   <script>
-    const morseCode = {
+    // Morse code mappings
+    const mc = {
       'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.',
       'F': '..-.', 'G': '--.', 'H': '....', 'I': '..', 'J': '.---',
       'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---',
@@ -653,98 +603,134 @@
       '8': '---..', '9': '----.', '0': '-----', ' ': '/'
     };
 
-    const textFromMorse = Object.fromEntries(
-      Object.entries(morseCode).map(([k, v]) => [v, k])
-    );
+    // Reverse mapping for Morse to text
+    const tfm = Object.fromEntries(Object.entries(mc).map(([k, v]) => [v, k]));
 
-    const input = document.getElementById('input');
-    const output = document.getElementById('output');
-    const soundInput = document.getElementById('sound-input');
-    const soundOutput = document.getElementById('sound-output');
-    const tabs = document.querySelectorAll('.tab');
-    const tabContents = document.querySelectorAll('.tab-content');
-    const toggleArrow = document.getElementById('toggle-arrow');
-    const tabSwitcher = document.querySelector('.tab-switcher');
-    const morseTable = document.getElementById('morse-table');
-    const playButton = document.getElementById('play-morse');
-    const stopButton = document.getElementById('stop-morse');
-    const playDotButton = document.getElementById('play-dot');
-    const playDashButton = document.getElementById('play-dash');
-    const dotDurationInput = document.getElementById('dot-duration');
-    const dashDurationInput = document.getElementById('dash-duration');
-    const symbolSpaceInput = document.getElementById('symbol-space');
-    const letterSpaceInput = document.getElementById('letter-space');
-    const wordSpaceInput = document.getElementById('word-space');
-    const settingsToggle = document.getElementById('settings-toggle');
-    const settingsMenu = document.getElementById('settings-menu');
-    const gameStart = document.getElementById('game-start');
-    const gamePlay = document.getElementById('game-play');
-    const startGameButton = document.getElementById('start-game');
-    const gamePrompt = document.getElementById('game-prompt');
-    const gameInput = document.getElementById('game-input');
-    const gameOutput = document.getElementById('game-output');
-    const submitAnswerButton = document.getElementById('submit-answer');
-    const playHintButton = document.getElementById('play-hint');
-    const stopGameButton = document.getElementById('stop-game');
-    const gameFeedback = document.getElementById('game-feedback');
-    const gameScoreDisplay = document.getElementById('game-score');
-    const gameLivesDisplay = document.getElementById('game-lives');
-    const difficultyButtons = document.querySelectorAll('.difficulty-button');
-    const gameModeCheckbox = document.getElementById('game-mode');
-    const modeLabel = document.getElementById('mode-label');
-    const showOutputCheckbox = document.getElementById('show-output');
-    const gameControls = document.querySelector('.game-controls');
-    const tutorialOverlay = document.getElementById('tutorial-overlay');
-    const tutorialText = document.getElementById('tutorial-text');
-    const tutorialSkip = document.getElementById('tutorial-skip');
-    const tutorialNext = document.getElementById('tutorial-next');
-    const highScoreEncodeEasy = document.getElementById('high-score-encode-easy');
-    const highScoreEncodeMedium = document.getElementById('high-score-encode-medium');
-    const highScoreEncodeHard = document.getElementById('high-score-encode-hard');
-    const highScoreDecodeEasy = document.getElementById('high-score-decode-easy');
-    const highScoreDecodeMedium = document.getElementById('high-score-decode-medium');
-    const highScoreDecodeHard = document.getElementById('high-score-decode-hard');
+    // DOM elements
+    const e = {
+      i: document.getElementById('i'),
+      o: document.getElementById('o'),
+      si: document.getElementById('si'),
+      so: document.getElementById('so'),
+      t: document.querySelectorAll('.tab'),
+      tc: document.querySelectorAll('.tab-content'),
+      ta: document.getElementById('ta'),
+      ts: document.querySelector('.ts'),
+      mt: document.getElementById('mt'),
+      pm: document.getElementById('pm'),
+      sm: document.getElementById('sm'),
+      pd: document.getElementById('pd'),
+      pda: document.getElementById('pda'),
+      dd: document.getElementById('dd'),
+      dad: document.getElementById('dad'),
+      ss: document.getElementById('ss'),
+      lsp: document.getElementById('lsp'),
+      ws: document.getElementById('ws'),
+      st: document.getElementById('st'),
+      smn: document.getElementById('sm'),
+      gs: document.getElementById('gs'),
+      gp: document.getElementById('gp'),
+      sg: document.getElementById('sg'),
+      gpr: document.getElementById('gpr'),
+      gi: document.getElementById('gi'),
+      go: document.getElementById('go'),
+      sa: document.getElementById('sa'),
+      ph: document.getElementById('ph'),
+      stg: document.getElementById('stg'),
+      gf: document.getElementById('gf'),
+      gsc: document.getElementById('gsc'),
+      gl: document.getElementById('gl'),
+      db: document.querySelectorAll('.difficulty-button'),
+      gm: document.getElementById('gm'),
+      ml: document.getElementById('ml'),
+      soc: document.getElementById('soc'),
+      lt: document.getElementById('lt'),
+      gc: document.querySelector('.game-ctrl'),
+      to: document.getElementById('to'),
+      tt: document.getElementById('tt'),
+      ts: document.getElementById('ts'),
+      tn: document.getElementById('tn'),
+      hsee: document.getElementById('hsee'),
+      hsem: document.getElementById('hsem'),
+      hseh: document.getElementById('hseh'),
+      hsex: document.getElementById('hsex'),
+      hsde: document.getElementById('hsde'),
+      hsdm: document.getElementById('hsdm'),
+      hsdh: document.getElementById('hsdh'),
+      hsdx: document.getElementById('hsdx')
+    };
 
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    let oscillator = null;
-    let isPlaying = false;
+    // Audio context for sound playback
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    let o = null; // Oscillator
+    let ip = false; // Is playing
 
-    let DOT_DURATION = 100;
-    let DASH_DURATION = 300;
-    let SYMBOL_SPACE = 100;
-    let LETTER_SPACE = 300;
-    let WORD_SPACE = 700;
+    // Sound settings
+    let dd = 100; // Dot duration
+    let dad = 300; // Dash duration
+    let ss = 100; // Symbol space
+    let lsp = 300; // Letter space
+    let ws = 700; // Word space
 
-    const gameWords = {
+    // Game state
+    let cd = 'easy'; // Current difficulty
+    let em = true; // Encode mode
+    let so = true; // Show output
+    let lt = true; // Lives toggle
+    let cq = ''; // Current question
+    let ca = ''; // Current answer
+    let sc = 0; // Score
+    let lv = 3; // Lives
+    let hs = { // High scores
+      encode: { easy: 0, medium: 0, hard: 0, extreme: 0 },
+      decode: { easy: 0, medium: 0, hard: 0, extreme: 0 }
+    };
+    let sv = true; // Switcher visible
+
+    // Tutorial steps
+    const tts = [
+      "Welcome! This app lets you translate, learn, and play with Morse code.",
+      "Use the Translator tab to convert text to Morse code or vice versa.",
+      "The Alphabet tab shows the Morse code for each character.",
+      "In the Sound tab, hear your text or Morse code played aloud.",
+      "Test your skills in the Game tab with encode or decode challenges.",
+      "Enjoy!"
+    ];
+    let cts = 0; // Current tutorial step
+
+    // Game words by difficulty
+    const gw = {
       easy: [
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-        'CAT', 'DOG', 'SUN', 'MOON', 'STAR', 'TREE', 'BIRD', 'PEN', 'HAT', 'BOX', 'CAR', 'KEY', 'SKY', 'SEA', 'HILL',
-        'WIND', 'RAIN', 'SNOW', 'FISH', 'COW', 'PIG', 'ANT', 'BEE', 'FOX', 'WOLF', 'DEER', 'BEAR', 'LION', 'TIGER',
-        'ZEBRA', 'SNAKE', 'EAGLE', 'OWL', 'BAT', 'RED', 'BLUE', 'GREEN', 'YELLOW', 'PINK', 'BLACK', 'WHITE', 'GOLD',
-        'SILVER', 'ROSE', 'TULIP', 'OAK', 'MAPLE', 'PINE', 'CLOUD', 'STORM', 'FIRE', 'ICE', 'DIRT', 'SAND', 'ROCK',
-        'PATH', 'ROAD', 'GATE', 'DOOR', 'WALL', 'FENCE', 'BRIDGE', 'BOAT', 'SHIP', 'JET', 'BIKE', 'BALL', 'CUP',
-        'PLATE', 'FORK', 'SPOON', 'CHAIR', 'TABLE', 'BED', 'LAMP', 'CLOCK', 'BAG', 'SHOE', 'COAT', 'SHIRT', 'PANTS',
-        'FARM', 'BARN', 'GOAT', 'SHEEP', 'DUCK', 'HORSE', 'MULE', 'CORN', 'WHEAT', 'RICE', 'BEAN', 'PEA', 'FRUIT',
-        'GRAPE', 'LEMON', 'PEACH', 'PLUM', 'BERRY', 'NUT', 'SEED', 'BUSH', 'VINE', 'LAWN', 'MOSS', 'FERN', 'PALM',
-        'CACTUS', 'BAMBOO', 'REED', 'WAVE', 'TIDE', 'POND', 'CREEK', 'BROOK', 'FALL', 'POOL', 'SPRING', 'WELL'
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+        'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+        'CAT', 'DOG', 'SUN', 'MOON', 'STAR', 'TREE', 'BIRD', 'PEN', 'HAT', 'BOX', 'CAR', 'KEY', 'SKY', 'SEA',
+        'HILL', 'WIND', 'RAIN', 'SNOW', 'FISH', 'COW', 'PIG', 'ANT', 'BEE', 'FOX', 'WOLF', 'DEER', 'BEAR',
+        'LION', 'TIGER', 'ZEBRA', 'SNAKE', 'EAGLE', 'OWL', 'BAT', 'RED', 'BLUE', 'GREEN', 'YELLOW', 'PINK',
+        'BLACK', 'WHITE', 'GOLD', 'SILVER', 'ROSE', 'TULIP', 'OAK', 'MAPLE', 'PINE', 'CLOUD', 'STORM', 'FIRE',
+        'ICE', 'DIRT', 'SAND', 'ROCK', 'PATH', 'ROAD', 'GATE', 'DOOR', 'WALL', 'FENCE', 'BRIDGE', 'BOAT',
+        'SHIP', 'JET', 'BIKE', 'BALL', 'CUP', 'PLATE', 'FORK', 'SPOON', 'CHAIR', 'TABLE', 'BED', 'LAMP',
+        'CLOCK', 'BAG', 'SHOE', 'COAT', 'SHIRT', 'PANTS', 'FARM', 'BARN', 'GOAT', 'SHEEP', 'DUCK', 'HORSE',
+        'MULE', 'CORN', 'WHEAT', 'RICE', 'BEAN', 'PEA', 'FRUIT', 'GRAPE', 'LEMON', 'PEACH', 'PLUM', 'BERRY',
+        'NUT', 'SEED', 'BUSH', 'VINE', 'LAWN', 'MOSS', 'FERN', 'PALM', 'CACTUS', 'BAMBOO', 'REED', 'WAVE',
+        'TIDE', 'POND', 'CREEK', 'BROOK', 'FALL', 'POOL', 'SPRING', 'WELL'
       ],
       medium: [
         'HOUSE', 'SCHOOL', 'RIVER', 'FOREST', 'GOOD DAY', 'HI THERE', 'TRAIN', 'APPLE', 'BOOKS', 'QUICK FOX',
-        'WARM SUN', 'COLD NIGHT', 'BRIGHT', 'DARK SKY', 'GREEN HILL', 'BLUE SEA', 'RED ROSE', 'WHITE SNOW',
+        'WARM SUN', 'COLD NIGHT', 'BRIGHT', 'DARK SKY', 'GREEN HILL', 'BLUE SEA', 'RED ROSE', ' WHITE SNOW',
         'YELLOW STAR', 'PINK CLOUD', 'GOLD RING', 'SILVER MOON', 'FARMER', 'BAKER', 'COOK', 'NURSE', 'DOCTOR',
         'PILOT', 'SINGER', 'DANCER', 'WRITER', 'PAINTER', 'BUILDER', 'DRIVER', 'TEACHER', 'MARKET', 'STORE',
         'SHOP', 'TOWN', 'CITY', 'VILLAGE', 'CASTLE', 'TOWER', 'BARN', 'SHED', 'HUT', 'TENT', 'CAMP', 'BEACH',
-        'LAKE', 'POND', 'STREAM', 'BROOK', 'FALLS', 'CAVE', 'MINE', 'HALL', 'ROOM', 'KITCHEN', 'BATH', 'BEDROOM',
-        'GARDEN', 'PARK', 'FIELD', 'MEADOW', 'DESERT', 'JUNGLE', 'SWAMP', 'PLAIN', 'VALLEY', 'CANYON', 'CLIFF',
-        'RIDGE', 'PEAK', 'SUMMIT', 'TRAIL', 'WAVE', 'TIDE', 'SHORE', 'BREEZE', 'GUST', 'STORM', 'FOG', 'MIST',
-        'HAIL', 'FROST', 'DEW', 'SPARK', 'FLAME', 'ASH', 'SMOKE', 'DUST', 'MUD', 'CLAY', 'STONE', 'PEBBLE',
-        'BOULDER', 'GEM', 'CRYSTAL', 'METAL', 'WOOD', 'GLASS', 'PAPER', 'LEATHER', 'CLOTH', 'STRING', 'ROPE',
-        'CHAIN', 'WHEEL', 'ENGINE', 'WINDOW', 'FLOOR', 'CEILING', 'STAIRS', 'ROOF', 'LANTERN', 'CANDLE',
-        'ORCHARD', 'VINEYARD', 'PASTURE', 'HARVEST', 'CROP', 'PLOW', 'SOW', 'REAP', 'GRAIN', 'FLOUR', 'BREAD',
-        'CHEESE', 'MILK', 'BUTTER', 'HONEY', 'JAM', 'SALT', 'SPICE', 'HERB', 'MEAT', 'SOUP', 'STEW', 'PIE',
-        'CAKE', 'WINE', 'BEER', 'TEA', 'COFFEE', 'SUGAR', 'CANDY', 'TOY', 'DOLL', 'KITE', 'DRUM', 'FLUTE',
-        'SONG', 'POEM', 'TALE', 'MYTH', 'LEGEND', 'RIDDLE', 'JOKE', 'PLAY', 'DANCE', 'FEAST', 'PARTY'
+        'LAKE', 'POND', 'STREAM', 'BROOK', 'FALLS', 'CAVE', 'MINE', 'HALL', 'ROOM', 'KITCHEN', 'BATH',
+        'BEDROOM', 'GARDEN', 'PARK', 'FIELD', 'MEADOW', 'DESERT', 'JUNGLE', 'SWAMP', 'PLAIN', 'VALLEY',
+        'CANYON', 'CLIFF', 'RIDGE', 'PEAK', 'SUMMIT', 'TRAIL', 'WAVE', 'TIDE', 'SHORE', 'BREEZE', 'GUST',
+        'STORM', 'FOG', 'MIST', 'HAIL', 'FROST', 'DEW', 'SPARK', 'FLAME', 'ASH', 'SMOKE', 'DUST', 'MUD',
+        'CLAY', 'STONE', 'PEBBLE', 'BOULDER', 'GEM', 'CRYSTAL', 'METAL', 'WOOD', 'GLASS', 'PAPER', 'LEATHER',
+        'CLOTH', 'STRING', 'ROPE', 'CHAIN', 'WHEEL', 'ENGINE', 'WINDOW', 'FLOOR', 'CEILING', 'STAIRS', 'ROOF',
+        'LANTERN', 'CANDLE', 'ORCHARD', 'VINEYARD', 'PASTURE', 'HARVEST', 'CROP', 'PLOW', 'SOW', 'REAP',
+        'GRAIN', 'FLOUR', 'BREAD', 'CHEESE', 'MILK', 'BUTTER', 'HONEY', 'JAM', 'SALT', 'SPICE', 'HERB',
+        'MEAT', 'SOUP', 'STEW', 'PIE', 'CAKE', 'WINE', 'BEER', 'TEA', 'COFFEE', 'SUGAR', 'CANDY', 'TOY',
+        'DOLL', 'KITE', 'DRUM', 'FLUTE', 'SONG', 'POEM', 'TALE', 'MYTH', 'LEGEND', 'RIDDLE', 'JOKE', 'PLAY',
+        'DANCE', 'FEAST', 'PARTY'
       ],
       hard: [
         'SAVE OUR SHIP', 'GOOD MORNING', 'CALL FOR HELP', 'MEET AT NOON', 'EMERGENCY CALL', 'SEND MESSAGE',
@@ -778,550 +764,589 @@
         'NAVIGATE TERRAIN', 'SURVEY AREA', 'COLLECT EVIDENCE', 'INTERCEPT SIGNAL', 'JAM TRANSMISSION',
         'REINFORCE POSITION', 'EVACUATE PERSONNEL', 'DEPLOY DRONE', 'ACTIVATE SHIELD',
         'DETONATE CHARGE', 'INFILTRATE BASE', 'EXTRACT ASSET', 'NEUTRALIZE THREAT', 'RECALL UNIT'
+      ],
+      extreme: [
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+        'ZYXWVUTSRQPONMLKJIHGFEDCBA9876543210',
+        'THEQUICKBROWNFOXJUMPEDOVERTHELAZYDOG123',
+        '0987654321ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        'CRYPTOGRAPHICSECURECOMMUNICATIONSYSTEMS',
+        'SATELLITENAVIGATIONANDPOSITIONINGDATA',
+        'INTERCONTINENTALBALLISTICMISSILEGUIDANCE',
+        'QUANTUMCOMPUTATIONALGORITHMOPTIMIZATION',
+        'DEOXYRIBONUCLEICACIDSEQUENCEANALYSIS',
+        'ELECTROMAGNETICSPECTRUMFREQUENCYMODULATION',
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ZYX',
+        '9876543210ZYXWVUTSRQPONMLKJIHGFEDCBA',
+        'THEBIGDWARFONLYJUMPEDANDRAN1234567890',
+        'COMPLEXMATHEMATICALEQUATIONRESOLUTION',
+        'ADVANCEDARTIFICIALINTELLIGENCEMODELS',
+        'HYPERSONICVEHICLETRAJECTORYCALCULATION',
+        'GLOBALPOSITIONINGSATELLITEDATASTREAM',
+        'NEURALNETWORKDEEPLEARNINGALGORITHM',
+        'THERMODYNAMICENTROPYCALCULATIONFORMULA',
+        'SUBATOMICPARTICLECOLLISIONEXPERIMENT',
+        'ZYXWVUTSRQPONMLKJIHGFEDCBA0123456789',
+        '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        'ENCRYPTEDMILITARYCOMMUNICATIONPROTOCOL',
+        'SATELLITEORBITALMECHANICSCALCULATIONS',
+        'QUANTUMENTANGLEMENTCOMMUNICATIONTHEORY',
+        'BIOMETRICAUTHENTICATIONSECURITYSYSTEM',
+        'SUPERNOVASTELLARCORECOLLAPSESIMULATION',
+        'HOLOGRAPHICDATAPROJECTIONTECHNOLOGY',
+        'NEUROTRANSMITTERSYNAPTICFIRINGPATTERN',
+        'INTERSTELLARSPACECRAFTNAVIGATIONPLAN',
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ9876543210',
+        '0123456789ZYXWVUTSRQPONMLKJIHGFEDCBA',
+        'THEQUICKFOXJUMPEDANDRANFARAWAY123456',
+        'CRYPTOCURRENCYBLOCKCHAINTRANSACTIONLEDGER',
+        'QUANTUMCRYPTOGRAPHYKEYDISTRIBUTION',
+        'HYPERDIMENSIONALPHYSICSTHEORYMODEL',
+        'GENETICMUTATIONEVOLUTIONARYBIOLOGY',
+        'PARTICLEACCELERATORCOLLISIONANALYSIS',
+        'EXTRATERRESTRIALSIGNALDETECTIONPROTOCOL',
+        'NEURALINTERFACEBRAINCOMPUTERINTEGRATION',
+        'ASTROPHYSICALBLACKHOLEEVENTHORIZON',
+        'INTERGALACTICCOMMUNICATIONFREQUENCYSPECTRUM',
+        'CYBERSECURITYINTRUSIONDETECTIONSYSTEM',
+        'QUANTUMFIELDINTERACTIONMATRIXCALCULATION',
+        'BIOTECHNOLOGICALGENEEDITINGCRISPRCAS9',
+        'SPACETIMEGRAVITATIONALWAVEOBSERVATION',
+        'MULTIDIMENSIONALDATAVISUALIZATIONTOOL',
+        'ADVANCEDROBOTICSAUTOMATIONFRAMEWORK',
+        'THEULTIMATECHALLENGEOFMORSECODEMASTERY',
+        'ZYXWVUTSRQPONMLKJIHGFEDCBA9876543210ABC'
       ]
     };
 
-    let currentDifficulty = 'easy';
-    let isEncodeMode = true;
-    let showOutput = true;
-    let currentQuestion = '';
-    let currentAnswer = '';
-    let score = 0;
-    let lives = 3;
-    let highScores = {
-      encode: { easy: 0, medium: 0, hard: 0 },
-      decode: { easy: 0, medium: 0, hard: 0 }
-    };
-    let switcherVisible = true;
-
-    const tutorialSteps = [
-      "Welcome! This app lets you translate, learn, and play with Morse code.",
-      "Use the Translator tab to convert text to Morse code or vice versa.",
-      "The Alphabet tab shows the Morse code for each character.",
-      "In the Sound tab, hear your text or Morse code played aloud.",
-      "Test your skills in the Game tab with encode or decode challenges.",
-      "Enjoy!"
-    ];
-    let currentTutorialStep = 0;
-
-    function loadSettings() {
+    // Load settings from localStorage
+    const ls = window.localStorage;
+    const load = () => {
       try {
-        if (!window.localStorage) return;
-        DOT_DURATION = parseInt(localStorage.getItem('dotDuration')) || 100;
-        DASH_DURATION = parseInt(localStorage.getItem('dashDuration')) || 300;
-        SYMBOL_SPACE = parseInt(localStorage.getItem('symbolSpace')) || 100;
-        LETTER_SPACE = parseInt(localStorage.getItem('letterSpace')) || 300;
-        WORD_SPACE = parseInt(localStorage.getItem('wordSpace')) || 700;
-        showOutput = localStorage.getItem('showOutput') !== 'false';
-        currentDifficulty = localStorage.getItem('currentDifficulty') || 'easy';
-        isEncodeMode = localStorage.getItem('isEncodeMode') !== 'false';
-        score = parseInt(localStorage.getItem('score')) || 0;
-        lives = parseInt(localStorage.getItem('lives')) || 3;
-        highScores = JSON.parse(localStorage.getItem('highScores')) || {
-          encode: { easy: 0, medium: 0, hard: 0 },
-          decode: { easy: 0, medium: 0, hard: 0 }
+        if (!ls) return;
+        dd = +ls.getItem('dd') || 100;
+        dad = +ls.getItem('dad') || 300;
+        ss = +ls.getItem('ss') || 100;
+        lsp = +ls.getItem('lsp') || 300;
+        ws = +ls.getItem('ws') || 700;
+        so = ls.getItem('so') !== 'false';
+        cd = ls.getItem('cd') || 'easy';
+        em = ls.getItem('em') !== 'false';
+        lt = ls.getItem('lt') !== 'false';
+        sc = +ls.getItem('sc') || 0;
+        lv = +ls.getItem('lv') || 3;
+        hs = JSON.parse(ls.getItem('hs')) || {
+          encode: { easy: 0, medium: 0, hard: 0, extreme: 0 },
+          decode: { easy: 0, medium: 0, hard: 0, extreme: 0 }
         };
-        currentQuestion = localStorage.getItem('currentQuestion') || '';
-        currentAnswer = localStorage.getItem('currentAnswer') || '';
+        cq = ls.getItem('cq') || '';
+        ca = ls.getItem('ca') || '';
 
-        input.value = localStorage.getItem('translatorInput') || '';
-        soundInput.value = localStorage.getItem('soundInput') || '';
-        gameInput.value = localStorage.getItem('gameInput') || '';
+        e.i.value = ls.getItem('ti') || '';
+        e.si.value = ls.getItem('si') || '';
+        e.gi.value = ls.getItem('gi') || '';
+        e.o.textContent = ls.getItem('to') || '';
+        e.so.textContent = ls.getItem('so') || 'Morse code to play...';
+        e.go.textContent = ls.getItem('go') || '';
 
-        output.textContent = localStorage.getItem('translatorOutput') || '';
-        soundOutput.textContent = localStorage.getItem('soundOutput') || 'Morse code to play...';
-        gameOutput.textContent = localStorage.getItem('gameOutput') || '';
+        e.dd.value = dd;
+        e.dad.value = dad;
+        e.ss.value = ss;
+        e.lsp.value = lsp;
+        e.ws.value = ws;
+        e.soc.checked = so;
+        e.gm.checked = em;
+        e.lt.checked = lt;
+        e.ml.textContent = em ? 'Encode (Text to Morse)' : 'Decode (Morse to Text)';
+        e.gsc.textContent = sc;
+        e.gl.textContent = '❤️'.repeat(lv);
+        e.hsee.textContent = hs.encode.easy;
+        e.hsem.textContent = hs.encode.medium;
+        e.hseh.textContent = hs.encode.hard;
+        e.hsex.textContent = hs.encode.extreme;
+        e.hsde.textContent = hs.decode.easy;
+        e.hsdm.textContent = hs.decode.medium;
+        e.hsdh.textContent = hs.decode.hard;
+        e.hsdx.textContent = hs.decode.extreme;
+        e.gc.classList.toggle('decode-mode', !em);
 
-        dotDurationInput.value = DOT_DURATION;
-        dashDurationInput.value = DASH_DURATION;
-        symbolSpaceInput.value = SYMBOL_SPACE;
-        letterSpaceInput.value = LETTER_SPACE;
-        wordSpaceInput.value = WORD_SPACE;
-        showOutputCheckbox.checked = showOutput;
-        gameModeCheckbox.checked = isEncodeMode;
-        modeLabel.textContent = isEncodeMode ? 'Encode (Text to Morse)' : 'Decode (Morse to Text)';
-        gameScoreDisplay.textContent = score;
-        gameLivesDisplay.textContent = '❤️'.repeat(lives);
-        highScoreEncodeEasy.textContent = highScores.encode.easy;
-        highScoreEncodeMedium.textContent = highScores.encode.medium;
-        highScoreEncodeHard.textContent = highScores.encode.hard;
-        highScoreDecodeEasy.textContent = highScores.decode.easy;
-        highScoreDecodeMedium.textContent = highScores.decode.medium;
-        highScoreDecodeHard.textContent = highScores.decode.hard;
-        gameControls.classList.toggle('decode-mode', !isEncodeMode);
+        const at = ls.getItem('at') || 'trans';
+        st(at);
 
-        const activeTab = localStorage.getItem('activeTab') || 'translator';
-        switchTab(activeTab);
-
-        difficultyButtons.forEach(btn => {
-          btn.classList.toggle('active', btn.dataset.difficulty === currentDifficulty);
+        e.db.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.difficulty === cd);
         });
 
-        if (currentQuestion && localStorage.getItem('gameActive') === 'true') {
-          gameStart.classList.add('hidden');
-          gamePlay.classList.remove('hidden');
-          gamePrompt.textContent = isEncodeMode ? `Encode: ${currentQuestion}` : `Decode: ${currentQuestion}`;
+        if (cq && ls.getItem('ga') === 'true') {
+          e.gs.classList.add('hid');
+          e.gp.classList.remove('hid');
+          e.gpr.textContent = em ? `Encode: ${cq}` : `Decode: ${cq}`;
+          e.sa.disabled = !e.gi.value.trim();
         } else {
-          gameStart.classList.remove('hidden');
-          gamePlay.classList.add('hidden');
-          currentQuestion = '';
-          currentAnswer = '';
-          lives = 3;
-          gameLivesDisplay.textContent = '❤️'.repeat(lives);
+          e.gs.classList.remove('hid');
+          e.gp.classList.add('hid');
+          cq = '';
+          ca = '';
+          lv = 3;
+          e.gl.textContent = '❤️'.repeat(lv);
         }
-      } catch (e) {
-        console.warn('Failed to load settings from localStorage:', e);
+      } catch (err) {
+        console.warn('Failed to load settings:', err);
       }
-    }
+    };
 
-    function saveSettings() {
+    // Save settings to localStorage
+    const save = () => {
       try {
-        if (!window.localStorage) return;
-        localStorage.setItem('dotDuration', String(DOT_DURATION));
-        localStorage.setItem('dashDuration', String(DASH_DURATION));
-        localStorage.setItem('symbolSpace', String(SYMBOL_SPACE));
-        localStorage.setItem('letterSpace', String(LETTER_SPACE));
-        localStorage.setItem('wordSpace', String(WORD_SPACE));
-        localStorage.setItem('showOutput', String(showOutput));
-        localStorage.setItem('currentDifficulty', currentDifficulty);
-        localStorage.setItem('isEncodeMode', String(isEncodeMode));
-        localStorage.setItem('score', String(score));
-        localStorage.setItem('lives', String(lives));
-        localStorage.setItem('highScores', JSON.stringify(highScores));
-        localStorage.setItem('currentQuestion', currentQuestion || '');
-        localStorage.setItem('currentAnswer', currentAnswer || '');
-        localStorage.setItem('gameActive', gamePlay.classList.contains('hidden') ? 'false' : 'true');
-        localStorage.setItem('activeTab', document.querySelector('.tab.active')?.dataset.tab || 'translator');
-      } catch (e) {
-        console.warn('Failed to save settings to localStorage:', e);
+        if (!ls) return;
+        ls.setItem('dd', String(dd));
+        ls.setItem('dad', String(dad));
+        ls.setItem('ss', String(ss));
+        ls.setItem('lsp', String(lsp));
+        ls.setItem('ws', String(ws));
+        ls.setItem('so', String(so));
+        ls.setItem('cd', cd);
+        ls.setItem('em', String(em));
+        ls.setItem('lt', String(lt));
+        ls.setItem('sc', String(sc));
+        ls.setItem('lv', String(lv));
+        ls.setItem('hs', JSON.stringify(hs));
+        ls.setItem('cq', cq || '');
+        ls.setItem('ca', ca || '');
+        ls.setItem('ga', e.gp.classList.contains('hid') ? 'false' : 'true');
+        ls.setItem('at', document.querySelector('.tab.active')?.dataset.tab || 'trans');
+      } catch (err) {
+        console.warn('Failed to save settings:', err);
       }
-    }
+    };
 
-    function saveInput(element, key) {
+    // Save input to localStorage
+    const si = (el, k) => {
       try {
-        if (!window.localStorage) return;
-        localStorage.setItem(key, element.value || '');
-      } catch (e) {
-        console.warn(`Failed to save ${key} to localStorage:`, e);
+        if (!ls) return;
+        ls.setItem(k, el.value || '');
+      } catch (err) {
+        console.warn(`Failed to save ${k}:`, err);
       }
-    }
+    };
 
-    function saveOutput(element, key) {
+    // Save output to localStorage
+    const soo = (el, k) => {
       try {
-        if (!window.localStorage) return;
-        localStorage.setItem(key, element.textContent || '');
-      } catch (e) {
-        console.warn(`Failed to save ${key} to localStorage:`, e);
+        if (!ls) return;
+        ls.setItem(k, el.textContent || '');
+      } catch (err) {
+        console.warn(`Failed to save ${k}:`, err);
       }
-    }
+    };
 
-    function generateMorseTable() {
-      morseTable.innerHTML = '';
-      for (const [char, code] of Object.entries(morseCode)) {
-        const item = document.createElement('div');
-        item.className = 'morse-item';
-        item.innerHTML = `<strong>${char}</strong><br>${code}`;
-        item.tabIndex = 0;
-        morseTable.appendChild(item);
+    // Generate Morse code table
+    const gmt = () => {
+      e.mt.innerHTML = '';
+      for (const [c, d] of Object.entries(mc)) {
+        const i = document.createElement('div');
+        i.className = 'mi';
+        i.innerHTML = `<strong>${c}</strong><br>${d}`;
+        i.tabIndex = 0;
+        e.mt.appendChild(i);
       }
-    }
+    };
 
-    function normalizeMorse(morse) {
-      if (!morse) return '';
-      return morse.trim()
-        .replace(/\s*\/\s*/g, ' / ')
-        .replace(/\s+/g, ' ')
-        .trim();
-    }
+    // Normalize Morse code input
+    const nm = m => m ? m.trim().replace(/\s*\/\s*/g, ' / ').replace(/\s+/g, ' ').trim() : '';
 
-    function textToMorse(text) {
-      if (!text) return '';
-      return text.toUpperCase()
+    // Convert text to Morse code
+    const ttm = t => {
+      if (!t) return '';
+      return t.toUpperCase()
         .split(' ')
-        .map(word => word.split('')
-          .map(char => morseCode[char] || '')
-          .filter(code => code)
-          .join(' '))
-        .filter(word => word)
+        .map(w => w.split('').map(c => mc[c] || '').filter(c => c).join(' '))
+        .filter(w => w)
         .join(' / ');
-    }
+    };
 
-    function morseToText(morse) {
-      if (!morse) return '';
-      morse = normalizeMorse(morse);
-      return morse.split(' / ')
-        .map(word => word.split(' ')
-          .map(code => textFromMorse[code] || '')
-          .filter(char => char)
-          .join(''))
-        .filter(word => word)
+    // Convert Morse code to text
+    const mtt = m => {
+      if (!m) return '';
+      m = nm(m);
+      return m.split(' / ')
+        .map(w => w.split(' ').map(c => tfm[c] || '').filter(c => c).join(''))
+        .filter(w => w)
         .join(' ');
-    }
+    };
 
-    function debounce(func, wait) {
-      let timeout;
-      return function executedFunction(...args) {
-        const later = () => {
-          clearTimeout(timeout);
-          func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+    // Debounce function
+    const deb = (f, w) => {
+      let t;
+      return (...a) => {
+        clearTimeout(t);
+        t = setTimeout(() => f(...a), w);
       };
-    }
+    };
 
-    const updateTranslatorOutput = debounce(() => {
-      const text = input.value.trim();
-      output.textContent = /^[.\-\/ ]+$/.test(text) ? morseToText(text) : textToMorse(text);
-      saveOutput(output, 'translatorOutput');
+    // Update translator output
+    const uto = deb(() => {
+      const t = e.i.value.trim();
+      e.o.textContent = /^[.\-\/ ]+$/.test(t) ? mtt(t) : ttm(t);
+      soo(e.o, 'to');
     }, 300);
 
-    const updateSoundOutput = debounce(() => {
-      const text = soundInput.value.trim();
-      const morse = /^[.\-\/ ]+$/.test(text) ? normalizeMorse(text) : textToMorse(text);
-      if (!text) {
-        soundOutput.textContent = 'Morse code to play...';
+    // Update sound output
+    const uso = deb(() => {
+      const t = e.si.value.trim();
+      const m = /^[.\-\/ ]+$/.test(t) ? nm(t) : ttm(t);
+      if (!t) {
+        e.so.textContent = 'Morse code to play...';
       } else {
-        soundOutput.innerHTML = morse
-          .split('')
-          .map((symbol, index) => `<span class="symbol-span" data-index="${index}">${symbol}</span>`)
-          .join('');
+        e.so.innerHTML = m.split('').map((s, i) => `<span class="sym" data-index="${i}">${s}</span>`).join('');
       }
-      saveOutput(soundOutput, 'soundOutput');
+      soo(e.so, 'so');
     }, 300);
 
-    const updateGameOutput = debounce(() => {
-      if (!showOutput) {
-        gameOutput.classList.add('hidden');
+    // Update game output
+    const ugo = deb(() => {
+      if (!so) {
+        e.go.classList.add('hid');
         return;
       }
-      gameOutput.classList.remove('hidden');
-      const userInput = gameInput.value.trim();
-      if (!userInput) {
-        gameOutput.textContent = '';
+      e.go.classList.remove('hid');
+      const t = e.gi.value.trim();
+      if (!t) {
+        e.go.textContent = '';
       } else {
-        gameOutput.innerHTML = (isEncodeMode ? morseToText(userInput) : textToMorse(userInput))
-          .split('')
-          .map((symbol, index) => `<span class="symbol-span" data-index="${index}">${symbol}</span>`)
-          .join('');
+        e.go.innerHTML = (em ? mtt(t) : ttm(t)).split('').map((s, i) => `<span class="sym" data-index="${i}">${s}</span>`).join('');
       }
-      saveOutput(gameOutput, 'gameOutput');
+      soo(e.go, 'go');
     }, 300);
 
-    async function playSymbol(symbol) {
-      if (isPlaying) return;
-      isPlaying = true;
-      playButton.disabled = true;
+    // Play a single Morse symbol
+    const ps = async s => {
+      if (ip || o) return;
+      ip = true;
+      e.pm.disabled = true;
 
-      oscillator = audioCtx.createOscillator();
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
-      oscillator.connect(audioCtx.destination);
-      oscillator.start();
+      o = ac.createOscillator();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(600, ac.currentTime);
+      o.connect(ac.destination);
+      o.start();
 
-      const duration = symbol === '.' ? DOT_DURATION : DASH_DURATION;
-      await new Promise(resolve => setTimeout(resolve, duration));
+      const dur = s === '.' ? dd : dad;
+      await new Promise(r => setTimeout(r, dur));
 
-      oscillator.stop();
-      oscillator = null;
-      isPlaying = false;
-      playButton.disabled = false;
-    }
+      o.stop();
+      o = null;
+      ip = false;
+      e.pm.disabled = false;
+    };
 
-    async function playMorseCode(morse, outputElement) {
-      if (isPlaying) return;
-      isPlaying = true;
-      playButton.disabled = true;
-      playHintButton.disabled = true;
+    // Play Morse code sequence
+    const pmc = async (m, oe) => {
+      if (ip) return;
+      ip = true;
+      e.pm.disabled = true;
+      e.ph.disabled = true;
 
-      const inputElement = outputElement === soundOutput ? soundInput : gameInput;
-      inputElement.disabled = true;
-      inputElement.style.cursor = 'not-allowed';
+      const ie = oe === e.so ? e.si : e.gi;
+      ie.disabled = true;
+      ie.style.cursor = 'not-allowed';
 
-      if (!morse) {
-        inputElement.disabled = false;
-        inputElement.style.cursor = 'auto';
-        isPlaying = false;
-        playButton.disabled = false;
-        playHintButton.disabled = false;
+      if (!m) {
+        ie.disabled = false;
+        ie.style.cursor = 'auto';
+        ip = false;
+        e.pm.disabled = false;
+        e.ph.disabled = false;
         return;
       }
 
-      morse = normalizeMorse(morse);
-      const codes = /^[.\-\/ ]+$/.test(morse) ? morse.split(' ') : textToMorse(morse).split(' ');
-      let symbolIndex = 0;
+      m = nm(m);
+      const c = /^[.\-\/ ]+$/.test(m) ? m.split(' ') : ttm(m).split(' ');
+      let si = 0;
 
-      for (const code of codes) {
-        if (!isPlaying) break;
+      for (const d of c) {
+        if (!ip) break;
 
-        if (code === '/') {
-          const slashSpan = outputElement.querySelector(`[data-index="${symbolIndex}"]`);
-          if (slashSpan) {
-            slashSpan.classList.add('highlight');
-            await new Promise(resolve => setTimeout(resolve, WORD_SPACE));
-            slashSpan.classList.remove('highlight');
+        if (d === '/') {
+          const s = oe.querySelector(`[data-index="${si}"]`);
+          if (s) {
+            s.classList.add('hl');
+            await new Promise(r => setTimeout(r, ws));
+            s.classList.remove('hl');
           }
-          symbolIndex += 2;
+          si += 2;
           continue;
         }
 
-        for (const symbol of code) {
-          if (!isPlaying) break;
+        for (const s of d) {
+          if (!ip) break;
 
-          const currentSpan = outputElement.querySelector(`[data-index="${symbolIndex}"]`);
-          if (currentSpan) {
-            currentSpan.classList.add('highlight');
-          }
+          const cs = oe.querySelector(`[data-index="${si}"]`);
+          if (cs) cs.classList.add('hl');
 
-          oscillator = audioCtx.createOscillator();
-          oscillator.type = 'sine';
-          oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
-          oscillator.connect(audioCtx.destination);
-          oscillator.start();
+          o = ac.createOscillator();
+          o.type = 'sine';
+          o.frequency.setValueAtTime(600, ac.currentTime);
+          o.connect(ac.destination);
+          o.start();
 
-          const duration = symbol === '.' ? DOT_DURATION : DASH_DURATION;
-          await new Promise(resolve => setTimeout(resolve, duration));
+          const dur = s === '.' ? dd : dad;
+          await new Promise(r => setTimeout(r, dur));
 
-          oscillator.stop();
-          if (currentSpan) {
-            currentSpan.classList.remove('highlight');
-          }
+          o.stop();
+          if (cs) cs.classList.remove('hl');
 
-          await new Promise(resolve => setTimeout(resolve, SYMBOL_SPACE));
-          symbolIndex++;
+          await new Promise(r => setTimeout(r, ss));
+          si++;
         }
 
-        await new Promise(resolve => setTimeout(resolve, LETTER_SPACE - SYMBOL_SPACE));
-        symbolIndex++;
+        await new Promise(r => setTimeout(r, lsp - ss));
+        si++;
       }
 
-      inputElement.disabled = false;
-      inputElement.style.cursor = 'auto';
-      isPlaying = false;
-      playButton.disabled = false;
-      playHintButton.disabled = false;
-    }
+      ie.disabled = false;
+      ie.style.cursor = 'auto';
+      ip = false;
+      e.pm.disabled = false;
+      e.ph.disabled = false;
+    };
 
-    function stopMorseCode(outputElement) {
-      isPlaying = false;
-      if (oscillator) {
-        oscillator.stop();
-        oscillator = null;
+    // Stop Morse code playback
+    const smc = oe => {
+      ip = false;
+      if (o) {
+        o.stop();
+        o = null;
       }
-      const inputElement = outputElement === soundOutput ? soundInput : gameInput;
-      inputElement.disabled = false;
-      inputElement.style.cursor = 'auto';
-      outputElement.querySelectorAll('.symbol-span').forEach(span => span.classList.remove('highlight'));
-      playButton.disabled = false;
-      playHintButton.disabled = false;
-    }
+      const ie = oe === e.so ? e.si : e.gi;
+      ie.disabled = false;
+      ie.style.cursor = 'auto';
+      oe.querySelectorAll('.sym').forEach(s => s.classList.remove('hl'));
+      e.pm.disabled = false;
+      e.ph.disabled = false;
+    };
 
-    function generateQuestion() {
-      const words = gameWords[currentDifficulty];
-      const word = words[Math.floor(Math.random() * words.length)];
-      currentQuestion = isEncodeMode ? word : textToMorse(word);
-      currentAnswer = isEncodeMode ? textToMorse(word) : word;
-      gamePrompt.textContent = isEncodeMode ? `Encode: ${currentQuestion}` : `Decode: ${currentQuestion}`;
-      gameInput.value = '';
-      gameFeedback.textContent = '';
-      gameFeedback.classList.remove('correct', 'incorrect');
-      submitAnswerButton.disabled = false;
-      saveSettings();
-      saveInput(gameInput, 'gameInput');
-      updateGameOutput();
-    }
+    // Generate game question
+    const gq = () => {
+      const w = gw[cd];
+      const word = w[Math.floor(Math.random() * w.length)];
+      cq = em ? word : ttm(word);
+      ca = em ? ttm(word) : word;
+      e.gpr.textContent = em ? `Encode: ${cq}` : `Decode: ${cq}`;
+      e.gi.value = '';
+      e.gf.textContent = '';
+      e.gf.classList.remove('correct', 'incorrect');
+      e.sa.disabled = true;
+      save();
+      si(e.gi, 'gi');
+      ugo();
+    };
 
-    async function checkAnswer() {
-      submitAnswerButton.disabled = true;
-      const userAnswer = gameInput.value.trim();
-      const normalizedUserAnswer = isEncodeMode ? normalizeMorse(userAnswer.toUpperCase()) : userAnswer.toUpperCase();
-      const normalizedCorrectAnswer = isEncodeMode ? normalizeMorse(currentAnswer) : currentAnswer.toUpperCase();
-      const isCorrect = normalizedUserAnswer === normalizedCorrectAnswer;
-      const mode = isEncodeMode ? 'encode' : 'decode';
+    // Check game answer
+    const chkAns = async () => {
+      e.sa.disabled = true;
+      const ua = e.gi.value.trim();
+      const nua = em ? nm(ua.toUpperCase()) : ua.toUpperCase();
+      const nca = em ? nm(ca) : ca.toUpperCase();
+      const ic = nua === nca;
+      const m = em ? 'encode' : 'decode';
 
-      if (isCorrect) {
-        score++;
-        gameFeedback.textContent = 'Correct!';
-        gameFeedback.classList.add('correct');
-        gameFeedback.classList.remove('incorrect');
-        if (score > highScores[mode][currentDifficulty]) {
-          highScores[mode][currentDifficulty] = score;
-          document.getElementById(`high-score-${mode}-${currentDifficulty}`).textContent = score;
+      if (ic) {
+        sc++;
+        e.gf.textContent = 'Correct!';
+        e.gf.classList.add('correct');
+        e.gf.classList.remove('incorrect');
+        if (sc > hs[m][cd]) {
+          hs[m][cd] = sc;
+          e[`hs${m.slice(0, 3)}${cd.slice(0, 3)}`].textContent = sc;
         }
-        gameScoreDisplay.textContent = score;
-        saveSettings();
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        generateQuestion();
+        e.gsc.textContent = sc;
+        save();
+        await new Promise(r => setTimeout(r, 1000));
+        gq();
       } else {
-        lives--;
-        gameLivesDisplay.textContent = '❤️'.repeat(lives);
-        gameFeedback.textContent = `Incorrect. Correct answer: ${currentAnswer}`;
-        gameFeedback.classList.add('incorrect');
-        gameFeedback.classList.remove('correct');
-        saveSettings();
-        if (lives <= 0) {
-          gameFeedback.textContent = `Game Over! Final Score: ${score}`;
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          stopGame();
+        if (lt) lv--;
+        e.gl.textContent = '❤️'.repeat(lv);
+        e.gf.textContent = `Incorrect. Correct answer: ${ca}`;
+        e.gf.classList.add('incorrect');
+        e.gf.classList.remove('correct');
+        save();
+        if (lt && lv <= 0) {
+          e.gf.textContent = `Game Over! Final Score: ${sc}`;
+          await new Promise(r => setTimeout(r, 2000));
+          sg();
         } else {
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          gameFeedback.textContent = '';
-          gameFeedback.classList.remove('correct', 'incorrect');
-          submitAnswerButton.disabled = false;
+          await new Promise(r => setTimeout(r, 2000));
+          e.gf.textContent = '';
+          e.gf.classList.remove('correct', 'incorrect');
+          e.sa.disabled = false;
         }
       }
-    }
+    };
 
-    function stopGame() {
-      score = 0;
-      lives = 3;
-      currentQuestion = '';
-      currentAnswer = '';
-      gameScoreDisplay.textContent = score;
-      gameLivesDisplay.textContent = '❤️'.repeat(lives);
-      gamePrompt.textContent = '';
-      gameInput.value = '';
-      gameFeedback.textContent = '';
-      gameFeedback.classList.remove('correct', 'incorrect');
-      gameOutput.textContent = '';
-      gamePlay.classList.add('hidden');
-      gameStart.classList.remove('hidden');
-      stopMorseCode(gameOutput);
-      submitAnswerButton.disabled = false;
-      saveSettings();
-      saveInput(gameInput, 'gameInput');
-      saveOutput(gameOutput, 'gameOutput');
-    }
+    // Stop game
+    const sg = () => {
+      sc = 0;
+      lv = 3;
+      cq = '';
+      ca = '';
+      e.gsc.textContent = sc;
+      e.gl.textContent = '❤️'.repeat(lv);
+      e.gpr.textContent = '';
+      e.gi.value = '';
+      e.gf.textContent = '';
+      e.gf.classList.remove('correct', 'incorrect');
+      e.go.textContent = '';
+      e.gp.classList.add('hid');
+      e.gs.classList.remove('hid');
+      smc(e.go);
+      e.sa.disabled = false;
+      save();
+      si(e.gi, 'gi');
+      soo(e.go, 'go');
+    };
 
-    function updateSoundSetting(input, min, max, key) {
-      let value = parseInt(input.value);
-      if (isNaN(value) || value < min) value = min;
-      if (value > max) value = max;
-      input.value = value;
-      window[key] = value;
-      saveSettings();
-    }
+    // Update sound setting
+    const us = (i, min, max, k) => {
+      let v = +i.value;
+      v = isNaN(v) || v < min ? min : v > max ? max : v;
+      i.value = v;
+      window[k] = v;
+      save();
+    };
 
-    function switchTab(tabName) {
-      tabs.forEach(t => t.classList.remove('active'));
-      tabContents.forEach(c => c.classList.add('hidden'));
-      const tabElement = document.querySelector(`.tab[data-tab="${tabName}"]`);
-      if (tabElement) tabElement.classList.add('active');
-      document.getElementById(`${tabName}-tab`).classList.remove('hidden');
-      saveSettings();
-    }
+    // Switch tabs
+    const st = tn => {
+      e.t.forEach(t => t.classList.remove('active'));
+      e.tc.forEach(c => c.classList.add('hid'));
+      const te = document.querySelector(`.tab[data-tab="${tn}"]`);
+      if (te) te.classList.add('active');
+      document.getElementById(`${tn}-tab`).classList.remove('hid');
+      save();
+    };
 
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+    // Event listeners
+    e.t.forEach(t => t.addEventListener('click', () => st(t.dataset.tab)));
+
+    e.ta.addEventListener('click', () => {
+      sv = !sv;
+      e.ts.classList.toggle('hid-tabs', !sv);
+      e.ta.textContent = sv ? '▲' : '▼';
     });
 
-    toggleArrow.addEventListener('click', () => {
-      switcherVisible = !switcherVisible;
-      tabSwitcher.classList.toggle('hidden-tabs', !switcherVisible);
-      toggleArrow.textContent = switcherVisible ? '▲' : '▼';
+    e.i.addEventListener('input', () => {
+      uto();
+      si(e.i, 'ti');
     });
 
-    input.addEventListener('input', () => {
-      updateTranslatorOutput();
-      saveInput(input, 'translatorInput');
-    });
-    soundInput.addEventListener('input', () => {
-      updateSoundOutput();
-      saveInput(soundInput, 'soundInput');
-    });
-    gameInput.addEventListener('input', () => {
-      updateGameOutput();
-      saveInput(gameInput, 'gameInput');
+    e.si.addEventListener('input', () => {
+      uso();
+      si(e.si, 'si');
     });
 
-    playButton.addEventListener('click', () => playMorseCode(soundInput.value.trim(), soundOutput));
-    stopButton.addEventListener('click', () => stopMorseCode(soundOutput));
-    playDotButton.addEventListener('click', () => playSymbol('.'));
-    playDashButton.addEventListener('click', () => playSymbol('-'));
-
-    dotDurationInput.addEventListener('input', () => updateSoundSetting(dotDurationInput, 50, 200, 'DOT_DURATION'));
-    dashDurationInput.addEventListener('input', () => updateSoundSetting(dashDurationInput, 150, 600, 'DASH_DURATION'));
-    symbolSpaceInput.addEventListener('input', () => updateSoundSetting(symbolSpaceInput, 50, 200, 'SYMBOL_SPACE'));
-    letterSpaceInput.addEventListener('input', () => updateSoundSetting(letterSpaceInput, 150, 600, 'LETTER_SPACE'));
-    wordSpaceInput.addEventListener('input', () => updateSoundSetting(wordSpaceInput, 350, 1400, 'WORD_SPACE'));
-
-    settingsToggle.addEventListener('click', () => {
-      const isOpen = settingsMenu.classList.toggle('open');
-      settingsToggle.textContent = `Sound Settings ${isOpen ? '▲' : '▼'}`;
+    e.gi.addEventListener('input', () => {
+      e.sa.disabled = !e.gi.value.trim();
+      ugo();
+      si(e.gi, 'gi');
     });
 
-    difficultyButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        difficultyButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        currentDifficulty = button.dataset.difficulty;
-        if (currentQuestion) generateQuestion();
-        saveSettings();
+    e.pm.addEventListener('click', () => pmc(e.si.value.trim(), e.so));
+    e.sm.addEventListener('click', () => smc(e.so));
+    e.pd.addEventListener('click', () => ps('.'));
+    e.pda.addEventListener('click', () => ps('-'));
+
+    e.dd.addEventListener('input', () => us(e.dd, 50, 200, 'dd'));
+    e.dad.addEventListener('input', () => us(e.dad, 150, 600, 'dad'));
+    e.ss.addEventListener('input', () => us(e.ss, 50, 200, 'ss'));
+    e.lsp.addEventListener('input', () => us(e.lsp, 150, 600, 'lsp'));
+    e.ws.addEventListener('input', () => us(e.ws, 350, 1400, 'ws'));
+
+    e.st.addEventListener('click', () => {
+      const o = e.smn.classList.toggle('open');
+      e.st.textContent = `Sound Settings ${o ? '▲' : '▼'}`;
+    });
+
+    e.db.forEach(b => {
+      b.addEventListener('click', () => {
+        e.db.forEach(btn => btn.classList.remove('active'));
+        b.classList.add('active');
+        cd = b.dataset.difficulty;
+        if (cq) gq();
+        save();
       });
     });
 
-    gameModeCheckbox.addEventListener('change', () => {
-      isEncodeMode = gameModeCheckbox.checked;
-      modeLabel.textContent = isEncodeMode ? 'Encode (Text to Morse)' : 'Decode (Morse to Text)';
-      gameControls.classList.toggle('decode-mode', !isEncodeMode);
-      if (currentQuestion) generateQuestion();
-      saveSettings();
+    e.gm.addEventListener('change', () => {
+      em = e.gm.checked;
+      e.ml.textContent = em ? 'Encode (Text to Morse)' : 'Decode (Morse to Text)';
+      e.gc.classList.toggle('decode-mode', !em);
+      if (cq) gq();
+      save();
     });
 
-    showOutputCheckbox.addEventListener('change', () => {
-      showOutput = showOutputCheckbox.checked;
-      saveSettings();
-      updateGameOutput();
+    e.soc.addEventListener('change', () => {
+      so = e.soc.checked;
+      save();
+      ugo();
     });
 
-    startGameButton.addEventListener('click', () => {
-      gameStart.classList.add('hidden');
-      gamePlay.classList.remove('hidden');
-      score = 0;
-      lives = 3;
-      gameScoreDisplay.textContent = score;
-      gameLivesDisplay.textContent = '❤️'.repeat(lives);
-      generateQuestion();
-      saveSettings();
+    e.lt.addEventListener('change', () => {
+      lt = e.lt.checked;
+      save();
     });
 
-    submitAnswerButton.addEventListener('click', checkAnswer);
-    playHintButton.addEventListener('click', () => playMorseCode(currentQuestion, gameOutput));
-    stopGameButton.addEventListener('click', stopGame);
+    e.sg.addEventListener('click', () => {
+      e.gs.classList.add('hid');
+      e.gp.classList.remove('hid');
+      sc = 0;
+      lv = 3;
+      e.gsc.textContent = sc;
+      e.gl.textContent = '❤️'.repeat(lv);
+      gq();
+      save();
+    });
 
-    tutorialNext.addEventListener('click', () => {
-      currentTutorialStep++;
-      if (currentTutorialStep < tutorialSteps.length) {
-        tutorialText.textContent = tutorialSteps[currentTutorialStep];
+    e.sa.addEventListener('click', chkAns);
+    e.ph.addEventListener('click', () => pmc(cq, e.go));
+    e.stg.addEventListener('click', sg);
+
+    e.tn.addEventListener('click', () => {
+      cts++;
+      if (cts < tts.length) {
+        e.tt.textContent = tts[cts];
       } else {
-        tutorialOverlay.classList.remove('active');
-        localStorage.setItem('tutorialCompleted', 'true');
+        e.to.classList.remove('active');
+        ls.setItem('tc', 'true');
       }
     });
 
-    tutorialSkip.addEventListener('click', () => {
-      tutorialOverlay.classList.remove('active');
-      localStorage.setItem('tutorialCompleted', 'true');
+    e.ts.addEventListener('click', () => {
+      e.to.classList.remove('active');
+      ls.setItem('tc', 'true');
     });
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && document.activeElement === gameInput) {
-        checkAnswer();
-      }
-      if (e.key === 't') {
-        const currentTab = document.querySelector('.tab.active');
-        const allTabs = Array.from(tabs);
-        const currentIndex = allTabs.indexOf(currentTab);
-        const nextIndex = (currentIndex + 1) % allTabs.length;
-        switchTab(allTabs[nextIndex].dataset.tab);
+    document.addEventListener('keydown', ev => {
+      if (ev.key === 'Enter' && document.activeElement === e.gi) chkAns();
+      if (ev.key === 't') {
+        const ct = document.querySelector('.tab.active');
+        const at = Array.from(e.t);
+        const ci = at.indexOf(ct);
+        const ni = (ci + 1) % at.length;
+        st(at[ni].dataset.tab);
       }
     });
 
-    generateMorseTable();
-    loadSettings();
-    updateSoundOutput();
-    updateTranslatorOutput();
-    updateGameOutput();
+    // Resume audio context on first interaction
+    document.addEventListener('click', () => {
+      if (ac.state === 'suspended') ac.resume();
+    }, { once: true });
+
+    // Initialize
+    gmt();
+    load();
+    uso();
+    uto();
+    ugo();
   </script>
 </body>
 </html>
