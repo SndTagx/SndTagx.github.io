@@ -22,7 +22,6 @@
             overflow: auto;
         }
 
-        /* Starry Background */
         .stars {
             position: fixed;
             top: 0;
@@ -52,7 +51,7 @@
             cursor: pointer;
             user-select: none;
             transition: transform 0.3s ease;
-                        -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .blender:hover {
@@ -72,9 +71,11 @@
         }
 
         .menu-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            margin: 0 !important;
+            transform: none !important;
             color: #ffffff;
             font-size: 16px;
             font-weight: 700;
@@ -84,9 +85,35 @@
             background: linear-gradient(45deg, #333333, #555555);
             border: 2px solid #ffffff;
             border-radius: 10px;
-            z-index: 1000;
+            z-index: 1001 !important;
             -webkit-tap-highlight-color: transparent;
             outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #00ff00;
+            color: #000000;
+            font-size: 12px;
+            font-weight: 600;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
         }
 
         .menu {
@@ -135,7 +162,7 @@
             border-radius: 10px;
             overflow: hidden;
             transition: border 0.3s ease;
-                        -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .skin-preview img {
@@ -155,6 +182,11 @@
 
         .skin-preview.locked {
             filter: grayscale(80%) opacity(0.5);
+        }
+
+        .skin-preview.available {
+            border: 3px solid #00ff00;
+            animation: flashGreen 1s infinite;
         }
 
         .skin-preview.insufficient {
@@ -184,15 +216,22 @@
             right: 0;
             background: rgba(0, 0, 0, 0.85);
             color: #ffffff;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             text-align: center;
-            padding: 6px;
-            display: none;
+            padding: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .cost-overlay .time-icon {
+            font-size: 14px;
         }
 
         .skin-preview.locked .cost-overlay {
-            display: block;
+            display: flex;
         }
 
         .page-controls {
@@ -233,6 +272,8 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .timer {
@@ -244,12 +285,74 @@
             font-weight: 600;
             min-width: 120px;
             text-align: center;
+            user-select: none;
+        }
+
+        .admin-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(180deg, #1a1a1a, #2a2a2a);
+            padding: 20px;
+            border: 2px solid #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1000;
+            width: 300px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .admin-panel.open {
+            display: flex;
+        }
+
+        .admin-panel h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .admin-panel label {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .admin-panel input {
+            padding: 8px;
+            font-size: 14px;
+            border: 2px solid #ffffff;
+            border-radius: 8px;
+            background: #333333;
+            color: #ffffff;
+            outline: none;
+        }
+
+        .admin-panel button {
+            background: linear-gradient(45deg, #333333, #555555);
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
     </style>
 </head>
 <body>
     <div class="stars" id="stars"></div>
-    <div class="menu-toggle">Skins</div>
+    <div class="menu-toggle">
+        Skins
+        <div class="notification-badge" id="notification-badge" style="display: none;">0</div>
+    </div>
     <div class="menu">
         <div class="menu-header">
             <h2>Blender Skins</h2>
@@ -264,21 +367,36 @@
     <div class="timers">
         <div class="timer" id="on-timer">On: 00</div>
     </div>
+    <div class="admin-panel" id="admin-panel">
+        <h2>Admin Panel</h2>
+        <label for="admin-time">Set On Time (seconds):</label>
+        <input type="number" id="admin-time" min="0" value="0">
+        <button id="apply-time">Apply</button>
+        <button id="close-admin">Close</button>
+    </div>
     <img src="https://media.istockphoto.com/id/1384863054/photo/blender-appliance-with-glass-container-isolated-on-white-background-3d-realistic-rendering-of.jpg?s=612x612&w=0&k=20&c=ym4bW25Ybfci2rvsr12hR0NYX_wUJ0nFh8G4C2-Qb3A=" alt="Kitchen Blender" class="blender">
     <audio id="blender-sound" preload="auto" src="BlenderSound.mp3"></audio>
+    <audio id="unlock-sound" preload="auto" src="https://freesound.org/data/previews/270/270333_5121236-lq.mp3"></audio>
 
     <script>
         // Cache DOM elements
         const blender = document.querySelector('.blender');
         const menuToggle = document.querySelector('.menu-toggle');
+        const notificationBadge = document.querySelector('#notification-badge');
         const menu = document.querySelector('.menu');
         const skinGrid = document.querySelector('#skin-grid');
         const prevPageBtn = document.querySelector('#prev-page');
         const nextPageBtn = document.querySelector('#next-page');
         const pageIndicator = document.querySelector('#page-indicator');
         const onTimerDisplay = document.querySelector('#on-timer');
+        const timers = document.querySelector('.timers');
+        const adminPanel = document.querySelector('#admin-panel');
+        const adminTimeInput = document.querySelector('#admin-time');
+        const applyTimeBtn = document.querySelector('#apply-time');
+        const closeAdminBtn = document.querySelector('#close-admin');
         const starsContainer = document.querySelector('#stars');
         const blenderSound = document.querySelector('#blender-sound');
+        const unlockSound = document.querySelector('#unlock-sound');
 
         // State variables
         let isShaking = false;
@@ -287,21 +405,24 @@
         const skinsPerPage = 4;
         let unlockedSkins = JSON.parse(localStorage.getItem('unlockedSkins') || '[0]');
         let selectedSkinIndex = parseInt(localStorage.getItem('selectedSkinIndex') || '0');
+        let holdStart = 0;
+        let blenderLevel = selectedSkinIndex + 1;
 
         // Blender images
         const blenderImages = [
             { url: 'https://media.istockphoto.com/id/1384863054/photo/blender-appliance-with-glass-container-isolated-on-white-background-3d-realistic-rendering-of.jpg?s=612x612&w=0&k=20&c=ym4bW25Ybfci2rvsr12hR0NYX_wUJ0nFh8G4C2-Qb3A=', onTimeCost: 0 },
-            { url: 'https://imgs.search.brave.com/e70BLzeg7W_y6VaWEZez_NE7yj_44DoTuCAjnNQBHI4/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAxLzEwLzUxLzUx/LzM2MF9GXzExMDUx/NTE0OF95T1FOcWlK/eHZteG5wa05ZYWsw/cVI0Szc5clNmWmFp/Ti5qcGc', onTimeCost: 200 },
-            { url: 'https://imgs.search.brave.com/FU5bzmMANwLcYmlfA_KehIuvDckOxlqzhA4P_SNvGyg/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90My5m/dGNkbi5uZXQvanBn/LzA0LzAzLzI4Lzcw/LzM2MF9GXzQwMzI4/NzA1NV9VSHhTWENQ/MkUwVjZyR3U1bk1J/dDVLSXJ3cFRva0ha/NC5qcGc', onTimeCost: 300 },
-            { url: 'https://imgs.search.brave.com/8aiBQzluW6r_YHqzOeiOecEKkjg7Z6SoA9KUAyoVadw/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTAx/MTE4MDk3NC9waG90/by9ibGVuZGVyLW9u/LXRoZS10YWJsZS5q/cGc_cz02MTJ4NjEy/Jnc9MCZrPTIwJmM9/dldLSkM3ZTlEanZB/dDNfTjdVX0t5Ujk0/UGhxRzVvT1FUZGxq/dEFJYWFkYz0', onTimeCost: 400 },
-            { url: 'https://imgs.search.brave.com/-1n5vqft_Toz5KeF4T6sc0RtVh7yL84GamzYESyIZ5s/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMuZnJlZWltYWdl/cy5jb20vaW1hZ2Vz/L2dyaWRzLzAwOC9i/bGVuZGVyLTEzMjE1/MjAuanBn', onTimeCost: 500 },
-            { url: 'https://imgs.search.brave.com/nDValmhVz1glxltjnayxZlhb9VinCnySluMMb_cwSDY/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90My5m/dGNkbi5uZXQvanBn/LzAyLzI0LzkyLzE4/LzM2MF9GXzIyNDky/MTgxNl9STUxLOUth/S0dPV3NmVHN6ZkJj/dmFrbTFrQXNXbTFL/NC5qcGc', onTimeCost: 600 },
-            { url: 'https://imgs.search.brave.com/58B6FZnZiDNkg8nuYyy4EKG1RR92nZ-PKp0o3hFJQg4/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly91cGxv/YWQud2lraW1lZGlh/Lm9yZy93aWtpcGVk/aWEvY29tbW9ucy8w/LzA2L0VsZWN0cmlj/QmxlbmRlci5qcGc', onTimeCost: 700 },
-            { url: 'https://imgs.search.brave.com/0gkBW8OMJvUUFUBVaudUu5-D17m20AI68vCOvqjJGj4/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90My5m/dGNkbi5uZXQvanBn/LzA5LzE5LzA4Lzk4/LzM2MF9GXzkxOTA4/OTg4NF9nbDVoQllL/RlJIdnZTclpDRVZa/cHh4NlNGRUF5MWRC/Zi5qcGc', onTimeCost: 800 },
-            { url: 'https://imgs.search.brave.com/bobol4vKRfKQRm9F3KPwR2XKRk5xtstu1h8O5DndryA/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90My5m/dGNkbi5uZXQvanBn/LzA5LzI1Lzg3LzA2/LzM2MF9GXzkyNTg3/MDYyM191a3hrSVVR/WkdxSHJzWFpCQjZp/T0tZbktjMWxHcE84/ZS5qcGc', onTimeCost: 900 },
-            { url: 'https://imgs.search.brave.com/vdHRoYYk0a-cIi8aD7kQvnzuuwUwwi5g9Gi7XvRjhgc/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly91cGxv/YWQud2lraW1lZGlh/Lm9yZy93aWtpcGVk/aWEvY29tbW9ucy90/aHVtYi8wLzBjL0Js/ZW5kZXJfbG9nb19u/b190ZXh0LnN2Zy8y/NTBweC1CbGVuZGVy/X2xvZ29fbm9fdGV4/dC5zdmcucG5n', onTimeCost: 1000 },
-        ];
-
+            { url: 'https://imgs.search.brave.com/e70BLzeg7W_y6VaWEZez_NE7yj_44DoTuCAjnNQBHI4/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAxLzEwLzUxLzUx/LzM2MF9GXzExMDUx/NTE0OF95T1FOcWlK/eHZteG5wa05ZYWsw/cVI0Szc5clNmWmFp/Ti5qcGc', onTimeCost: 300 },
+            { url: 'https://imgs.search.brave.com/FU5bzmMANwLcYmlfA_KehIuvDckOxlqzhA4P_SNvGyg/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90My5m/dGNkbi5uZXQvanBn/LzA0LzAzLzI4Lzcw/LzM2MF9GXzQwMzI4/NzA1NV9VSHhTWENQ/MkUwVjZyR3U1bk1J/dDVLSXJ3cFRva0ha/NC5qcGc', onTimeCost: 600 },
+            { url: 'https://imgs.search.brave.com/8aiBQzluW6r_YHqzOeiOecEKkjg7Z6SoA9KUAyoVadw/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTAx/MTE4MDk3NC9waG90/by9ibGVuZGVyLW9u/LXRoZS10YWJsZS5q/cGc_cz02MTJ4NjEy/Jnc9MCZrPTIwJmM9/dldLSkM3ZTlEanZB/dDNfTjdVX0t5Ujk0/UGhxRzVvT1FUZGxq/dEFJYWFkYz0', onTimeCost: 1500 },
+            { url: 'https://imgs.search.brave.com/-1n5vqft_Toz5KeF4T6sc0RtVh7yL84GamzYESyIZ5s/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMuZnJlZWltYWdl/cy5jb20vaW1hZ2Vz/L2dyaWRzLzAwOC9i/bGVuZGVyLTEzMjE1/MjAuanBn', onTimeCost: 1800 },
+            { url: 'https://imgs.search.brave.com/nDValmhVz1glxltjnayxZlhb9VinCnySluMMb_cwSDY/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90My5m/dGNkbi5uZXQvanBn/LzAyLzI0LzkyLzE4/LzM2MF9GXzIyNDky/MTgxNl9STUxLOUth/S0dPV3NmVHN6ZkJj/dmFrbTFrQXNXbTFL/NC5qcGc', onTimeCost: 3600 },
+            { url: 'https://imgs.search.brave.com/58B6FZnZiDNkg8nuYyy4EKG1RR92nZ-PKp0o3hFJQg4/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly91cGxv/YWQud2lraW1lZGlh/Lm9yZy93aWtpcGVk/aWEvY29tbW9ucy8w/LzA2L0VsZWN0cmlj/QmxlbmRlci5qcGc', onTimeCost: 4800 },
+            { url: 'https://imgs.search.brave.com/0gkBW8OMJvUUFUBVaudUu5-D17m20AI68vCOvqjJGj4/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90My5m/dGNkbi5uZXQvanBn/LzA5LzE5LzA4Lzk4/LzM2MF9GXzkxOTA4/OTg4NF9nbDVoQllL/RlJIdnZTclpDRVZa/cHh4NlNGRUF5MWRC/Zi5qcGc', onTimeCost: 6000 },
+            { url: 'https://imgs.search.brave.com/bobol4vKRfKQRm9F3KPwR2XKRk5xtstu1h8O5DndryA/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90My5m/dGNkbi5uZXQvanBn/LzA5LzI1Lzg3LzA2/LzM2MF9GXzkyNTg3/MDYyM191a3hrSVVR/WkdxSHJzWFpCQjZp/T0tZbktjMWxHcE84/ZS5qcGc', onTimeCost: 7200 },
+            { url: 'https://imgs.search.brave.com/vdHRoYYk0a-cIi8aD7kQvnzuuwUwwi5g9Gi7XvRjhgc/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly91cGxv/YWQud2lraW1lZGlh/Lm9yZy93aWtpcGVk/aWEvY29tbW9ucy90/aHVtYi8wLzBjL0Js/ZW5kZXJfbG9nb19u/b190ZXh0LnN2Zy8y/NTBweC1CbGVuZGVy/X2xvZ29fbm9fdGV4/dC5zdmcucG5n', onTimeCost: 10000 },
+            { url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcToSZplOgDT_Jv1SO-4PJblmZRR8N6pApf1TQ&s', onTimeCost: 60000},
+            { url: 'https://imgs.search.brave.com/OFktj7j82fhlqvKWOmUDg0_aBMXsyDC2Vh8hOND4Sks/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/Y3JlYXRlLnZpc3Rh/LmNvbS9hcGkvbWVk/aWEvc21hbGwvMzcw/NTUxMTc2L3N0b2Nr/LXBob3RvLWludmlz/aWJsZS1tYW4tc3Vp/dC1zdGFuZGluZy12/ZXJ0aWNhbC1pbWFn/ZQ', onTimeCost: 80000 }
+]
         // Apply initial skin
         blender.src = blenderImages[selectedSkinIndex].url;
         blender.alt = `Kitchen Blender ${selectedSkinIndex + 1}`;
@@ -333,11 +454,12 @@
         // Timer management
         function updateTimers() {
             onTimerDisplay.textContent = `On: ${formatTime(onTime)}`;
+            updateNotifications();
         }
 
         const timerInterval = setInterval(() => {
             if (isShaking) {
-                onTime++;
+                onTime += blenderLevel;
                 localStorage.setItem('onTime', onTime);
                 updateTimers();
             }
@@ -363,6 +485,22 @@
         }
         createStars();
 
+        // Update notifications
+        function updateNotifications() {
+            let purchasableCount = 0;
+            blenderImages.forEach((skin, index) => {
+                if (!unlockedSkins.includes(index) && onTime >= skin.onTimeCost) {
+                    purchasableCount++;
+                }
+            });
+            if (purchasableCount > 0) {
+                notificationBadge.textContent = purchasableCount;
+                notificationBadge.style.display = 'flex';
+            } else {
+                notificationBadge.style.display = 'none';
+            }
+        }
+
         // Render skins
         function renderSkinsPage(page) {
             const fragment = document.createDocumentFragment();
@@ -370,8 +508,10 @@
             const end = Math.min(start + skinsPerPage, blenderImages.length);
 
             for (let i = start; i < end; i++) {
+                const isUnlocked = unlockedSkins.includes(i);
+                const isPurchasable = !isUnlocked && onTime >= blenderImages[i].onTimeCost;
                 const skinContainer = document.createElement('div');
-                skinContainer.className = `skin-preview ${unlockedSkins.includes(i) ? '' : 'locked'} ${selectedSkinIndex === i ? 'selected' : ''}`;
+                skinContainer.className = `skin-preview ${isUnlocked ? '' : 'locked'} ${selectedSkinIndex === i ? 'selected' : ''} ${isPurchasable ? 'available' : ''}`;
                 skinContainer.dataset.index = i;
 
                 const img = document.createElement('img');
@@ -381,7 +521,7 @@
 
                 const costOverlay = document.createElement('div');
                 costOverlay.className = 'cost-overlay';
-                costOverlay.textContent = `${blenderImages[i].onTimeCost}s On`;
+                costOverlay.innerHTML = `<span class="time-icon">⏱️</span> ${formatTime(blenderImages[i].onTimeCost)}`;
 
                 skinContainer.appendChild(img);
                 skinContainer.appendChild(costOverlay);
@@ -403,6 +543,7 @@
             const skinPreview = skinGrid.querySelector(`[data-index="${index}"]`);
             if (unlockedSkins.includes(index)) {
                 selectedSkinIndex = index;
+                blenderLevel = selectedSkinIndex + 1;
                 blender.src = blenderImages[index].url;
                 blender.alt = `Kitchen Blender ${index + 1}`;
                 localStorage.setItem('selectedSkinIndex', selectedSkinIndex);
@@ -416,9 +557,11 @@
                 localStorage.setItem('onTime', onTime);
                 updateTimers();
                 selectedSkinIndex = index;
+                blenderLevel = selectedSkinIndex + 1;
                 blender.src = blenderImages[index].url;
                 blender.alt = `Kitchen Blender ${index + 1}`;
                 localStorage.setItem('selectedSkinIndex', selectedSkinIndex);
+                unlockSound.play().catch(e => console.error('Sound play error:', e));
                 renderSkinsPage(currentPage);
             } else {
                 skinPreview.classList.add('insufficient');
@@ -454,6 +597,9 @@
             if (menu.classList.contains('open') && !menu.contains(e.target) && e.target !== menuToggle) {
                 menu.classList.remove('open');
             }
+            if (adminPanel.classList.contains('open') && !adminPanel.contains(e.target)) {
+                adminPanel.classList.remove('open');
+            }
         });
 
         // Page navigation
@@ -475,6 +621,52 @@
         skinGrid.addEventListener('click', e => {
             const index = e.target.closest('.skin-preview')?.dataset.index;
             if (index) handleSkinClick(index);
+        });
+
+        // Admin panel access
+        timers.addEventListener('mousedown', () => {
+            holdStart = Date.now();
+            setTimeout(() => {
+                if (Date.now() - holdStart >= 5000) {
+                    adminPanel.classList.add('open');
+                    adminTimeInput.value = onTime;
+                }
+            }, 5000);
+        });
+
+        timers.addEventListener('mouseup', () => {
+            holdStart = 0;
+        });
+
+        timers.addEventListener('touchstart', e => {
+            e.preventDefault();
+            holdStart = Date.now();
+            setTimeout(() => {
+                if (Date.now() - holdStart >= 5000) {
+                    adminPanel.classList.add('open');
+                    adminTimeInput.value = onTime;
+                }
+            }, 5000);
+        });
+
+        timers.addEventListener('touchend', () => {
+            holdStart = 0;
+        });
+
+        // Admin panel actions
+        applyTimeBtn.addEventListener('click', () => {
+            const newTime = parseInt(adminTimeInput.value) || 0;
+            if (newTime >= 0) {
+                onTime = newTime;
+                localStorage.setItem('onTime', onTime);
+                updateTimers();
+                renderSkinsPage(currentPage);
+                adminPanel.classList.remove('open');
+            }
+        });
+
+        closeAdminBtn.addEventListener('click', () => {
+            adminPanel.classList.remove('open');
         });
     </script>
 </body>
