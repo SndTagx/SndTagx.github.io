@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blender Shake Website</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #000000, #1c1c1c);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+            position: relative;
+            font-family: 'Montserrat', sans-serif;
+            color: #ffffff;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Starry Background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            background: radial-gradient(circle, #ffffff 10%, #ffffff 70%, transparent 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.5);
+            animation: grow 4s infinite ease-in-out, fade 4s infinite ease-in-out;
+            will-change: transform, opacity;
+        }
+
+        @keyframes grow {
+            0%, 100% { transform: scale(0.8); box-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.5); }
+            50% { transform: scale(1.5); box-shadow: 0 0 15px rgba(255, 255, 255, 1), 0 0 30px rgba(255, 255, 255, 0.7); }
+        }
+
+        @keyframes fade {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .blender {
+            width: 220px;
+            height: auto;
+            cursor: pointer;
+            user-select: none;
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
+            transition: transform 0.3s ease;
+        }
+
+        .blender:hover {
+            transform: scale(1.05);
+        }
+
+        .shake {
+            animation: shake 0.15s infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(10px, 10px) rotate(5deg); }
+            50% { transform: translate(-10px, -10px) rotate(-5deg); }
+            75% { transform: translate(10px, -10px) rotate(5deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        /* Menu Toggle */
+        .menu-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #333333, #555555);
+            border: 2px solid #ffffff;
+            border-radius: 10px;
+            z-index: 1000;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Menu */
+        .menu {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            width: 320px;
+            background: linear-gradient(180deg, #1a1a1a, #2a2a2a);
+            padding: 20px;
+            border: 2px solid #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 999;
+            animation: slideIn 0.3s ease forwards;
+        }
+
+        .menu.open {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .menu-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .menu-header h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Skin Grid */
+        .skin-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .skin-preview {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            cursor: pointer;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: border 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .skin-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .skin-preview:hover:not(.locked) {
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .skin-preview.selected {
+            border: 3px solid #ffffff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .skin-preview.locked {
+            filter: grayscale(80%) opacity(0.5);
+        }
+
+        .skin-preview.insufficient {
+            border: 3px solid #ff0000;
+            animation: flashRed 0.5s ease;
+        }
+
+        .skin-preview.sufficient {
+            border: 3px solid #00ff00;
+            animation: flashGreen 0.5s ease;
+        }
+
+        @keyframes flashRed {
+            0%, 100% { border-color: #ff0000; }
+            50% { border-color: transparent; }
+        }
+
+        @keyframes flashGreen {
+            0%, 100% { border-color: #00ff00; }
+            50% { border-color: transparent; }
+        }
+
+        .cost-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.85);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            padding: 6px;
+            display: none;
+        }
+
+        .skin-preview.locked .cost-overlay {
+            display: block;
+        }
+
+        /* Page Controls */
+        .page-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .page-btn {
+            background: linear-gradient(45deg, #333333, #555555);
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .page-btn:disabled {
+            background: #222222;
+            border-color: #666666;
+            cursor: not-allowed;
+        }
+
+        .page-indicator {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Timers */
+        .timers {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .timer {
+            background: linear-gradient(45deg, #1c1c1c, #333333);
+            padding: 10px 15px;
+            border: 2px solid #ffffff;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            min-width: 120px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    <div class="menu-toggle">Skins</div>
+    <div class="menu">
+        <div class="menu-header">
+            <h2>Blender Skins</h2>
+        </div>
+        <div class="skin-grid" id="skin-grid"></div>
+        <div class="page-controls">
+            <button class="page-btn" id="prev-page" disabled>←</button>
+            <span class="page-indicator" id="page-indicator">1 / 1</span>
+            <button class="page-btn" id="next-page">→</button>
+        </div>
+    </div>
+    <div class="timers">
+        <div class="timer" id="on-timer">On: 00</div>
+    </div>
+    <img src="https://media.istockphoto.com/id/1384863054/photo/blender-appliance-with-glass-container-isolated-on-white-background-3d-realistic-rendering-of.jpg?s=612x612&w=0&k=20&c=ym4bW25Ybfci2rvsr12hR0NYX_wUJ0nFh8G4C2-Qb3A=" alt="Kitchen Blender" class="blender">
+
+    <script>
+        const blender = document.querySelector('.blender');
+        const menuToggle = document.querySelector('.menu-toggle');
+        const menu = document.querySelector('.menu');
+        const skinGrid = document.querySelector('#skin-grid');
+        const prevPageBtn = document.querySelector('#prev-page');
+        const nextPageBtn = document.querySelector('#next-page');
+        const pageIndicator = document.querySelector('#page-indicator');
+        const onTimerDisplay = document.querySelector('#on-timer');
+        const starsContainer = document.querySelector('#stars');
+        let isShaking = false;
+        let onTime = parseInt(localStorage.getItem('onTime') || '0');
+        let timerInterval = null;
+        let currentPage = 0;
+        const skinsPerPage = 4; // 2x2 grid for dropdown
+
+        // Initialize blender sound
+        const blenderSound = new Audio('BlenderSound.mp3');
+        blenderSound.loop = true;
+
+        // Array of blender images with only onTimeCost
+        const blenderImages = [
+            { url: 'https://media.istockphoto.com/id/1384863054/photo/blender-appliance-with-glass-container-isolated-on-white-background-3d-realistic-rendering-of.jpg?s=612x612&w=0&k=20&c=ym4bW25Ybfci2rvsr12hR0NYX_wUJ0nFh8G4C2-Qb3A=', onTimeCost: 0 },
+            { url: 'https://imgs.search.brave.com/e70BLzeg7W_y6VaWEZez_NE7yj_44DoTuCAjnNQBHI4/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAxLzEwLzUxLzUx/LzM2MF9GXzExMDUx/NTE0OF95T1FOcWlK/eHZteG5wa05ZYWsw/cVI0Szc5clNmWmFp/Ti5qcGc', onTimeCost: 200 },
+            { url: 'https://imgs.search.brave.com/FU5bzmMANwLcYmlfA_KehIuvDckOxlqzhA4P_SNvGyg/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90My5m/dGNkbi5uZXQvanBn/LzA0LzAzLzI4Lzcw/LzM2MF9GXzQwMzI4/NzA1NV9VSHhTWENQ/MkUwVjZyR3U1bk1J/dDVLSXJ3cFRva0ha/NC5qcGc', onTimeCost: 300},
+            { url: 'https://imgs.search.brave.com/8aiBQzluW6r_YHqzOeiOecEKkjg7Z6SoA9KUAyoVadw/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTAx/MTE4MDk3NC9waG90/by9ibGVuZGVyLW9u/LXRoZS10YWJsZS5q/cGc_cz02MTJ4NjEy/Jnc9MCZrPTIwJmM9/dldLSkM3ZTlEanZB/dDNfTjdVX0t5Ujk0/UGhxRzVvT1FUZGxq/dEFJYWFkYz0', onTimeCost: 400},
+            { url: 'https://imgs.search.brave.com/-1n5vqft_Toz5KeF4T6sc0RtVh7yL84GamzYESyIZ5s/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMuZnJlZWltYWdl/cy5jb20vaW1hZ2Vz/L2dyaWRzLzAwOC9i/bGVuZGVyLTEzMjE1/MjAuanBn', onTimeCost: 500 },
+            { url: 'https://imgs.search.brave.com/nDValmhVz1glxltjnayxZlhb9VinCnySluMMb_cwSDY/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90My5m/dGNkbi5uZXQvanBn/LzAyLzI0LzkyLzE4/LzM2MF9GXzIyNDky/MTgxNl9STUxLOUth/S0dPV3NmVHN6ZkJj/dmFrbTFrQXNXbTFL/NC5qcGc', onTimeCost: 600 },
+            { url: 'https://imgs.search.brave.com/58B6FZnZiDNkg8nuYyy4EKG1RR92nZ-PKp0o3hFJQg4/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly91cGxv/YWQud2lraW1lZGlh/Lm9yZy93aWtpcGVk/aWEvY29tbW9ucy8w/LzA2L0VsZWN0cmlj/QmxlbmRlci5qcGc', onTimeCost: 700 },
+            { url: 'https://imgs.search.brave.com/0gkBW8OMJvUUFUBVaudUu5-D17m20AI68vCOvqjJGj4/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90My5m/dGNkbi5uZXQvanBn/LzA5LzE5LzA4Lzk4/LzM2MF9GXzkxOTA4/OTg4NF9nbDVoQllL/RlJIdnZTclpDRVZa/cHh4NlNGRUF5MWRC/Zi5qcGc', onTimeCost: 800},
+            { url: 'https://imgs.search.brave.com/bobol4vKRfKQRm9F3KPwR2XKRk5xtstu1h8O5DndryA/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90My5m/dGNkbi5uZXQvanBn/LzA5LzI1Lzg3LzA2/LzM2MF9GXzkyNTg3/MDYyM191a3hrSVVR/WkdxSHJzWFpCQjZp/T0tZbktjMWxHcE84/ZS5qcGc', onTimeCost: 900 },
+            { url: 'https://imgs.search.brave.com/vdHRoYYk0a-cIi8aD7kQvnzuuwUwwi5g9Gi7XvRjhgc/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly91cGxv/YWQud2lraW1lZGlh/Lm9yZy93aWtpcGVk/aWEvY29tbW9ucy90/aHVtYi8wLzBjL0Js/ZW5kZXJfbG9nb19u/b190ZXh0LnN2Zy8y/NTBweC1CbGVuZGVy/X2xvZ29fbm9fdGV4/dC5zdmcucG5n', onTimeCost: 1000 },
+        ];
+
+        // Load saved data
+        let unlockedSkins = JSON.parse(localStorage.getItem('unlockedSkins') || '[0]');
+        let selectedSkinIndex = parseInt(localStorage.getItem('selectedSkinIndex') || '0');
+
+        // Apply initial skin
+        blender.src = blenderImages[selectedSkinIndex].url;
+        blender.alt = `Kitchen Blender ${selectedSkinIndex + 1}`;
+
+        // Format seconds dynamically
+        function formatTime(seconds) {
+            const years = Math.floor(seconds / (365 * 24 * 60 * 60));
+            seconds %= 365 * 24 * 60 * 60;
+            const months = Math.floor(seconds / (30 * 24 * 60 * 60));
+            seconds %= 30 * 24 * 60 * 60;
+            const weeks = Math.floor(seconds / (7 * 24 * 60 * 60));
+            seconds %= 7 * 24 * 60 * 60;
+            const days = Math.floor(seconds / (24 * 60 * 60));
+            seconds %= 24 * 60 * 60;
+            const hrs = Math.floor(seconds / 3600);
+            seconds %= 3600;
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+
+            if (years > 0) {
+                return `${years.toString().padStart(2, '0')}:${months.toString().padStart(2, '0')}:${weeks.toString().padStart(2, '0')}:${days.toString().padStart(2, '0')}:${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+            if (months > 0) {
+                return `${months.toString().padStart(2, '0')}:${weeks.toString().padStart(2, '0')}:${days.toString().padStart(2, '0')}:${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+            if (weeks > 0) {
+                return `${weeks.toString().padStart(2, '0')}:${days.toString().padStart(2, '0')}:${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+            if (days > 0) {
+                return `${days.toString().padStart(2, '0')}:${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+            if (hrs > 0) {
+                return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+            if (mins > 0) {
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+            return `${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Update timer display
+        function updateTimers() {
+            onTimerDisplay.textContent = `On: ${formatTime(onTime)}`;
+        }
+
+        // Start or stop timer
+        function manageTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            timerInterval = setInterval(() => {
+                if (isShaking) {
+                    onTime++;
+                    localStorage.setItem('onTime', onTime);
+                }
+                updateTimers();
+            }, 1000);
+        }
+
+        // Initialize timers
+        updateTimers();
+        manageTimer();
+
+        // Generate starry background with repositioning
+        function createStars() {
+            starsContainer.innerHTML = '';
+            for (let i = 0; i < 80; i++) {
+                createStar();
+            }
+        }
+
+        function createStar() {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = `${Math.random() * 3 + 1}px`;
+            star.style.height = star.style.width;
+            repositionStar(star);
+            star.style.animationDelay = `${Math.random() * 2}s`;
+            starsContainer.appendChild(star);
+
+            // Randomly reposition and recreate star
+            setInterval(() => {
+                star.style.opacity = '0';
+                setTimeout(() => {
+                    repositionStar(star);
+                    star.style.opacity = '1';
+                }, 1000);
+            }, Math.random() * 5000 + 3000);
+        }
+
+        function repositionStar(star) {
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+        }
+
+        // Initialize stars
+        createStars();
+
+        // Render skins for current page
+        function renderSkinsPage(page) {
+            skinGrid.innerHTML = '';
+            const start = page * skinsPerPage;
+            const end = Math.min(start + skinsPerPage, blenderImages.length);
+
+            for (let i = start; i < end; i++) {
+                const skinContainer = document.createElement('div');
+                skinContainer.className = `skin-preview ${unlockedSkins.includes(i) ? '' : 'locked'} ${selectedSkinIndex === i ? 'selected' : ''}`;
+                skinContainer.setAttribute('data-index', i);
+
+                const img = document.createElement('img');
+                img.src = blenderImages[i].url;
+                img.alt = `Blender Skin ${i + 1}`;
+
+                const costOverlay = document.createElement('div');
+                costOverlay.className = 'cost-overlay';
+                costOverlay.textContent = `${blenderImages[i].onTimeCost}s On`;
+
+                skinContainer.appendChild(img);
+                skinContainer.appendChild(costOverlay);
+                skinGrid.appendChild(skinContainer);
+            }
+
+            prevPageBtn.disabled = page === 0;
+            nextPageBtn.disabled = end >= blenderImages.length;
+            pageIndicator.textContent = `${page + 1} / ${Math.ceil(blenderImages.length / skinsPerPage)}`;
+        }
+
+        // Initial render
+        renderSkinsPage(currentPage);
+
+        // Skin purchase and selection
+        function handleSkinClick(index) {
+            index = parseInt(index);
+            const skinPreview = skinGrid.querySelector(`[data-index="${index}"]`);
+            if (unlockedSkins.includes(index)) {
+                selectedSkinIndex = index;
+                blender.src = blenderImages[index].url;
+                blender.alt = `Kitchen Blender ${index + 1}`;
+                localStorage.setItem('selectedSkinIndex', selectedSkinIndex);
+                renderSkinsPage(currentPage);
+            } else {
+                const { onTimeCost } = blenderImages[index];
+                if (onTime >= onTimeCost) {
+                    skinPreview.classList.add('sufficient');
+                    setTimeout(() => skinPreview.classList.remove('sufficient'), 500);
+                    unlockedSkins.push(index);
+                    localStorage.setItem('unlockedSkins', JSON.stringify(unlockedSkins));
+                    onTime -= onTimeCost;
+                    localStorage.setItem('onTime', onTime);
+                    updateTimers();
+                    selectedSkinIndex = index;
+                    blender.src = blenderImages[index].url;
+                    blender.alt = `Kitchen Blender ${index + 1}`;
+                    localStorage.setItem('selectedSkinIndex', selectedSkinIndex);
+                    renderSkinsPage(currentPage);
+                } else {
+                    skinPreview.classList.add('insufficient');
+                    setTimeout(() => skinPreview.classList.remove('insufficient'), 500);
+                }
+            }
+        }
+
+        // Toggle shake and sound on blender click
+        blender.addEventListener('click', () => {
+            isShaking = !isShaking;
+            if (isShaking) {
+                blender.classList.add('shake');
+                blenderSound.play().catch((e) => console.error('Sound play error:', e));
+            } else {
+                blender.classList.remove('shake');
+                blenderSound.pause();
+                blenderSound.currentTime = 0; // Reset to start
+            }
+            manageTimer();
+        });
+
+        // Toggle menu visibility
+        function toggleMenu() {
+            menu.classList.toggle('open');
+        }
+
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMenu();
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!menu.contains(e.target) && !menuToggle.contains(e.target) && menu.classList.contains('open')) {
+                toggleMenu();
+            }
+        });
+
+        // Page navigation
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                renderSkinsPage(currentPage);
+            }
+        });
+
+        nextPageBtn.addEventListener('click', () => {
+            if ((currentPage + 1) * skinsPerPage < blenderImages.length) {
+                currentPage++;
+                renderSkinsPage(currentPage);
+            }
+        });
+
+        // Skin preview click
+        skinGrid.addEventListener('click', (e) => {
+            const skinPreview = e.target.closest('.skin-preview');
+            if (skinPreview) {
+                const index = skinPreview.getAttribute('data-index');
+                handleSkinClick(index);
+            }
+        });
+    </script>
+</body>
+</html>
