@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blender Shake Website</title>
+    <title>Blender</title>
     <style>
         * {
             box-sizing: border-box;
@@ -68,7 +68,7 @@
         }
 
         .shake {
-            animation: shake 0.15s infinite;
+            animation: shake 0.07s infinite;
         }
 
         @keyframes shake {
@@ -303,7 +303,7 @@
         let isShaking = false;
         let onTime = parseInt(localStorage.getItem('onTime') || '0');
         let timerInterval = null;
-        let currentPage = 0;
+        let currentPage = 1;
         const skinsPerPage = 4; // 2x2 grid for dropdown
 
         // Initialize blender sound
@@ -325,8 +325,8 @@
         ];
 
         // Load saved data
-        let unlockedSkins = JSON.parse(localStorage.getItem('unlockedSkins') || '[0]');
-        let selectedSkinIndex = parseInt(localStorage.getItem('selectedSkinIndex') || '0');
+        let unlockedSkins = JSON.parse(localStorage.getItem('unlockedSkins') || '[1]');
+        let selectedSkinIndex = parseInt(localStorage.getItem('selectedSkinIndex') || '1');
 
         // Apply initial skin
         blender.src = blenderImages[selectedSkinIndex].url;
