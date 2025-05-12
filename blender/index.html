@@ -375,7 +375,7 @@
         <button id="close-admin">Close</button>
     </div>
     <img src="https://media.istockphoto.com/id/1384863054/photo/blender-appliance-with-glass-container-isolated-on-white-background-3d-realistic-rendering-of.jpg?s=612x612&w=0&k=20&c=ym4bW25Ybfci2rvsr12hR0NYX_wUJ0nFh8G4C2-Qb3A=" alt="Kitchen Blender" class="blender">
-    <audio id="blender-sound" preload="auto" src="BlenderSound.mp3"></audio>
+    <audio id="blender-sound" preload="auto" src="BlenderSound.mp3" loop></audio>
     <audio id="unlock-sound" preload="auto" src="https://freesound.org/data/previews/270/270333_5121236-lq.mp3"></audio>
 
     <script>
@@ -406,6 +406,7 @@
         let unlockedSkins = JSON.parse(localStorage.getItem('unlockedSkins') || '[0]');
         let selectedSkinIndex = parseInt(localStorage.getItem('selectedSkinIndex') || '0');
         let holdStart = 0;
+        let holdTimer = null;
         let blenderLevel = selectedSkinIndex + 1;
 
         // Blender images
@@ -420,9 +421,10 @@
             { url: 'https://imgs.search.brave.com/0gkBW8OMJvUUFUBVaudUu5-D17m20AI68vCOvqjJGj4/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90My5m/dGNkbi5uZXQvanBn/LzA5LzE5LzA4Lzk4/LzM2MF9GXzkxOTA4/OTg4NF9nbDVoQllL/RlJIdnZTclpDRVZa/cHh4NlNGRUF5MWRC/Zi5qcGc', onTimeCost: 6000 },
             { url: 'https://imgs.search.brave.com/bobol4vKRfKQRm9F3KPwR2XKRk5xtstu1h8O5DndryA/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90My5m/dGNkbi5uZXQvanBn/LzA5LzI1Lzg3LzA2/LzM2MF9GXzkyNTg3/MDYyM191a3hrSVVR/WkdxSHJzWFpCQjZp/T0tZbktjMWxHcE84/ZS5qcGc', onTimeCost: 7200 },
             { url: 'https://imgs.search.brave.com/vdHRoYYk0a-cIi8aD7kQvnzuuwUwwi5g9Gi7XvRjhgc/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly91cGxv/YWQud2lraW1lZGlh/Lm9yZy93aWtpcGVk/aWEvY29tbW9ucy90/aHVtYi8wLzBjL0Js/ZW5kZXJfbG9nb19u/b190ZXh0LnN2Zy8y/NTBweC1CbGVuZGVy/X2xvZ29fbm9fdGV4/dC5zdmcucG5n', onTimeCost: 10000 },
-            { url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcToSZplOgDT_Jv1SO-4PJblmZRR8N6pApf1TQ&s', onTimeCost: 60000},
+            { url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcToSZplOgDT_Jv1SO-4PJ internet connection blmZRR8N6pApf1TQ&s', onTimeCost: 60000},
             { url: 'https://imgs.search.brave.com/OFktj7j82fhlqvKWOmUDg0_aBMXsyDC2Vh8hOND4Sks/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/Y3JlYXRlLnZpc3Rh/LmNvbS9hcGkvbWVk/aWEvc21hbGwvMzcw/NTUxMTc2L3N0b2Nr/LXBob3RvLWludmlz/aWJsZS1tYW4tc3Vp/dC1zdGFuZGluZy12/ZXJ0aWNhbC1pbWFn/ZQ', onTimeCost: 80000 }
-]
+        ];
+
         // Apply initial skin
         blender.src = blenderImages[selectedSkinIndex].url;
         blender.alt = `Kitchen Blender ${selectedSkinIndex + 1}`;
@@ -624,33 +626,41 @@
         });
 
         // Admin panel access
-        timers.addEventListener('mousedown', () => {
+        function startHoldTimer() {
             holdStart = Date.now();
-            setTimeout(() => {
-                if (Date.now() - holdStart >= 5000) {
-                    adminPanel.classList.add('open');
-                    adminTimeInput.value = onTime;
-                }
+            holdTimer = setTimeout(() => {
+                adminPanel.classList.add('open');
+                adminTimeInput.value = onTime;
             }, 5000);
+        }
+
+        function clearHoldTimer() {
+            clearTimeout(holdTimer);
+            holdTimer = null;
+            holdStart = 0;
+        }
+
+        timers.addEventListener('mousedown', () => {
+            startHoldTimer();
         });
 
         timers.addEventListener('mouseup', () => {
-            holdStart = 0;
+            clearHoldTimer();
         });
 
         timers.addEventListener('touchstart', e => {
             e.preventDefault();
-            holdStart = Date.now();
-            setTimeout(() => {
-                if (Date.now() - holdStart >= 5000) {
-                    adminPanel.classList.add('open');
-                    adminTimeInput.value = onTime;
-                }
-            }, 5000);
+            startHoldTimer();
         });
 
-        timers.addEventListener('touchend', () => {
-            holdStart = 0;
+        timers.addEventListener('touchend', e => {
+            e.preventDefault();
+            clearHoldTimer();
+        });
+
+        timers.addEventListener('touchcancel', e => {
+            e.preventDefault();
+            clearHoldTimer();
         });
 
         // Admin panel actions
