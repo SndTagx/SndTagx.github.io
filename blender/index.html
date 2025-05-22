@@ -64,13 +64,13 @@
 
         @keyframes shake {
             0% { transform: translate(0, 0) rotate(0deg); }
-            25% { transform: translate(10px, 10px) rotate(5deg); }
-            50% { transform: translate(-10px, -10px) rotate(-5deg); }
-            75% { transform: translate(10px, -10px) rotate(5deg); }
+            25% { transform: translate(var(--shake-strength, 10px), var(--shake-strength, 10px)) rotate(5deg); }
+            50% { transform: translate(calc(-1 * var(--shake-strength, 10px)), calc(-1 * var(--shake-strength, 10px))) rotate(-5deg); }
+            75% { transform: translate(var(--shake-strength, 10px), calc(-1 * var(--shake-strength, 10px))) rotate(5deg); }
             100% { transform: translate(0, 0) rotate(0deg); }
         }
 
-        .menu-toggle {
+        .menu-toggle, .settings-toggle {
             position: fixed !important;
             top: 20px !important;
             right: 20px !important;
@@ -91,6 +91,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        .settings-toggle {
+            top: 70px !important;
         }
 
         .notification-badge {
@@ -116,7 +120,7 @@
             100% { transform: scale(1); }
         }
 
-        .menu {
+        .menu, .settings-menu {
             position: fixed;
             top: 60px;
             right: 20px;
@@ -133,7 +137,11 @@
             animation: slideIn 0.3s ease forwards;
         }
 
-        .menu.open {
+        .settings-menu {
+            top: 110px;
+        }
+
+        .menu.open, .settings-menu.open {
             display: flex;
         }
 
@@ -142,7 +150,7 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
-        .menu-header h2 {
+        .menu-header, .settings-header {
             margin: 0;
             font-size: 20px;
             font-weight: 700;
@@ -345,6 +353,40 @@
             -webkit-tap-highlight-color: transparent;
             outline: none;
         }
+
+        .settings-menu label {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .settings-menu input[type="range"],
+        .settings-menu input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            font-size: 14px;
+            border: 2px solid #ffffff;
+            border-radius: 8px;
+            background: #333333;
+            color: #ffffff;
+            outline: none;
+        }
+
+        .settings-menu button {
+            background: linear-gradient(45deg, #333333, #555555);
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        .settings-menu button.reset-btn {
+            background: linear-gradient(45deg, #ff0000, #cc0000);
+        }
     </style>
 </head>
 <body>
@@ -352,6 +394,9 @@
     <div class="menu-toggle">
         Skins
         <div class="notification-badge" id="notification-badge" style="display: none;">0</div>
+    </div>
+    <div class="settings-toggle">
+        Settings
     </div>
     <div class="menu">
         <div class="menu-header">
@@ -363,6 +408,18 @@
             <span class="page-indicator" id="page-indicator">1 / 1</span>
             <button class="page-btn" id="next-page">→</button>
         </div>
+    </div>
+    <div class="settings-menu" id="settings-menu">
+        <h2 class="settings-header">Settings</h2>
+        <label for="shake-strength">Shake Strength: <span id="shake-strength-value"></span>px</label>
+        <input type="range" id="shake-strength" min="0" max="1000" step="1">
+        <label for="shake-speed">Shake Speed: <span id="shake-speed-value"></span>s</label>
+        <input type="range" id="shake-speed" min="0.01" max="10" step="0.01">
+        <label for="star-density">Background Star Density: <span id="star-density-value"></span></label>
+        <input type="range" id="star-density" min="10" max="500" step="1">
+        <label for="sound-volume">Sound Volume: <span id="sound-volume-value"></span>%</label>
+        <input type="range" id="sound-volume" min="0" max="100" step="1">
+        <button class="reset-btn" id="reset-settings">Reset Everything</button>
     </div>
     <div class="timers">
         <div class="timer" id="on-timer">On: 00</div>
@@ -382,8 +439,10 @@
         // Cache DOM elements
         const blender = document.querySelector('.blender');
         const menuToggle = document.querySelector('.menu-toggle');
+        const settingsToggle = document.querySelector('.settings-toggle');
         const notificationBadge = document.querySelector('#notification-badge');
         const menu = document.querySelector('.menu');
+        const settingsMenu = document.querySelector('#settings-menu');
         const skinGrid = document.querySelector('#skin-grid');
         const prevPageBtn = document.querySelector('#prev-page');
         const nextPageBtn = document.querySelector('#next-page');
@@ -397,6 +456,15 @@
         const starsContainer = document.querySelector('#stars');
         const blenderSound = document.querySelector('#blender-sound');
         const unlockSound = document.querySelector('#unlock-sound');
+        const shakeStrengthInput = document.querySelector('#shake-strength');
+        const shakeStrengthValue = document.querySelector('#shake-strength-value');
+        const shakeSpeedInput = document.querySelector('#shake-speed');
+        const shakeSpeedValue = document.querySelector('#shake-speed-value');
+        const starDensityInput = document.querySelector('#star-density');
+        const starDensityValue = document.querySelector('#star-density-value');
+        const soundVolumeInput = document.querySelector('#sound-volume');
+        const soundVolumeValue = document.querySelector('#sound-volume-value');
+        const resetSettingsBtn = document.querySelector('#reset-settings');
 
         // State variables
         let isShaking = false;
@@ -408,6 +476,10 @@
         let holdStart = 0;
         let holdTimer = null;
         let blenderLevel = selectedSkinIndex + 1;
+        let shakeStrength = parseInt(localStorage.getItem('shakeStrength') || '10');
+        let shakeSpeed = parseFloat(localStorage.getItem('shakeSpeed') || '0.07');
+        let starDensity = parseInt(localStorage.getItem('starDensity') || '50');
+        let soundVolume = parseInt(localStorage.getItem('soundVolume') || '50');
 
         // Blender images
         const blenderImages = [
@@ -426,13 +498,14 @@
             { url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTdIH5y92wh7b_ED41i2qPdZPVyyT5DgH3rl2vaqWoNQA&s', onTimeCost: 26000},
             { url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRnjkIucNYSHN6hMgpo10ZLuY1tTnmSntpAiLl_N0BkiA&s', onTimeCost: 40000},
             { url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRhNntBabgYcI3VCgRc45UeQiNHuxXt3-hQ9v7jcPtFg&s', onTimeCost: 50000},
-            { url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcToSZplOgDT_Jv1SO-4PJ internet connection blmZRR8N6pApf1TQ&s', onTimeCost: 60000},
+            { url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcToSZplOgDT_Jv1SO-4PJblmZRR8N6pApf1TQ&s', onTimeCost: 60000},
             { url: 'https://imgs.search.brave.com/OFktj7j82fhlqvKWOmUDg0_aBMXsyDC2Vh8hOND4Sks/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/Y3JlYXRlLnZpc3Rh/LmNvbS9hcGkvbWVk/aWEvc21hbGwvMzcw/NTUxMTc2L3N0b2Nr/LXBob3RvLWludmlz/aWJsZS1tYW4tc3Vp/dC1zdGFuZGluZy12/ZXJ0aWNhbC1pbWFn/ZQ', onTimeCost: 80000 }
         ];
 
-        // Apply initial skin
+        // Apply initial skin and settings
         blender.src = blenderImages[selectedSkinIndex].url;
         blender.alt = `Kitchen Blender ${selectedSkinIndex + 1}`;
+        applySettings();
 
         // Format time
         function formatTime(seconds) {
@@ -475,10 +548,28 @@
         // Initialize timer
         updateTimers();
 
+        // Apply settings
+        function applySettings() {
+            blender.style.setProperty('--shake-strength', `${shakeStrength}px`);
+            blender.style.animationDuration = `${shakeSpeed}s`;
+            blenderSound.volume = soundVolume / 100;
+            unlockSound.volume = soundVolume / 100;
+            shakeStrengthInput.value = shakeStrength;
+            shakeStrengthValue.textContent = shakeStrength;
+            shakeSpeedInput.value = shakeSpeed;
+            shakeSpeedValue.textContent = shakeSpeed.toFixed(2);
+            starDensityInput.value = starDensity;
+            starDensityValue.textContent = starDensity;
+            soundVolumeInput.value = soundVolume;
+            soundVolumeValue.textContent = soundVolume;
+            createStars();
+        }
+
         // Starry background
         function createStars() {
+            starsContainer.innerHTML = '';
             const fragment = document.createDocumentFragment();
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < starDensity; i++) {
                 const star = document.createElement('div');
                 star.className = 'star';
                 star.style.width = `${Math.random() * 2 + 1}px`;
@@ -576,6 +667,38 @@
             }
         }
 
+        // Reset everything
+        function resetEverything() {
+            if (confirm('Are you sure you want to reset everything? This will clear all progress and settings.')) {
+                onTime = 0;
+                unlockedSkins = [0];
+                selectedSkinIndex = 0;
+                blenderLevel = 1;
+                shakeStrength = 10;
+                shakeSpeed = 0.07;
+                starDensity = 50;
+                soundVolume = 50;
+                localStorage.setItem('onTime', onTime);
+                localStorage.setItem('unlockedSkins', JSON.stringify(unlockedSkins));
+                localStorage.setItem('selectedSkinIndex', selectedSkinIndex);
+                localStorage.setItem('shakeStrength', shakeStrength);
+                localStorage.setItem('shakeSpeed', shakeSpeed);
+                localStorage.setItem('starDensity', starDensity);
+                localStorage.setItem('soundVolume', soundVolume);
+                blender.src = blenderImages[0].url;
+                blender.alt = `Kitchen Blender 1`;
+                updateTimers();
+                applySettings();
+                renderSkinsPage(currentPage);
+                if (isShaking) {
+                    isShaking = false;
+                    blender.classList.remove('shake');
+                    blenderSound.pause();
+                    blenderSound.currentTime = 0;
+                }
+            }
+        }
+
         // Blender click
         let lastClick = 0;
         blender.addEventListener('click', () => {
@@ -597,12 +720,23 @@
         menuToggle.addEventListener('click', e => {
             e.stopPropagation();
             menu.classList.toggle('open');
+            settingsMenu.classList.remove('open');
         });
 
-        // Close menu on outside click
+        // Settings toggle
+        settingsToggle.addEventListener('click', e => {
+            e.stopPropagation();
+            settingsMenu.classList.toggle('open');
+            menu.classList.remove('open');
+        });
+
+        // Close menus on outside click
         document.addEventListener('click', e => {
             if (menu.classList.contains('open') && !menu.contains(e.target) && e.target !== menuToggle) {
                 menu.classList.remove('open');
+            }
+            if (settingsMenu.classList.contains('open') && !settingsMenu.contains(e.target) && e.target !== settingsToggle) {
+                settingsMenu.classList.remove('open');
             }
             if (adminPanel.classList.contains('open') && !adminPanel.contains(e.target)) {
                 adminPanel.classList.remove('open');
@@ -682,6 +816,40 @@
 
         closeAdminBtn.addEventListener('click', () => {
             adminPanel.classList.remove('open');
+        });
+
+        // Settings actions
+        shakeStrengthInput.addEventListener('input', () => {
+            shakeStrength = parseInt(shakeStrengthInput.value);
+            shakeStrengthValue.textContent = shakeStrength;
+            blender.style.setProperty('--shake-strength', `${shakeStrength}px`);
+            localStorage.setItem('shakeStrength', shakeStrength);
+        });
+
+        shakeSpeedInput.addEventListener('input', () => {
+            shakeSpeed = parseFloat(shakeSpeedInput.value);
+            shakeSpeedValue.textContent = shakeSpeed.toFixed(2);
+            blender.style.animationDuration = `${shakeSpeed}s`;
+            localStorage.setItem('shakeSpeed', shakeSpeed);
+        });
+
+        starDensityInput.addEventListener('input', () => {
+            starDensity = parseInt(starDensityInput.value);
+            starDensityValue.textContent = starDensity;
+            localStorage.setItem('starDensity', starDensity);
+            createStars();
+        });
+
+        soundVolumeInput.addEventListener('input', () => {
+            soundVolume = parseInt(soundVolumeInput.value);
+            soundVolumeValue.textContent = soundVolume;
+            blenderSound.volume = soundVolume / 100;
+            unlockSound.volume = soundVolume / 100;
+            localStorage.setItem('soundVolume', soundVolume);
+        });
+
+        resetSettingsBtn.addEventListener('click', () => {
+            resetEverything();
         });
     </script>
 </body>
