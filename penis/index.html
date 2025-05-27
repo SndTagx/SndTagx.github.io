@@ -145,10 +145,10 @@
         let bullets = [];
         let enemies = [];
         const bulletSpeed = 10;
-        const bulletCooldown = 300;
+        const bulletCooldown = 200;
         let lastShot = 0;
         const enemySpeed = 3;
-        const enemySpawnRate = 60;
+        const enemySpawnRate = 120;
         let frameCount = 0;
         const maxBullets = 20;
         const maxEnemies = 10;
@@ -270,6 +270,7 @@
                         enemies.splice(j, 1);
                         bullets.splice(i, 1);
                         score += 1;
+                        enemySpeed += 0.05
                         break;
                     }
                 }
@@ -342,6 +343,7 @@
                     cancelAnimationFrame(animationFrameId);
                 }
                 gameState = 'playing';
+                enemySpeed = 3;
                 score = 0;
                 bullets = [];
                 enemies = [];
