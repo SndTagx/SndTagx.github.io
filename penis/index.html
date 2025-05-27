@@ -32,7 +32,8 @@
             text-align: center;
             display: none;
             width: 80%;
-            max-width: 300px;
+            max-width: 400px;
+            min-width: 200px;
             z-index: 10;
         }
         h1 {
@@ -92,6 +93,7 @@
         let topScore = localStorage.getItem('topScore') ? parseInt(localStorage.getItem('topScore')) : 0;
         topScoreDisplay.textContent = topScore;
         let animationFrameId = null;
+        let enemySpeed = 3;
 
         // Load images
         const images = {
@@ -100,16 +102,16 @@
             enemy: new Image(),
             loaded: { cannon: false, bullet: false, enemy: false }
         };
-        images.cannon.src = 'https://imgs.search.brave.com/RRQUVmKhjRvYw3FsSw6iQRXnF2J8_6R_ANRI0rdUKGc/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWdz/LnNlYXJjaC5icmF2/ZS5jb20vMTE4VkJM/SVZxclRGcVk4VnFF/bnE5WTlpUE5lTkpR/ZU43ejVIcW9XVWRP/cy9yczpmaXQ6NTAw/OjA6MDowL2c6Y2Uv/YUhSMGNITTZMeTkx/Y0d4di9ZV1F1ZDJs/cmFXMWxaR2xoL0xt/OXlaeTkzYVd0cGNH/VmsvYVdFdlkyOXRi/Vzl1Y3k4Mi9Mell6/TDBWeVpXTjBYM0Js/L2JtbHpYM2RwZEdo/Zk1UbGovYlY5bWNt/OXRYMkZpYjNabC9M/bXB3Wnc.jpeg';
+        images.cannon.src = 'https://imgs.search.brave.com/RRQUVmKhjRvYw3FsSw6iQRXnF2J8_6R_ANRI0rdUKGc/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWdz/LnNlYXJjaC5icmF2/ZS5JB20vMTE4VkJM/SVZxclRGcVk4VnFF/bnE5WTlpUE5lTkpR/ZU43ejVIcW9XVWRP/cy9yczpmaXQ6NTAw/OjA6MDowL2c6Y2Uv/YUhSMGNITTZMeTkx/Y0d4di9ZV1F1ZDJs/cmFXMWxaR2xoL0xt/OXlaeTkzYVd0cGNH/VmsvYVdFdlkyOXRi/Vzl1Y3k4Mi9Mell6/TDBWeVpXTjBYM0Js/L2JtbHpYM2RwZEdo/Zk1UbGovYlY5bWNt/OXRYMkZpYjNabC9M/bXB3Wnc.jpeg';
         images.bullet.src = 'https://imgs.search.brave.com/bGW6K3n1KLCe5-YFraD0txSmnZp8Cx0vAJ7ebRdW9Zk/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWdz/LnNlYXJjaC5icmF2/ZS5jb20vQTYzSTRB/UkhhUnJiYzVhTXVl/SDAyNUljT29EeHdo/eV9oU05oUkx5Q0xL/QS9yczpmaXQ6NTAw/OjA6MDowL2c6Y2Uv/YUhSMGNITTZMeTlo/YzNObC9kSE15TG1O/aWMyNWxkM056L2RH/RjBhV011WTI5dEwy/aDEvWWk5cEwzSXZN/akF4TUM4dy9PUzh5/TWk4NE5tSXpZelZt/L1lpMWhOalF6TFRF/eFpUSXQvWVRObU1D/MHdNamt4TVRnMC9N/VGczTlRrdmRHaDFi/V0p1L1lXbHNMell5/TUhnME5qVXYvTW1S/bFl6azJZbUV4WkRF/Mi9ZMk01TkdFNE9H/SXdaREJpL1pEZ3ha/R1l3TUdZdmMzQmwv/Y20xZk1TNXFjR2Nf/ZGowMC9PR1l3Tnpo/aFpUaGhOelJoL01U/UXhNall4TkdJd1pH/STIvWmprek5XVTBP/Q00.jpeg';
         images.enemy.src = 'https://imgs.search.brave.com/JUHsTSGVoZad0iNuL_P5murKa67bPZi2039kT6m18rM/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWdz/LnNlYXJjaC5icmF2/ZS5jb20vcE45c1U5/WkFsQ19FMFkwcE9W/Yy05SEtGX1Nwd3dn/MjJVS0NKaElhRkhj/ay9yczpmaXQ6NTAw/OjA6MDowL2c6Y2Uv/YUhSMGNITTZMeTlw/YldjdS9abkpsWlhC/cGF5NWpiMjB2L2NI/SmxiV2wxYlMxd2FH/OTAvYnk5emRIVmth/Vzh0Y0dWdi9jR3hs/TFd0cFpDMXRiMlJs/L2JDMXphRzl2ZEMx/eVlXTmwvWHpVek9E/YzJMVE00TXpJNS9M/bXB3Wno5elpXMTBQ/V0ZwL2MxOW9lV0p5/YVdRbWR6MDMvTkRB.jpeg';
 
         images.cannon.onload = () => { images.loaded.cannon = true; console.log('Cannon image loaded'); };
         images.bullet.onload = () => { images.loaded.bullet = true; console.log('Bullet image loaded'); };
         images.enemy.onload = () => { images.loaded.enemy = true; console.log('Enemy image loaded'); };
-        images.cannon.onerror = () => console.error('Cannon image failed to load');
-        images.bullet.onerror = () => console.error('Bullet image failed to load');
-        images.enemy.onerror = () => console.error('Enemy image failed to load');
+        images.cannon.onerror = () => console.error('Cannon image failed to load:', images.cannon.src);
+        images.bullet.onerror = () => console.error('Bullet image failed to load:', images.bullet.src);
+        images.enemy.onerror = () => console.error('Enemy image failed to load:', images.enemy.src);
 
         // Canvas setup
         let width, height, scale;
@@ -117,13 +119,14 @@
             try {
                 const dpr = window.devicePixelRatio || 1;
                 width = window.innerWidth;
-                height = window.innerWidth; // 1:1 aspect ratio
+                height = window.innerHeight;
                 canvas.width = width * dpr;
                 canvas.height = height * dpr;
                 canvas.style.width = `${width}px`;
                 canvas.style.height = `${height}px`;
-                scale = width / 1000;
+                scale = Math.min(width / 1000, height / 1000);
                 ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
+                cannon.y = 1000 - 50; // Keep cannon near bottom
                 console.log(`Canvas resized: ${width}x${height}, scale=${scale}`);
             } catch (e) {
                 console.error('Canvas resize error:', e);
@@ -147,7 +150,6 @@
         const bulletSpeed = 10;
         const bulletCooldown = 200;
         let lastShot = 0;
-        const enemySpeed = 3;
         const enemySpawnRate = 120;
         let frameCount = 0;
         const maxBullets = 20;
@@ -161,11 +163,17 @@
                 const touch = e.changedTouches[0];
                 const touchX = (touch.clientX - rect.left) / scale;
                 const touchY = (touch.clientY - rect.top) / scale;
-                if (touchX >= cannon.x - cannon.width / 2 && touchX <= cannon.x + cannon.width / 2 &&
-                    touchY >= cannon.y - cannon.height / 2 && touchY <= cannon.y + cannon.height / 2) {
+                if (
+                    touchX >= cannon.x - cannon.width / 2 &&
+                    touchX <= cannon.x + cannon.width / 2 &&
+                    touchY >= cannon.y - cannon.height / 2 &&
+                    touchY <= cannon.y + cannon.height / 2
+                ) {
                     cannon.dragging = true;
                     cannon.touchId = touch.identifier;
                     console.log(`Touch start: x=${touchX}, y=${touchY}`);
+                } else {
+                    shootBullet();
                 }
             }
         });
@@ -198,16 +206,29 @@
         });
 
         // Button touch events
+        let isButtonProcessing = false;
         startButton.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            startGame();
-            console.log('Start button tapped');
+            if (!isButtonProcessing) {
+                isButtonProcessing = true;
+                startGame();
+                console.log('Start button tapped');
+                setTimeout(() => { isButtonProcessing = false; }, 500);
+            }
         });
         menuButton.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            returnToMenu();
-            console.log('Menu button tapped');
+            if (!isButtonProcessing) {
+                isButtonProcessing = true;
+                returnToMenu();
+                console.log('Menu button tapped');
+                setTimeout(() => { isButtonProcessing = false; }, 500);
+            }
         });
+
+        function checkImagesLoaded() {
+            return images.loaded.cannon && images.loaded.bullet && images.loaded.enemy;
+        }
 
         function shootBullet() {
             if (bullets.length >= maxBullets) return;
@@ -217,7 +238,8 @@
                     x: cannon.x,
                     y: cannon.y - cannon.height / 2,
                     width: 60,
-                    height: 60
+                    height: 60,
+                    radius: 30
                 });
                 lastShot = now;
             }
@@ -225,7 +247,7 @@
 
         function spawnEnemy() {
             if (enemies.length >= maxEnemies) return;
-            const radius = 20;
+            const radius = 40; // Half of enemy width/height
             enemies.push({
                 x: Math.random() * (1000 - 2 * radius) + radius,
                 y: 0,
@@ -254,7 +276,7 @@
 
             enemies.forEach(enemy => {
                 enemy.y += enemySpeed;
-                if (enemy.y + enemy.radius > 1000) {
+                if (enemy.y + enemy.height / 2 > 1000) {
                     gameOver();
                 }
             });
@@ -266,11 +288,11 @@
                     const dx = bullet.x - enemy.x;
                     const dy = bullet.y - enemy.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < bullet.height + enemy.radius) {
+                    if (distance < bullet.radius + enemy.radius) {
                         enemies.splice(j, 1);
                         bullets.splice(i, 1);
                         score += 1;
-                        enemySpeed += 0.05;
+                        enemySpeed = Math.min(enemySpeed + 0.05, 10);
                         break;
                     }
                 }
@@ -339,6 +361,11 @@
 
         function startGame() {
             try {
+                if (!checkImagesLoaded()) {
+                    alert('Images failed to load. Please try again later.');
+                    console.error('Images not loaded, cannot start game');
+                    return;
+                }
                 if (animationFrameId) {
                     cancelAnimationFrame(animationFrameId);
                 }
