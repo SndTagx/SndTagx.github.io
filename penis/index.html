@@ -136,8 +136,8 @@
         const cannon = {
             x: 500,
             y: 950,
-            width: 70,
-            height: 60,
+            width: 100,
+            height: 130,
             dragging: false,
             touchId: null
         };
@@ -216,8 +216,8 @@
                 bullets.push({
                     x: cannon.x,
                     y: cannon.y - cannon.height / 2,
-                    width: 50,
-                    height: 50
+                    width: 60,
+                    height: 60
                 });
                 lastShot = now;
             }
@@ -229,8 +229,8 @@
             enemies.push({
                 x: Math.random() * (1000 - 2 * radius) + radius,
                 y: 0,
-                width: 40,
-                height: 40,
+                width: 80,
+                height: 80,
                 radius: radius
             });
         }
