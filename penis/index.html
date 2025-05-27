@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Cannon Defense</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: #000;
+            overflow: hidden;
+            touch-action: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            background: #112;
+            display: block;
+        }
+        #mainMenu, #gameOverScreen {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            width: 80%;
+            max-width: 300px;
+            z-index: 10;
+        }
+        h1 {
+            font-family: Arial, sans-serif;
+            color: #fff;
+            font-size: 32px;
+            margin: 10px 0;
+        }
+        p {
+            font-family: Arial, sans-serif;
+            color: #fff;
+            font-size: 20px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 20px;
+            background: #0a0;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        button:active {
+            background: #080;
+        }
+    </style>
+</head>
+<body>
+    <div id="mainMenu">
+        <h1>Cannon Defense</h1>
+        <p>Top Score: <span id="topScore">0</span></p>
+        <button id="startButton">Start Game</button>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div id="gameOverScreen">
+        <h1>Game Over</h1>
+        <p>Score: <span id="finalScore">0</span></p>
+        <p>Top Score: <span id="topScoreGameOver">0</span></p>
+        <button id="menuButton">Main Menu</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const mainMenu = document.getElementById('mainMenu');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const topScoreDisplay = document.getElementById('topScore');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const topScoreGameOver = document.getElementById('topScoreGameOver');
+        const startButton = document.getElementById('startButton');
+        const menuButton = document.getElementById('menuButton');
+
+        let gameState = 'menu';
+        let score = 0;
+        let topScore = localStorage.getItem('topScore') ? parseInt(localStorage.getItem('topScore')) : 0;
+        topScoreDisplay.textContent = topScore;
+        let animationFrameId = null;
+
+        // Load images
+        const images = {
+            cannon: new Image(),
+            bullet: new Image(),
+            enemy: new Image(),
+            loaded: { cannon: false, bullet: false, enemy: false }
+        };
+        images.cannon.src = 'https://imgs.search.brave.com/RRQUVmKhjRvYw3FsSw6iQRXnF2J8_6R_ANRI0rdUKGc/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWdz/LnNlYXJjaC5icmF2/ZS5jb20vMTE4VkJM/SVZxclRGcVk4VnFF/bnE5WTlpUE5lTkpR/ZU43ejVIcW9XVWRP/cy9yczpmaXQ6NTAw/OjA6MDowL2c6Y2Uv/YUhSMGNITTZMeTkx/Y0d4di9ZV1F1ZDJs/cmFXMWxaR2xoL0xt/OXlaeTkzYVd0cGNH/VmsvYVdFdlkyOXRi/Vzl1Y3k4Mi9Mell6/TDBWeVpXTjBYM0Js/L2JtbHpYM2RwZEdo/Zk1UbGovYlY5bWNt/OXRYMkZpYjNabC9M/bXB3Wnc.jpeg';
+        images.bullet.src = 'https://imgs.search.brave.com/bGW6K3n1KLCe5-YFraD0txSmnZp8Cx0vAJ7ebRdW9Zk/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWdz/LnNlYXJjaC5icmF2/ZS5jb20vQTYzSTRB/UkhhUnJiYzVhTXVl/SDAyNUljT29EeHdo/eV9oU05oUkx5Q0xL/QS9yczpmaXQ6NTAw/OjA6MDowL2c6Y2Uv/YUhSMGNITTZMeTlo/YzNObC9kSE15TG1O/aWMyNWxkM056L2RH/RjBhV011WTI5dEwy/aDEvWWk5cEwzSXZN/akF4TUM4dy9PUzh5/TWk4NE5tSXpZelZt/L1lpMWhOalF6TFRF/eFpUSXQvWVRObU1D/MHdNamt4TVRnMC9N/VGczTlRrdmRHaDFi/V0p1L1lXbHNMell5/TUhnME5qVXYvTW1S/bFl6azJZbUV4WkRF/Mi9ZMk01TkdFNE9H/SXdaREJpL1pEZ3ha/R1l3TUdZdmMzQmwv/Y20xZk1TNXFjR2Nf/ZGowMC9PR1l3Tnpo/aFpUaGhOelJoL01U/UXhNall4TkdJd1pH/STIvWmprek5XVTBP/Q00.jpeg';
+        images.enemy.src = 'https://imgs.search.brave.com/JUHsTSGVoZad0iNuL_P5murKa67bPZi2039kT6m18rM/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWdz/LnNlYXJjaC5icmF2/ZS5jb20vcE45c1U5/WkFsQ19FMFkwcE9W/Yy05SEtGX1Nwd3dn/MjJVS0NKaElhRkhj/ay9yczpmaXQ6NTAw/OjA6MDowL2c6Y2Uv/YUhSMGNITTZMeTlw/YldjdS9abkpsWlhC/cGF5NWpiMjB2L2NI/SmxiV2wxYlMxd2FH/OTAvYnk5emRIVmth/Vzh0Y0dWdi9jR3hs/TFd0cFpDMXRiMlJs/L2JDMXphRzl2ZEMx/eVlXTmwvWHpVek9E/YzJMVE00TXpJNS9M/bXB3Wno5elpXMTBQ/V0ZwL2MxOW9lV0p5/YVdRbWR6MDMvTkRB.jpeg';
+
+        images.cannon.onload = () => { images.loaded.cannon = true; console.log('Cannon image loaded'); };
+        images.bullet.onload = () => { images.loaded.bullet = true; console.log('Bullet image loaded'); };
+        images.enemy.onload = () => { images.loaded.enemy = true; console.log('Enemy image loaded'); };
+        images.cannon.onerror = () => console.error('Cannon image failed to load');
+        images.bullet.onerror = () => console.error('Bullet image failed to load');
+        images.enemy.onerror = () => console.error('Enemy image failed to load');
+
+        // Canvas setup
+        let width, height, scale;
+        function resizeCanvas() {
+            try {
+                const dpr = window.devicePixelRatio || 1;
+                width = window.innerWidth;
+                height = window.innerWidth; // 1:1 aspect ratio
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                canvas.style.width = `${width}px`;
+                canvas.style.height = `${height}px`;
+                scale = width / 1000;
+                ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
+                console.log(`Canvas resized: ${width}x${height}, scale=${scale}`);
+            } catch (e) {
+                console.error('Canvas resize error:', e);
+            }
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Cannon
+        const cannon = {
+            x: 500,
+            y: 950,
+            width: 70,
+            height: 60,
+            dragging: false,
+            touchId: null
+        };
+
+        let bullets = [];
+        let enemies = [];
+        const bulletSpeed = 10;
+        const bulletCooldown = 300;
+        let lastShot = 0;
+        const enemySpeed = 3;
+        const enemySpawnRate = 60;
+        let frameCount = 0;
+        const maxBullets = 20;
+        const maxEnemies = 10;
+
+        // Touch controls for canvas
+        canvas.addEventListener('touchstart', (e) => {
+            if (gameState === 'playing') {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.changedTouches[0];
+                const touchX = (touch.clientX - rect.left) / scale;
+                const touchY = (touch.clientY - rect.top) / scale;
+                if (touchX >= cannon.x - cannon.width / 2 && touchX <= cannon.x + cannon.width / 2 &&
+                    touchY >= cannon.y - cannon.height / 2 && touchY <= cannon.y + cannon.height / 2) {
+                    cannon.dragging = true;
+                    cannon.touchId = touch.identifier;
+                    console.log(`Touch start: x=${touchX}, y=${touchY}`);
+                }
+            }
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (cannon.dragging && gameState === 'playing') {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                for (let touch of e.changedTouches) {
+                    if (touch.identifier === cannon.touchId) {
+                        const touchX = (touch.clientX - rect.left) / scale;
+                        cannon.x = Math.max(cannon.width / 2, Math.min(1000 - cannon.width / 2, touchX));
+                        console.log(`Touch move: x=${touchX}`);
+                        break;
+                    }
+                }
+            }
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            for (let touch of e.changedTouches) {
+                if (touch.identifier === cannon.touchId) {
+                    cannon.dragging = false;
+                    cannon.touchId = null;
+                    console.log('Touch end');
+                    break;
+                }
+            }
+        });
+
+        // Button touch events
+        startButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startGame();
+            console.log('Start button tapped');
+        });
+        menuButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            returnToMenu();
+            console.log('Menu button tapped');
+        });
+
+        function shootBullet() {
+            if (bullets.length >= maxBullets) return;
+            const now = Date.now();
+            if (now - lastShot >= bulletCooldown) {
+                bullets.push({
+                    x: cannon.x,
+                    y: cannon.y - cannon.height / 2,
+                    width: 50,
+                    height: 50
+                });
+                lastShot = now;
+            }
+        }
+
+        function spawnEnemy() {
+            if (enemies.length >= maxEnemies) return;
+            const radius = 20;
+            enemies.push({
+                x: Math.random() * (1000 - 2 * radius) + radius,
+                y: 0,
+                width: 40,
+                height: 40,
+                radius: radius
+            });
+        }
+
+        function update() {
+            if (gameState !== 'playing') return;
+
+            frameCount++;
+            if (frameCount % enemySpawnRate === 0) {
+                spawnEnemy();
+            }
+
+            if (cannon.dragging) {
+                shootBullet();
+            }
+
+            bullets = bullets.filter(bullet => bullet.y > -bullet.height);
+            bullets.forEach(bullet => {
+                bullet.y -= bulletSpeed;
+            });
+
+            enemies.forEach(enemy => {
+                enemy.y += enemySpeed;
+                if (enemy.y + enemy.radius > 1000) {
+                    gameOver();
+                }
+            });
+
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const bullet = bullets[i];
+                for (let j = enemies.length - 1; j >= 0; j--) {
+                    const enemy = enemies[j];
+                    const dx = bullet.x - enemy.x;
+                    const dy = bullet.y - enemy.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < bullet.height + enemy.radius) {
+                        enemies.splice(j, 1);
+                        bullets.splice(i, 1);
+                        score += 1;
+                        break;
+                    }
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, 1000, 1000);
+
+            if (gameState === 'playing') {
+                // Cannon (spaceship)
+                if (images.loaded.cannon) {
+                    ctx.drawImage(images.cannon, cannon.x - cannon.width / 2, cannon.y - cannon.height / 2, cannon.width, cannon.height);
+                } else {
+                    ctx.fillStyle = '#aaa';
+                    ctx.beginPath();
+                    ctx.moveTo(cannon.x, cannon.y - cannon.height / 2);
+                    ctx.lineTo(cannon.x - cannon.width / 2, cannon.y + cannon.height / 2);
+                    ctx.lineTo(cannon.x + cannon.width / 2, cannon.y + cannon.height / 2);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+
+                // Bullets (lasers)
+                if (images.loaded.bullet) {
+                    bullets.forEach(bullet => {
+                        ctx.drawImage(images.bullet, bullet.x - bullet.width / 2, bullet.y - bullet.height / 2, bullet.width, bullet.height);
+                    });
+                } else {
+                    ctx.fillStyle = '#ff0';
+                    bullets.forEach(bullet => {
+                        ctx.fillRect(bullet.x - bullet.width / 2, bullet.y - bullet.height / 2, bullet.width, bullet.height);
+                    });
+                }
+
+                // Enemies (asteroids)
+                if (images.loaded.enemy) {
+                    enemies.forEach(enemy => {
+                        ctx.drawImage(images.enemy, enemy.x - enemy.radius, enemy.y - enemy.radius, enemy.radius * 2, enemy.radius * 2);
+                    });
+                } else {
+                    ctx.fillStyle = '#444';
+                    enemies.forEach(enemy => {
+                        ctx.beginPath();
+                        ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                }
+
+                // Score
+                ctx.fillStyle = '#fff';
+                ctx.font = '20px Arial';
+                ctx.fillText(`Score: ${score}`, 10, 30);
+            }
+        }
+
+        function gameLoop() {
+            try {
+                update();
+                draw();
+                animationFrameId = requestAnimationFrame(gameLoop);
+            } catch (e) {
+                console.error('Game loop error:', e);
+            }
+        }
+
+        function startGame() {
+            try {
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                }
+                gameState = 'playing';
+                score = 0;
+                bullets = [];
+                enemies = [];
+                frameCount = 0;
+                cannon.x = 500;
+                mainMenu.style.display = 'none';
+                gameOverScreen.style.display = 'none';
+                resizeCanvas();
+                gameLoop();
+                console.log('Game started');
+            } catch (e) {
+                console.error('Start game error:', e);
+            }
+        }
+
+        function gameOver() {
+            try {
+                gameState = 'gameOver';
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+                if (score > topScore) {
+                    topScore = score;
+                    localStorage.setItem('topScore', topScore);
+                    topScoreDisplay.textContent = topScore;
+                    topScoreGameOver.textContent = topScore;
+                }
+                finalScoreDisplay.textContent = score;
+                gameOverScreen.style.display = 'block';
+                console.log('Game over');
+            } catch (e) {
+                console.error('Game over error:', e);
+            }
+        }
+
+        function returnToMenu() {
+            try {
+                gameState = 'menu';
+                mainMenu.style.display = 'block';
+                gameOverScreen.style.display = 'none';
+                console.log('Returned to menu');
+            } catch (e) {
+                console.error('Return to menu error:', e);
+            }
+        }
+
+        mainMenu.style.display = 'block';
+    </script>
+</body>
+</html>
